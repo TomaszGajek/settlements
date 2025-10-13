@@ -26,6 +26,7 @@ A web-based MVP (Minimum Viable Product) application designed for simple and eff
 ## Tech Stack
 
 ### Frontend
+
 - **Framework**: [Astro 5](https://astro.build/)
 - **UI Library**: [React 19](https://react.dev/) for interactive components
 - **Language**: [TypeScript 5](https://www.typescriptlang.org/)
@@ -33,12 +34,14 @@ A web-based MVP (Minimum Viable Product) application designed for simple and eff
 - **Components**: [Shadcn/ui](https://ui.shadcn.com/)
 
 ### Backend
+
 - **Platform**: [Supabase](https://supabase.io/)
   - PostgreSQL Database
   - Authentication
   - Backend-as-a-Service (BaaS)
 
 ### CI/CD & Hosting
+
 - **CI/CD**: [GitHub Actions](https://github.com/features/actions)
 - **Hosting**: [DigitalOcean](https://www.digitalocean.com/) (via Docker)
 
@@ -55,27 +58,33 @@ Follow these instructions to set up the project on your local machine.
 ### Installation
 
 1.  **Clone the repository:**
+
     ```sh
     git clone https://github.com/your-username/settlements.git
     cd settlements
     ```
 
 2.  **Set up the correct Node.js version (optional, if you use nvm):**
+
     ```sh
     nvm use
     ```
 
 3.  **Install dependencies:**
+
     ```sh
     npm install
     ```
 
 4.  **Set up environment variables:**
     Create a `.env` file in the root of the project by copying the example file:
+
     ```sh
     cp .env.example .env
     ```
+
     Then, add your Supabase project URL and Anon Key to the `.env` file:
+
     ```
     PUBLIC_SUPABASE_URL="your-supabase-url"
     PUBLIC_SUPABASE_ANON_KEY="your-supabase-anon-key"

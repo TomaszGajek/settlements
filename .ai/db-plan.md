@@ -9,42 +9,45 @@
 ---
 
 #### Tabela: `profiles`
+
 Przechowuje publiczne dane użytkowników, rozszerzając tabelę `auth.users`.
 
-| Nazwa kolumny | Typ danych    | Ograniczenia                                               | Opis                                           |
-|---------------|---------------|------------------------------------------------------------|------------------------------------------------|
+| Nazwa kolumny | Typ danych    | Ograniczenia                                                 | Opis                                              |
+| ------------- | ------------- | ------------------------------------------------------------ | ------------------------------------------------- |
 | `id`          | `UUID`        | `PRIMARY KEY`, `REFERENCES auth.users(id) ON DELETE CASCADE` | Klucz główny, powiązany z użytkownikiem Supabase. |
-| `updated_at`  | `TIMESTAMPTZ` | -                                                          | Data ostatniej aktualizacji profilu.           |
+| `updated_at`  | `TIMESTAMPTZ` | -                                                            | Data ostatniej aktualizacji profilu.              |
 
 ---
 
 #### Tabela: `categories`
+
 Przechowuje kategorie transakcji zdefiniowane przez użytkownika oraz domyślne.
 
-| Nazwa kolumny  | Typ danych | Ograniczenia                                                         | Opis                                                               |
-|----------------|------------|----------------------------------------------------------------------|--------------------------------------------------------------------|
-| `id`           | `UUID`     | `PRIMARY KEY`, `DEFAULT gen_random_uuid()`                           | Unikalny identyfikator kategorii.                                  |
-| `user_id`      | `UUID`     | `NOT NULL`, `REFERENCES auth.users(id) ON DELETE CASCADE`              | Identyfikator użytkownika, do którego należy kategoria.            |
-| `name`         | `TEXT`     | `NOT NULL`, `CHECK (char_length(name) <= 100)`                       | Nazwa kategorii.                                                   |
-| `is_deletable` | `BOOLEAN`  | `NOT NULL`, `DEFAULT true`                                           | Flaga określająca, czy kategoria może być usunięta przez użytkownika. |
-| `created_at`   | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT now()`                                        | Data utworzenia kategorii.                                         |
-| **Unikalność** |            | `UNIQUE (user_id, name)`                                             | Zapewnia, że nazwy kategorii są unikalne dla każdego użytkownika.    |
+| Nazwa kolumny  | Typ danych    | Ograniczenia                                              | Opis                                                                  |
+| -------------- | ------------- | --------------------------------------------------------- | --------------------------------------------------------------------- |
+| `id`           | `UUID`        | `PRIMARY KEY`, `DEFAULT gen_random_uuid()`                | Unikalny identyfikator kategorii.                                     |
+| `user_id`      | `UUID`        | `NOT NULL`, `REFERENCES auth.users(id) ON DELETE CASCADE` | Identyfikator użytkownika, do którego należy kategoria.               |
+| `name`         | `TEXT`        | `NOT NULL`, `CHECK (char_length(name) <= 100)`            | Nazwa kategorii.                                                      |
+| `is_deletable` | `BOOLEAN`     | `NOT NULL`, `DEFAULT true`                                | Flaga określająca, czy kategoria może być usunięta przez użytkownika. |
+| `created_at`   | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT now()`                               | Data utworzenia kategorii.                                            |
+| **Unikalność** |               | `UNIQUE (user_id, name)`                                  | Zapewnia, że nazwy kategorii są unikalne dla każdego użytkownika.     |
 
 ---
 
 #### Tabela: `transactions`
+
 Główna tabela przechowująca wszystkie transakcje finansowe użytkowników.
 
-| Nazwa kolumny  | Typ danych         | Ograniczenia                                                              | Opis                                                                   |
-|----------------|--------------------|---------------------------------------------------------------------------|------------------------------------------------------------------------|
-| `id`           | `UUID`             | `PRIMARY KEY`, `DEFAULT gen_random_uuid()`                                | Unikalny identyfikator transakcji.                                     |
-| `user_id`      | `UUID`             | `NOT NULL`, `REFERENCES auth.users(id) ON DELETE CASCADE`                   | Identyfikator użytkownika, do którego należy transakcja.               |
-| `category_id`  | `UUID`             | `REFERENCES public.categories(id) ON DELETE SET NULL`                       | Identyfikator powiązanej kategorii. `ON DELETE SET NULL` jest celowe, ponieważ trigger przejmie logikę przepinania do kategorii "Inne". |
-| `amount`       | `NUMERIC(10, 2)`   | `NOT NULL`, `CHECK (amount > 0)`                                          | Kwota transakcji.                                                      |
-| `type`         | `transaction_type` | `NOT NULL`                                                                | Typ transakcji ('income' lub 'expense').                                 |
-| `date`         | `DATE`             | `NOT NULL`                                                                | Data transakcji.                                                       |
-| `note`         | `TEXT`             | `CHECK (char_length(note) <= 500)`                                        | Opcjonalna notatka do transakcji.                                      |
-| `created_at`   | `TIMESTAMPTZ`      | `NOT NULL`, `DEFAULT now()`                                               | Data utworzenia rekordu transakcji.                                    |
+| Nazwa kolumny | Typ danych         | Ograniczenia                                              | Opis                                                                                                                                    |
+| ------------- | ------------------ | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`          | `UUID`             | `PRIMARY KEY`, `DEFAULT gen_random_uuid()`                | Unikalny identyfikator transakcji.                                                                                                      |
+| `user_id`     | `UUID`             | `NOT NULL`, `REFERENCES auth.users(id) ON DELETE CASCADE` | Identyfikator użytkownika, do którego należy transakcja.                                                                                |
+| `category_id` | `UUID`             | `REFERENCES public.categories(id) ON DELETE SET NULL`     | Identyfikator powiązanej kategorii. `ON DELETE SET NULL` jest celowe, ponieważ trigger przejmie logikę przepinania do kategorii "Inne". |
+| `amount`      | `NUMERIC(10, 2)`   | `NOT NULL`, `CHECK (amount > 0)`                          | Kwota transakcji.                                                                                                                       |
+| `type`        | `transaction_type` | `NOT NULL`                                                | Typ transakcji ('income' lub 'expense').                                                                                                |
+| `date`        | `DATE`             | `NOT NULL`                                                | Data transakcji.                                                                                                                        |
+| `note`        | `TEXT`             | `CHECK (char_length(note) <= 500)`                        | Opcjonalna notatka do transakcji.                                                                                                       |
+| `created_at`  | `TIMESTAMPTZ`      | `NOT NULL`, `DEFAULT now()`                               | Data utworzenia rekordu transakcji.                                                                                                     |
 
 ---
 
