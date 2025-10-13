@@ -18,11 +18,11 @@ begin
   -- insert default categories for the new user
   insert into public.categories (user_id, name, is_deletable)
   values
-    (new.id, 'jedzenie', true),
-    (new.id, 'opłaty', true),
-    (new.id, 'wynagrodzenie', true),
-    (new.id, 'przyjemności', true),
-    (new.id, 'Inne', false); -- the 'Inne' (Other) category is not deletable
+    (new.id, 'Food', true),
+    (new.id, 'Bills', true),
+    (new.id, 'Salary', true),
+    (new.id, 'Entertainment', true),
+    (new.id, 'Other', false); -- the 'Other' category is not deletable
 
   return new;
 end;
@@ -46,13 +46,13 @@ returns trigger as $$
 declare
   other_category_id uuid;
 begin
-  -- find the id of the non-deletable 'Inne' category for the current user
+  -- find the id of the non-deletable 'Other' category for the current user
   select id into other_category_id
   from public.categories
-  where user_id = old.user_id and is_deletable = false and name = 'Inne'
+  where user_id = old.user_id and is_deletable = false and name = 'Other'
   limit 1;
 
-  -- if the 'Inne' category is found, update the transactions
+  -- if the 'Other' category is found, update the transactions
   if other_category_id is not null then
     update public.transactions
     set category_id = other_category_id
@@ -62,7 +62,7 @@ begin
   return old;
 end;
 $$ language plpgsql security definer;
-comment on function public.handle_category_delete() is 're-assigns transactions to the default ''Inne'' category before a category is deleted.';
+comment on function public.handle_category_delete() is 're-assigns transactions to the default ''Other'' category before a category is deleted.';
 
 -- trigger: before_category_delete
 -- description: executes the handle_category_delete function before a category row is deleted.

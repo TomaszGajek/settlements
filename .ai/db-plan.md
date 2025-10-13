@@ -100,8 +100,8 @@ Główna tabela przechowująca wszystkie transakcje finansowe użytkowników.
 
 1.  **Automatyzacja za pomocą Triggerów**:
     - **Tworzenie profilu**: Trigger na `auth.users` po operacji `INSERT` powinien automatycznie tworzyć powiązany rekord w tabeli `profiles`.
-    - **Tworzenie domyślnych kategorii**: Ten sam trigger (`AFTER INSERT ON auth.users`) powinien wywołać funkcję, która doda domyślny zestaw kategorii (`jedzenie`, `opłaty`, `wynagrodzenie`, `przyjemności`) oraz jedną systemową, nieusuwalną kategorię `Inne` (`is_deletable = false`) dla nowego użytkownika.
-    - **Bezpieczne usuwanie kategorii**: Trigger `BEFORE DELETE` na tabeli `categories` jest niezbędny. Przed usunięciem kategorii, trigger musi zidentyfikować kategorię "Inne" (`is_deletable = false`) należącą do tego samego użytkownika i zaktualizować `category_id` we wszystkich powiązanych transakcjach na ID tej kategorii "Inne".
+    - **Tworzenie domyślnych kategorii**: Ten sam trigger (`AFTER INSERT ON auth.users`) powinien wywołać funkcję, która doda domyślny zestaw kategorii (`Food`, `Bills`, `Salary`, `Entertainment`) oraz jedną systemową, nieusuwalną kategorię `Other` (`is_deletable = false`) dla nowego użytkownika.
+    - **Bezpieczne usuwanie kategorii**: Trigger `BEFORE DELETE` na tabeli `categories` jest niezbędny. Przed usunięciem kategorii, trigger musi zidentyfikować kategorię "Other" (`is_deletable = false`) należącą do tego samego użytkownika i zaktualizować `category_id` we wszystkich powiązanych transakcjach na ID tej kategorii "Other".
 
 2.  **Integralność danych**:
     - Użycie typu `ENUM` dla `transaction_type` gwarantuje, że do bazy trafią tylko dozwolone wartości.
