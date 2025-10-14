@@ -16,6 +16,8 @@ Authorization: Bearer <your-jwt-token>
 
 Retrieve a list of all categories for the authenticated user.
 
+**Endpoint:** `GET /api/categories`
+
 **Request:**
 
 ```http
@@ -118,6 +120,472 @@ const response = await fetch('http://localhost:3000/api/categories', {
 const categories = await response.json();
 console.log(categories);
 ```
+
+### POST /api/categories
+
+Create a new category for the authenticated user.
+
+**Endpoint:** `POST /api/categories`
+
+**Request:**
+
+```http
+POST /api/categories HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <your-jwt-token>
+Content-Type: application/json
+
+{
+  "name": "Subscriptions"
+}
+```
+
+**Request Body:**
+
+- `name` (string, required): Category name, max 100 characters, must be unique per user
+
+**Response (201 Created):**
+
+```json
+{
+  "id": "c3d4e5f6-a7b8-9012-3456-7890abcdef12",
+  "name": "Subscriptions",
+  "isDeletable": true
+}
+```
+
+**Fields:**
+
+- `id` (string): Unique category identifier (UUID)
+- `name` (string): Category name (trimmed of whitespace)
+- `isDeletable` (boolean): Always `true` for user-created categories
+
+**Features:**
+
+- Category names are trimmed of leading/trailing whitespace
+- Names must be unique per user (case-sensitive)
+- User-created categories are always deletable
+- Maximum name length: 100 characters
+
+**Error Responses:**
+
+400 Bad Request - Invalid JSON:
+
+```json
+{
+  "error": "Bad Request",
+  "message": "Invalid JSON in request body"
+}
+```
+
+400 Bad Request - Validation errors:
+
+```json
+{
+  "error": "Bad Request",
+  "message": "Validation failed",
+  "details": {
+    "name": "Name is required"
+  }
+}
+```
+
+Possible validation errors:
+- "Name is required" - Missing name field
+- "Name cannot be empty" - Empty string or whitespace only
+- "Name must be at most 100 characters" - Name exceeds maximum length
+
+401 Unauthorized - Missing or invalid authentication token:
+
+```json
+{
+  "error": "Unauthorized",
+  "message": "Authentication required"
+}
+```
+
+409 Conflict - Category name already exists:
+
+```json
+{
+  "error": "Conflict",
+  "message": "A category with this name already exists"
+}
+```
+
+500 Internal Server Error - Unexpected server error:
+
+```json
+{
+  "error": "Internal Server Error",
+  "message": "An unexpected error occurred"
+}
+```
+
+**Example using cURL:**
+
+```bash
+curl -X POST "http://localhost:3000/api/categories" \
+  -H "Authorization: Bearer your-jwt-token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Subscriptions"
+  }'
+```
+
+**Example using JavaScript (fetch):**
+
+```javascript
+const response = await fetch('http://localhost:3000/api/categories', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${accessToken}`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    name: 'Subscriptions'
+  })
+});
+
+if (response.status === 201) {
+  const category = await response.json();
+  console.log('Category created:', category);
+} else if (response.status === 409) {
+  console.error('Category already exists');
+} else {
+  const error = await response.json();
+  console.error('Error:', error);
+}
+```
+
+### PATCH /api/categories/{id}
+
+Update a category's name for the authenticated user.
+
+**Endpoint:** `PATCH /api/categories/{id}`
+
+**Path Parameters:**
+
+- `id` (string, required): UUID of the category to update
+
+**Request:**
+
+```http
+PATCH /api/categories/c3d4e5f6-a7b8-9012-3456-7890abcdef12 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <your-jwt-token>
+Content-Type: application/json
+
+{
+  "name": "Monthly Subscriptions"
+}
+```
+
+**Request Body:**
+
+- `name` (string, required): New category name, max 100 characters, must be unique per user
+
+**Response (200 OK):**
+
+```json
+{
+  "id": "c3d4e5f6-a7b8-9012-3456-7890abcdef12",
+  "name": "Monthly Subscriptions",
+  "isDeletable": true
+}
+```
+
+**Fields:**
+
+- `id` (string): Unique category identifier (UUID)
+- `name` (string): Updated category name (trimmed of whitespace)
+- `isDeletable` (boolean): Whether the category can be deleted
+
+**Features:**
+
+- Category names are trimmed of leading/trailing whitespace
+- New name must be unique per user (case-sensitive)
+- Cannot rename the "Other" category (system category with `isDeletable: false`)
+- If name is unchanged, returns current category (optimization)
+
+**Error Responses:**
+
+400 Bad Request - Invalid UUID format:
+
+```json
+{
+  "error": "Bad Request",
+  "message": "Validation failed",
+  "details": {
+    "id": "Invalid category ID format"
+  }
+}
+```
+
+400 Bad Request - Invalid JSON:
+
+```json
+{
+  "error": "Bad Request",
+  "message": "Invalid JSON in request body"
+}
+```
+
+400 Bad Request - Validation errors:
+
+```json
+{
+  "error": "Bad Request",
+  "message": "Validation failed",
+  "details": {
+    "name": "Name is required"
+  }
+}
+```
+
+Possible validation errors:
+- "Name is required" - Missing name field
+- "Name cannot be empty" - Empty string or whitespace only
+- "Name must be at most 100 characters" - Name exceeds maximum length
+
+401 Unauthorized - Missing or invalid authentication token:
+
+```json
+{
+  "error": "Unauthorized",
+  "message": "Authentication required"
+}
+```
+
+403 Forbidden - Category belongs to another user:
+
+```json
+{
+  "error": "Forbidden",
+  "message": "You do not have permission to update this category"
+}
+```
+
+403 Forbidden - Cannot update "Other" category:
+
+```json
+{
+  "error": "Forbidden",
+  "message": "Cannot update non-editable category"
+}
+```
+
+404 Not Found - Category doesn't exist:
+
+```json
+{
+  "error": "Not Found",
+  "message": "Category not found"
+}
+```
+
+409 Conflict - New name already exists:
+
+```json
+{
+  "error": "Conflict",
+  "message": "A category with this name already exists"
+}
+```
+
+500 Internal Server Error - Unexpected server error:
+
+```json
+{
+  "error": "Internal Server Error",
+  "message": "An unexpected error occurred"
+}
+```
+
+**Example using cURL:**
+
+```bash
+curl -X PATCH "http://localhost:3000/api/categories/c3d4e5f6-a7b8-9012-3456-7890abcdef12" \
+  -H "Authorization: Bearer your-jwt-token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Monthly Subscriptions"
+  }'
+```
+
+**Example using JavaScript (fetch):**
+
+```javascript
+const categoryId = 'c3d4e5f6-a7b8-9012-3456-7890abcdef12';
+
+const response = await fetch(`http://localhost:3000/api/categories/${categoryId}`, {
+  method: 'PATCH',
+  headers: {
+    'Authorization': `Bearer ${accessToken}`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    name: 'Monthly Subscriptions'
+  })
+});
+
+if (response.status === 200) {
+  const category = await response.json();
+  console.log('Category updated:', category);
+} else if (response.status === 403) {
+  const error = await response.json();
+  console.error('Cannot update:', error.message);
+} else if (response.status === 409) {
+  console.error('Category name already exists');
+} else {
+  const error = await response.json();
+  console.error('Error:', error);
+}
+```
+
+### DELETE /api/categories/{id}
+
+Delete a specific category for the authenticated user.
+
+**Endpoint:** `DELETE /api/categories/{id}`
+
+**Path Parameters:**
+
+- `id` (string, required): UUID of the category to delete
+
+**Request:**
+
+```http
+DELETE /api/categories/c3d4e5f6-a7b8-9012-3456-7890abcdef12 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <your-jwt-token>
+```
+
+**Response (204 No Content):**
+
+```
+HTTP/1.1 204 No Content
+Content-Length: 0
+```
+
+**Features:**
+
+- Permanently deletes the category from the database
+- Cannot delete the "Other" category (system category with `isDeletable: false`)
+- Database trigger automatically reassigns all transactions from the deleted category to "Other"
+- No transactions are orphaned or lost
+- Returns empty response body on success
+- Idempotent from user perspective
+
+**Business Logic:**
+
+1. Validates category ID is a valid UUID
+2. Verifies user is authenticated
+3. Checks category exists and belongs to authenticated user (via RLS)
+4. Verifies category is deletable (`isDeletable: true`)
+5. Deletes category from database
+6. Database trigger automatically reassigns associated transactions to "Other" category
+7. Returns 204 No Content
+
+**Error Responses:**
+
+400 Bad Request - Invalid UUID format:
+
+```json
+{
+  "error": "Bad Request",
+  "message": "Validation failed",
+  "details": {
+    "id": "Invalid category ID format"
+  }
+}
+```
+
+401 Unauthorized - Missing or invalid authentication token:
+
+```json
+{
+  "error": "Unauthorized",
+  "message": "Authentication required"
+}
+```
+
+403 Forbidden - Category belongs to another user:
+
+```json
+{
+  "error": "Forbidden",
+  "message": "You do not have permission to delete this category"
+}
+```
+
+403 Forbidden - Cannot delete "Other" category:
+
+```json
+{
+  "error": "Forbidden",
+  "message": "Cannot delete non-deletable category"
+}
+```
+
+404 Not Found - Category doesn't exist:
+
+```json
+{
+  "error": "Not Found",
+  "message": "Category not found"
+}
+```
+
+500 Internal Server Error - Unexpected server error:
+
+```json
+{
+  "error": "Internal Server Error",
+  "message": "An unexpected error occurred"
+}
+```
+
+**Example using cURL:**
+
+```bash
+curl -X DELETE "http://localhost:3000/api/categories/c3d4e5f6-a7b8-9012-3456-7890abcdef12" \
+  -H "Authorization: Bearer your-jwt-token" \
+  -v
+```
+
+**Example using JavaScript (fetch):**
+
+```javascript
+const categoryId = 'c3d4e5f6-a7b8-9012-3456-7890abcdef12';
+
+const response = await fetch(`http://localhost:3000/api/categories/${categoryId}`, {
+  method: 'DELETE',
+  headers: {
+    'Authorization': `Bearer ${accessToken}`
+  }
+});
+
+if (response.status === 204) {
+  console.log('Category deleted successfully');
+  // Category deleted, transactions reassigned to "Other"
+} else if (response.status === 403) {
+  const error = await response.json();
+  console.error('Cannot delete:', error.message);
+} else if (response.status === 404) {
+  console.error('Category not found');
+} else {
+  const error = await response.json();
+  console.error('Error:', error);
+}
+```
+
+**Important Notes:**
+
+- **Permanent Deletion**: This operation cannot be undone
+- **Transaction Preservation**: All transactions are preserved and reassigned to "Other" category
+- **System Category Protection**: The "Other" category cannot be deleted to ensure there's always a fallback category
+- **Idempotency**: Deleting the same category twice returns 404 on the second attempt (not an error)
 
 ## Dashboard
 
