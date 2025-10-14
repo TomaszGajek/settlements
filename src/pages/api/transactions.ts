@@ -144,21 +144,10 @@ export const GET: APIRoute = async ({ url, locals }) => {
       );
     }
 
-    const {
-      month: validMonth,
-      year: validYear,
-      page: validPage,
-      pageSize: validPageSize,
-    } = validationResult.data;
+    const { month: validMonth, year: validYear, page: validPage, pageSize: validPageSize } = validationResult.data;
 
     // 4. Call service layer to retrieve transactions
-    const result = await listTransactions(
-      locals.supabase,
-      validMonth,
-      validYear,
-      validPage ?? 1,
-      validPageSize ?? 20
-    );
+    const result = await listTransactions(locals.supabase, validMonth, validYear, validPage ?? 1, validPageSize ?? 20);
 
     // 5. Return success response
     return new Response(JSON.stringify(result), {

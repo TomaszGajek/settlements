@@ -119,6 +119,8 @@ In the project directory, you can run the following commands:
 - `npm run format`
   - Formats the code using Prettier.
 
+For detailed API documentation, see [API_DOCUMENTATION.md](API_DOCUMENTATION.md).
+
 ## Project Scope
 
 ### Key Features (MVP)
