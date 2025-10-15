@@ -1,8 +1,36 @@
 ---
-import Welcome from "../components/Welcome.astro";
-import Layout from "../layouts/Layout.astro";
+import AuthLayout from "../layouts/AuthLayout.astro";
+import { AuthWrapper } from "../components/auth/AuthWrapper";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Alert, AlertDescription } from "../components/ui/alert";
+import { AlertCircle } from "lucide-react";
+
+// Get URL params
+const tab = Astro.url.searchParams.get("tab") || "login";
+const reason = Astro.url.searchParams.get("reason");
+const email = Astro.url.searchParams.get("email") || undefined;
+
+// Check for session expired
+const sessionExpired = reason === "session_expired";
 ---
 
-<Layout>
-  <Welcome />
-</Layout>
+<AuthLayout title="Logowanie - Settlements">
+  <Card className="w-full max-w-md">
+    <CardHeader>
+      <CardTitle>Witaj w Settlements</CardTitle>
+      <CardDescription> Zaloguj się lub utwórz nowe konto, aby zarządzać swoimi finansami </CardDescription>
+    </CardHeader>
+    <CardContent>
+      {
+        sessionExpired && (
+          <Alert variant="default" className="mb-4 border-yellow-500 bg-yellow-500/10">
+            <AlertCircle className="h-4 w-4 text-yellow-500" />
+            <AlertDescription className="text-yellow-500">Sesja wygasła. Zaloguj się ponownie.</AlertDescription>
+          </Alert>
+        )
+      }
+
+      <AuthWrapper client:load defaultTab={tab} defaultEmail={email} />
+    </CardContent>
+  </Card>
+</AuthLayout>

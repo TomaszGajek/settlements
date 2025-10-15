@@ -236,9 +236,9 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
  *
  * Delete a specific category for the authenticated user.
  *
- * This endpoint allows users to delete their own deletable categories. The "Other" 
- * category cannot be deleted (is_deletable = false). Before deletion, a database 
- * trigger automatically reassigns all transactions associated with the deleted 
+ * This endpoint allows users to delete their own deletable categories. The "Other"
+ * category cannot be deleted (is_deletable = false). Before deletion, a database
+ * trigger automatically reassigns all transactions associated with the deleted
  * category to the user's "Other" category, ensuring no transactions are orphaned.
  *
  * Path parameters:

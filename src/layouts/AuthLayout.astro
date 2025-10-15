@@ -1,0 +1,42 @@
+---
+/**
+ * Layout dla stron autentykacji (login, register, reset password)
+ * Wyświetla centered card z formularzem na ciemnym tle
+ */
+import { Toaster } from "../components/ui/sonner";
+import "../styles/global.css";
+
+const { title = "Settlements" } = Astro.props;
+
+// Check if user is already authenticated - redirect to dashboard
+const session = await Astro.locals.supabase.auth.getSession();
+if (session.data.session) {
+  return Astro.redirect("/dashboard");
+}
+---
+
+<!doctype html>
+<html lang="pl" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Settlements - Zarządzaj swoimi finansami" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <title>{title}</title>
+  </head>
+  <body class="min-h-screen bg-background text-foreground antialiased">
+    <main class="min-h-screen flex flex-col items-center justify-center p-4">
+      <!-- Logo/Branding -->
+      <div class="mb-8 text-center">
+        <h1 class="text-4xl font-bold tracking-tight">Settlements</h1>
+        <p class="text-muted-foreground mt-2">Zarządzaj swoimi finansami</p>
+      </div>
+
+      <!-- Content -->
+      <slot />
+    </main>
+
+    <!-- Toast Notifications -->
+    <Toaster client:load />
+  </body>
+</html>

@@ -1,27 +1,65 @@
 import { defineMiddleware } from "astro:middleware";
-import { createClient } from "@supabase/supabase-js";
+import { createServerClient, parseCookieHeader } from "@supabase/ssr";
 
 import type { Database } from "../db/database.types.ts";
 
-const supabaseUrl = import.meta.env.SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.SUPABASE_KEY;
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+
+// Public paths that don't require authentication
+const publicPaths = ["/", "/reset-password"];
+
+// API paths that need special handling
+const apiPaths = ["/api/"];
 
 export const onRequest = defineMiddleware(async (context, next) => {
-  // Extract the JWT token from the Authorization header
-  const authHeader = context.request.headers.get("Authorization");
-  const accessToken = authHeader?.replace("Bearer ", "");
+  const { request, redirect, cookies } = context;
+  const pathname = new URL(request.url).pathname;
 
-  // Create a new Supabase client with the user's access token if available
-  const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-    global: {
-      headers: accessToken
-        ? {
-            Authorization: `Bearer ${accessToken}`,
-          }
-        : {},
+  // Create a Supabase client that works with server-side cookies
+  const supabase = createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
+    cookies: {
+      getAll() {
+        return parseCookieHeader(request.headers.get("Cookie") ?? "").map((cookie) => ({
+          name: cookie.name,
+          value: cookie.value ?? "",
+        }));
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value, options }) => {
+          cookies.set(name, value, options);
+        });
+      },
     },
   });
 
+  // Make supabase available in context.locals
   context.locals.supabase = supabase;
+
+  // Get current session
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  // Check if path is public
+  const isPublicPath = publicPaths.some((path) => pathname === path);
+  const isApiPath = apiPaths.some((path) => pathname.startsWith(path));
+
+  // If it's an API path, let it handle auth internally
+  if (isApiPath) {
+    return next();
+  }
+
+  // If user is not authenticated and trying to access protected route
+  if (!session && !isPublicPath) {
+    return redirect("/?reason=session_expired");
+  }
+
+  // If user is authenticated and trying to access public auth pages
+  if (session && isPublicPath) {
+    const now = new Date();
+    return redirect(`/dashboard?month=${now.getMonth() + 1}&year=${now.getFullYear()}`);
+  }
+
   return next();
 });

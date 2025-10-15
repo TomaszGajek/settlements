@@ -242,7 +242,7 @@ export async function updateTransaction(
 
   // Prepare update data - only include provided fields
   // Map camelCase (categoryId) to snake_case (category_id)
-  const updateData: Record<string, any> = {};
+  const updateData: Record<string, string | number | null> = {};
   if (command.amount !== undefined) updateData.amount = command.amount;
   if (command.date !== undefined) updateData.date = command.date;
   if (command.type !== undefined) updateData.type = command.type;

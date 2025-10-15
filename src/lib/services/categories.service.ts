@@ -260,10 +260,7 @@ export async function updateCategory(
  * // Category deleted, transactions reassigned to "Other" by database trigger
  * ```
  */
-export async function deleteCategory(
-  supabase: SupabaseClient,
-  categoryId: string
-): Promise<void> {
+export async function deleteCategory(supabase: SupabaseClient, categoryId: string): Promise<void> {
   // Get authenticated user early to fail fast if not authenticated
   const {
     data: { user },
@@ -300,10 +297,7 @@ export async function deleteCategory(
 
   // Delete category (trigger will reassign transactions to "Other")
   // RLS ensures user can only delete their own categories
-  const { error, count } = await supabase
-    .from("categories")
-    .delete({ count: "exact" })
-    .eq("id", categoryId);
+  const { error, count } = await supabase.from("categories").delete({ count: "exact" }).eq("id", categoryId);
 
   // Handle database errors early
   if (error) {

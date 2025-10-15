@@ -1,0 +1,41 @@
+---
+import AppLayout from "@/layouts/AppLayout.astro";
+import { DashboardApp } from "@/components/dashboard/DashboardApp";
+
+// Check authentication via middleware
+// Middleware will handle redirect to / if not authenticated
+// So if we reach this point, user is authenticated
+
+// Get query params for initial month/year
+const url = new URL(Astro.request.url);
+const monthParam = url.searchParams.get("month");
+const yearParam = url.searchParams.get("year");
+
+// Parse and validate month/year or use current date as fallback
+const now = new Date();
+let initialMonth = monthParam ? parseInt(monthParam, 10) : now.getMonth() + 1;
+let initialYear = yearParam ? parseInt(yearParam, 10) : now.getFullYear();
+
+// Validate month (1-12)
+if (isNaN(initialMonth) || initialMonth < 1 || initialMonth > 12) {
+  initialMonth = now.getMonth() + 1;
+}
+
+// Validate year (1900-2100)
+if (isNaN(initialYear) || initialYear < 1900 || initialYear > 2100) {
+  initialYear = now.getFullYear();
+}
+
+// Redirect to add query params if missing
+if (!monthParam || !yearParam) {
+  return Astro.redirect(`/dashboard?month=${initialMonth}&year=${initialYear}`);
+}
+
+// SSR is enabled for this page
+export const prerender = false;
+---
+
+<AppLayout title="Dashboard - Settlements">
+  <DashboardApp client:only="react" />
+</AppLayout>
+
