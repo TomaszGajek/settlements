@@ -20,7 +20,7 @@ const CreateCategorySchema = z.object({
  * Retrieve a list of all categories for the authenticated user.
  *
  * This endpoint returns all categories (both user-created and default categories)
- * sorted alphabetically by name. The "Other" category has isDeletable set to false
+ * sorted alphabetically by name. The "Inne" category has isDeletable set to false
  * and cannot be deleted.
  *
  * Query parameters: None
@@ -35,17 +35,17 @@ const CreateCategorySchema = z.object({
  * [
  *   {
  *     "id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
- *     "name": "Bills",
+ *     "name": "Rachunki",
  *     "isDeletable": true
  *   },
  *   {
  *     "id": "b2c3d4e5-f6a7-8901-2345-67890abcdef1",
- *     "name": "Food",
+ *     "name": "Jedzenie",
  *     "isDeletable": true
  *   },
  *   {
  *     "id": "c3d4e5f6-a7b8-9012-3456-7890abcdef12",
- *     "name": "Other",
+ *     "name": "Inne",
  *     "isDeletable": false
  *   }
  * ]

@@ -19,9 +19,9 @@ begin
   insert into public.categories (user_id, name, is_deletable)
   values
     (new.id, 'Jedzenie', true),
-    (new.id, 'Opłaty', true),
+    (new.id, 'Rachunki', true),
     (new.id, 'Wynagrodzenie', true),
-    (new.id, 'Przyjemności', true),
+    (new.id, 'Rozrywka', true),
     (new.id, 'Inne', false); -- the 'Inne' category is not deletable
 
   return new;

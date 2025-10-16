@@ -33,27 +33,27 @@ Content-Type: application/json
 [
   {
     "id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-    "name": "Bills",
+    "name": "Rachunki",
     "isDeletable": true
   },
   {
     "id": "b2c3d4e5-f6a7-8901-2345-67890abcdef1",
-    "name": "Entertainment",
+    "name": "Rozrywka",
     "isDeletable": true
   },
   {
     "id": "c3d4e5f6-a7b8-9012-3456-7890abcdef12",
-    "name": "Food",
+    "name": "Jedzenie",
     "isDeletable": true
   },
   {
     "id": "d4e6f2g7-d8g1-6c3b-bc3b-b1h9c9f9g9g9",
-    "name": "Other",
+    "name": "Inne",
     "isDeletable": false
   },
   {
     "id": "e5f7g3h8-e9h2-7d4c-cd4c-c2i0d0g0h0h0",
-    "name": "Salary",
+    "name": "Wynagrodzenie",
     "isDeletable": true
   }
 ]
@@ -63,13 +63,13 @@ Content-Type: application/json
 
 - `id` (string): Unique category identifier (UUID)
 - `name` (string): Category name (unique per user)
-- `isDeletable` (boolean): Whether the category can be deleted (`false` for system "Other" category)
+- `isDeletable` (boolean): Whether the category can be deleted (`false` for system "Inne" category)
 
 **Features:**
 
 - Results are sorted alphabetically by name
 - Includes both user-created and default categories
-- The "Other" category is a system category that cannot be deleted
+- The "Inne" category is a system category that cannot be deleted
 - RLS (Row-Level Security) ensures users only see their own categories
 
 **Error Responses:**
@@ -305,7 +305,7 @@ Content-Type: application/json
 
 - Category names are trimmed of leading/trailing whitespace
 - New name must be unique per user (case-sensitive)
-- Cannot rename the "Other" category (system category with `isDeletable: false`)
+- Cannot rename the "Inne" category (system category with `isDeletable: false`)
 - If name is unchanged, returns current category (optimization)
 
 **Error Responses:**
@@ -366,7 +366,7 @@ Possible validation errors:
 }
 ```
 
-403 Forbidden - Cannot update "Other" category:
+403 Forbidden - Cannot update "Inne" category:
 
 ```json
 {
@@ -471,8 +471,8 @@ Content-Length: 0
 **Features:**
 
 - Permanently deletes the category from the database
-- Cannot delete the "Other" category (system category with `isDeletable: false`)
-- Database trigger automatically reassigns all transactions from the deleted category to "Other"
+- Cannot delete the "Inne" category (system category with `isDeletable: false`)
+- Database trigger automatically reassigns all transactions from the deleted category to "Inne"
 - No transactions are orphaned or lost
 - Returns empty response body on success
 - Idempotent from user perspective
@@ -484,7 +484,7 @@ Content-Length: 0
 3. Checks category exists and belongs to authenticated user (via RLS)
 4. Verifies category is deletable (`isDeletable: true`)
 5. Deletes category from database
-6. Database trigger automatically reassigns associated transactions to "Other" category
+6. Database trigger automatically reassigns associated transactions to "Inne" category
 7. Returns 204 No Content
 
 **Error Responses:**
@@ -519,7 +519,7 @@ Content-Length: 0
 }
 ```
 
-403 Forbidden - Cannot delete "Other" category:
+403 Forbidden - Cannot delete "Inne" category:
 
 ```json
 {
@@ -568,7 +568,7 @@ const response = await fetch(`http://localhost:3000/api/categories/${categoryId}
 
 if (response.status === 204) {
   console.log('Category deleted successfully');
-  // Category deleted, transactions reassigned to "Other"
+  // Category deleted, transactions reassigned to "Inne"
 } else if (response.status === 403) {
   const error = await response.json();
   console.error('Cannot delete:', error.message);
@@ -583,8 +583,8 @@ if (response.status === 204) {
 **Important Notes:**
 
 - **Permanent Deletion**: This operation cannot be undone
-- **Transaction Preservation**: All transactions are preserved and reassigned to "Other" category
-- **System Category Protection**: The "Other" category cannot be deleted to ensure there's always a fallback category
+- **Transaction Preservation**: All transactions are preserved and reassigned to "Inne" category
+- **System Category Protection**: The "Inne" category cannot be deleted to ensure there's always a fallback category
 - **Idempotency**: Deleting the same category twice returns 404 on the second attempt (not an error)
 
 ## Dashboard
@@ -734,7 +734,7 @@ Content-Type: application/json
       "type": "expense",
       "note": "Grocery shopping",
       "categoryId": "c3d4e5f6-a7b8-9012-3456-7890abcdef12",
-      "categoryName": "Food",
+      "categoryName": "Jedzenie",
       "createdAt": "2025-10-15T10:30:00Z"
     },
     {
@@ -744,7 +744,7 @@ Content-Type: application/json
       "type": "income",
       "note": "Monthly salary",
       "categoryId": "e5f7g3h8-e9h2-7d4c-cd4c-c2i0d0g0h0h0",
-      "categoryName": "Salary",
+      "categoryName": "Wynagrodzenie",
       "createdAt": "2025-10-01T09:00:00Z"
     }
   ],
@@ -875,7 +875,7 @@ Content-Type: application/json
   "type": "expense",
   "note": "Grocery shopping",
   "categoryId": "c3d4e5f6-a7b8-9012-3456-7890abcdef12",
-  "categoryName": "Food",
+  "categoryName": "Jedzenie",
   "createdAt": "2025-10-15T10:30:00Z"
 }
 ```

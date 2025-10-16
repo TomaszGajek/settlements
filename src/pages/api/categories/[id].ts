@@ -27,7 +27,7 @@ const UpdateCategorySchema = z.object({
  *
  * Update a category's name for the authenticated user.
  *
- * This endpoint allows users to rename their editable categories. The "Other"
+ * This endpoint allows users to rename their editable categories. The "Inne"
  * category cannot be renamed (is_deletable = false). The new name must be unique
  * per user. Only the category's name can be updated.
  *
@@ -236,10 +236,10 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
  *
  * Delete a specific category for the authenticated user.
  *
- * This endpoint allows users to delete their own deletable categories. The "Other"
+ * This endpoint allows users to delete their own deletable categories. The "Inne"
  * category cannot be deleted (is_deletable = false). Before deletion, a database
  * trigger automatically reassigns all transactions associated with the deleted
- * category to the user's "Other" category, ensuring no transactions are orphaned.
+ * category to the user's "Inne" category, ensuring no transactions are orphaned.
  *
  * Path parameters:
  * - id (string, UUID): ID of the category to delete

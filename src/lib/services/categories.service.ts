@@ -24,9 +24,9 @@ import type {
  * const categories = await listCategories(supabase);
  * // Returns:
  * // [
- * //   { id: "uuid-1", name: "Bills", isDeletable: true },
- * //   { id: "uuid-2", name: "Food", isDeletable: true },
- * //   { id: "uuid-3", name: "Other", isDeletable: false }
+ * //   { id: "uuid-1", name: "Rachunki", isDeletable: true },
+ * //   { id: "uuid-2", name: "Jedzenie", isDeletable: true },
+ * //   { id: "uuid-3", name: "Inne", isDeletable: false }
  * // ]
  * ```
  */
@@ -133,7 +133,7 @@ export async function createCategory(
  *
  * This function updates an existing category's name. The category must exist,
  * belong to the authenticated user, and be editable (is_deletable = true).
- * The "Other" category cannot be renamed. The new name must be unique per user
+ * The "Inne" category cannot be renamed. The new name must be unique per user
  * (enforced by database UNIQUE constraint).
  *
  * @param supabase - Authenticated Supabase client (with user context)
@@ -191,7 +191,7 @@ export async function updateCategory(
   }
 
   // Check if category is editable
-  // "Other" category has is_deletable = false and cannot be renamed
+  // "Inne" category has is_deletable = false and cannot be renamed
   if (!existingCategory.is_deletable) {
     throw new Error("NOT_EDITABLE");
   }
@@ -242,9 +242,9 @@ export async function updateCategory(
  *
  * This function deletes an existing category. The category must exist,
  * belong to the authenticated user, and be deletable (is_deletable = true).
- * The "Other" category cannot be deleted. Before deletion, a database trigger
+ * The "Inne" category cannot be deleted. Before deletion, a database trigger
  * automatically reassigns all transactions associated with the deleted category
- * to the user's "Other" category.
+ * to the user's "Inne" category.
  *
  * @param supabase - Authenticated Supabase client (with user context)
  * @param categoryId - UUID of the category to delete
@@ -257,7 +257,7 @@ export async function updateCategory(
  * @example
  * ```typescript
  * await deleteCategory(supabase, "uuid-123");
- * // Category deleted, transactions reassigned to "Other" by database trigger
+ * // Category deleted, transactions reassigned to "Inne" by database trigger
  * ```
  */
 export async function deleteCategory(supabase: SupabaseClient, categoryId: string): Promise<void> {
@@ -290,12 +290,12 @@ export async function deleteCategory(supabase: SupabaseClient, categoryId: strin
   }
 
   // Check if category is deletable
-  // "Other" category has is_deletable = false and cannot be deleted
+  // "Inne" category has is_deletable = false and cannot be deleted
   if (!existingCategory.is_deletable) {
     throw new Error("NOT_DELETABLE");
   }
 
-  // Delete category (trigger will reassign transactions to "Other")
+  // Delete category (trigger will reassign transactions to "Inne")
   // RLS ensures user can only delete their own categories
   const { error, count } = await supabase.from("categories").delete({ count: "exact" }).eq("id", categoryId);
 
@@ -310,5 +310,5 @@ export async function deleteCategory(supabase: SupabaseClient, categoryId: strin
     throw new Error("DELETE_FAILED");
   }
 
-  // Success - category deleted, transactions reassigned by database trigger
+  // Success - category deleted, transactions reassigned to "Inne" by database trigger
 }

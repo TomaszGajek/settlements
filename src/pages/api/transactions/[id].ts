@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import { updateTransaction } from "@/lib/services/transactions.service";
+import { updateTransaction, deleteTransaction } from "@/lib/services/transactions.service";
 
 /**
  * Validation schema for transaction ID path parameter.
@@ -231,6 +231,119 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     // 8. Handle unexpected errors
     // eslint-disable-next-line no-console
     console.error("[Update Transaction API] Unexpected error:", error);
+
+    return new Response(
+      JSON.stringify({
+        error: "Internal Server Error",
+        message: "An unexpected error occurred",
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }
+};
+
+/**
+ * DELETE /api/transactions/{id}
+ *
+ * Delete a specific transaction for the authenticated user.
+ *
+ * Path parameters:
+ * - id (string, required): UUID of the transaction to delete
+ *
+ * Responses:
+ * - 204 No Content: Transaction deleted successfully
+ * - 400 Bad Request: Invalid UUID format
+ * - 401 Unauthorized: User not authenticated
+ * - 403 Forbidden: Transaction belongs to another user
+ * - 404 Not Found: Transaction doesn't exist
+ * - 500 Internal Server Error: Unexpected error
+ */
+export const DELETE: APIRoute = async ({ params, locals }) => {
+  try {
+    // 1. Validate path parameter (transaction ID)
+    const idValidation = TransactionIdSchema.safeParse({ id: params.id });
+
+    if (!idValidation.success) {
+      const errors = idValidation.error.format();
+      return new Response(
+        JSON.stringify({
+          error: "Bad Request",
+          message: "Validation failed",
+          details: {
+            id: errors.id?._errors[0],
+          },
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    const { id: transactionId } = idValidation.data;
+
+    // 2. Check authentication early
+    const {
+      data: { user },
+      error: authError,
+    } = await locals.supabase.auth.getUser();
+
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({
+          error: "Unauthorized",
+          message: "Authentication required",
+        }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // 3. Call service layer to delete transaction
+    await deleteTransaction(locals.supabase, transactionId);
+
+    // 4. Return success response with 204 No Content
+    return new Response(null, {
+      status: 204,
+    });
+  } catch (error) {
+    // 5. Handle specific business logic errors
+    if (error instanceof Error) {
+      if (error.message === "NOT_FOUND") {
+        return new Response(
+          JSON.stringify({
+            error: "Not Found",
+            message: "Transaction not found",
+          }),
+          {
+            status: 404,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      if (error.message === "FORBIDDEN") {
+        return new Response(
+          JSON.stringify({
+            error: "Forbidden",
+            message: "You do not have permission to delete this transaction",
+          }),
+          {
+            status: 403,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      }
+    }
+
+    // 6. Handle unexpected errors
+    // eslint-disable-next-line no-console
+    console.error("[Delete Transaction API] Unexpected error:", error);
 
     return new Response(
       JSON.stringify({
