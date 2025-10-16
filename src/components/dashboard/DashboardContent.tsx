@@ -3,11 +3,12 @@ import { DatePeriodNav } from "./DatePeriodNav";
 import { SummaryCards } from "./SummaryCards";
 import { DailyChart } from "./DailyChart";
 import { TransactionsList } from "./TransactionsList";
-import { FloatingActionButton } from "./FloatingActionButton";
 import { TransactionModal } from "./TransactionModal";
 import { DeleteDialog } from "./DeleteDialog";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { OfflineIndicator } from "@/components/shared/OfflineIndicator";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import { useDatePeriod } from "@/lib/contexts/DatePeriodContext";
 import { useDashboard } from "@/lib/hooks/useDashboard";
 import { useTransactionMutations } from "@/lib/hooks/useTransactionMutations";
@@ -101,6 +102,19 @@ export const DashboardContent: React.FC = () => {
     await deleteMutation.mutateAsync(transactionId);
   };
 
+  // Global keyboard shortcut: Ctrl+K
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === "k") {
+        e.preventDefault();
+        handleAddTransaction();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   // Transform daily breakdown for chart
   const chartData = dashboardData?.dailyBreakdown ? transformDailyBreakdown(dashboardData.dailyBreakdown) : [];
 
@@ -124,8 +138,18 @@ export const DashboardContent: React.FC = () => {
 
           {/* Transactions list */}
           <div className="bg-gray-900 rounded-lg border border-gray-800 mb-6">
-            <div className="p-4 border-b border-gray-800">
+            <div className="p-4 border-b border-gray-800 flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-100">Transakcje</h2>
+              <Button
+                onClick={handleAddTransaction}
+                variant="ghost"
+                size="sm"
+                className="text-gray-400 hover:text-gray-100 hover:bg-gray-800 rounded-md transition-colors"
+                aria-label="Dodaj transakcję (Ctrl+K)"
+              >
+                Dodaj
+                <Plus className="w-4 h-4 ml-2" />
+              </Button>
             </div>
             <TransactionsList
               month={period.month}
@@ -138,9 +162,6 @@ export const DashboardContent: React.FC = () => {
           {/* Daily chart */}
           <DailyChart data={chartData} isLoading={dashboardLoading} />
         </ErrorBoundary>
-
-        {/* Floating action button */}
-        <FloatingActionButton onClick={handleAddTransaction} />
 
         {/* Transaction modal */}
         <TransactionModal
