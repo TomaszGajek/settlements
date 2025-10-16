@@ -136,3 +136,19 @@ export async function deleteTransaction(id: string): Promise<void> {
   }
 }
 
+/**
+ * Fetch transaction counts per category from client-side.
+ *
+ * This is a simplified approach for Settings page - we use the client-side
+ * Supabase client to fetch only category IDs and count them.
+ *
+ * @returns Object mapping category IDs to transaction counts
+ * @throws Error if query fails
+ */
+export async function fetchTransactionCounts(): Promise<Record<string, number>> {
+  // We'll implement this using Supabase client directly
+  // This will be imported and used in the hook
+  // For now, return empty object - will be implemented in the hook
+  return {};
+}
+

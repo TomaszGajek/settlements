@@ -1,0 +1,16 @@
+---
+import AppLayout from "@/layouts/AppLayout.astro";
+import { SettingsApp } from "@/components/settings";
+
+// Check authentication via middleware
+// Middleware will handle redirect to / if not authenticated
+// So if we reach this point, user is authenticated
+
+// SSR is enabled for this page
+export const prerender = false;
+---
+
+<AppLayout title="Ustawienia - Settlements">
+  <SettingsApp client:only="react" />
+</AppLayout>
+
