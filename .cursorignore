@@ -1,0 +1,66 @@
+# Cursor IDE ignore file
+# Files and directories listed here will be excluded from Cursor's indexing and context
+
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Build outputs
+dist/
+build/
+.astro/
+.output/
+
+# Environment variables (optional - remove if you want AI to see them)
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Cache and temporary files
+.cache/
+.temp/
+.tmp/
+*.log
+*.log.*
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE files (optional)
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore
+
+# Package manager locks (large files)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Supabase local (optional)
+supabase/.branches/
+supabase/.temp/
+
+# Database dumps
+*.sql.gz
+*.dump
+
+# Large media files (optional)
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.zip
+*.tar.gz
+*.rar
+
