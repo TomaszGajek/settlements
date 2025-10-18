@@ -64,22 +64,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Setup Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
-
-      - name: Start Supabase local instance
-        run: supabase start
-
       - name: Setup environment variables
         run: |
-          echo "PUBLIC_SUPABASE_URL=https://bvvztrdwsdymjzvahpwa.supabase.co" >> $GITHUB_ENV
-          echo "PUBLIC_SUPABASE_ANON_KEY=$(supabase status --output json | jq -r '.anon_key')" >> $GITHUB_ENV
-          echo "SUPABASE_SERVICE_ROLE_KEY=$(supabase status --output json | jq -r '.service_role_key')" >> $GITHUB_ENV
+          echo "PUBLIC_SUPABASE_URL=${{ secrets.PUBLIC_SUPABASE_URL }}" >> $GITHUB_ENV
+          echo "PUBLIC_SUPABASE_ANON_KEY=${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}" >> $GITHUB_ENV
+          echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> $GITHUB_ENV
           echo "BASE_URL=http://localhost:4322" >> $GITHUB_ENV
-          echo "E2E_TEST_USER_EMAIL=e2etest@gmail.com" >> $GITHUB_ENV
-          echo "E2E_TEST_USER_PASSWORD=Example123" >> $GITHUB_ENV
+          echo "E2E_TEST_USER_EMAIL=${{ secrets.E2E_TEST_USER_EMAIL }}" >> $GITHUB_ENV
+          echo "E2E_TEST_USER_PASSWORD=${{ secrets.E2E_TEST_USER_PASSWORD }}" >> $GITHUB_ENV
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium
@@ -109,7 +101,3 @@ jobs:
           name: playwright-results
           path: playwright-results/
           retention-days: 7
-
-      - name: Stop Supabase
-        if: always()
-        run: supabase stop
