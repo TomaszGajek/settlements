@@ -44,7 +44,7 @@ describe("categories.service", () => {
             error: null,
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act
       const result = await listCategories(mockSupabase);
@@ -67,7 +67,7 @@ describe("categories.service", () => {
             error: null,
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act
       const result = await listCategories(mockSupabase);
@@ -85,7 +85,7 @@ describe("categories.service", () => {
             error: { message: "Database error" },
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act & Assert
       await expect(listCategories(mockSupabase)).rejects.toThrow("Failed to fetch categories: Database error");
@@ -100,7 +100,7 @@ describe("categories.service", () => {
             error: null,
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act
       const result = await listCategories(mockSupabase);
@@ -120,7 +120,7 @@ describe("categories.service", () => {
       vi.spyOn(mockSupabase.auth, "getUser").mockResolvedValue({
         data: { user: mockUser },
         error: null,
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       vi.spyOn(mockSupabase, "from").mockReturnValue({
         insert: vi.fn().mockReturnValue({
@@ -131,7 +131,7 @@ describe("categories.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act
       const result = await createCategory(mockSupabase, command);
@@ -147,7 +147,7 @@ describe("categories.service", () => {
       vi.spyOn(mockSupabase.auth, "getUser").mockResolvedValue({
         data: { user: null },
         error: null,
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act & Assert
       await expect(createCategory(mockSupabase, { name: "Test" })).rejects.toThrow("User not authenticated");
@@ -160,7 +160,7 @@ describe("categories.service", () => {
       vi.spyOn(mockSupabase.auth, "getUser").mockResolvedValue({
         data: { user: mockUser },
         error: null,
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       vi.spyOn(mockSupabase, "from").mockReturnValue({
         insert: vi.fn().mockReturnValue({
@@ -171,7 +171,7 @@ describe("categories.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act & Assert
       await expect(createCategory(mockSupabase, { name: "Duplicate" })).rejects.toThrow("DUPLICATE_NAME");
@@ -184,7 +184,7 @@ describe("categories.service", () => {
       vi.spyOn(mockSupabase.auth, "getUser").mockResolvedValue({
         data: { user: mockUser },
         error: null,
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       vi.spyOn(mockSupabase, "from").mockReturnValue({
         insert: vi.fn().mockReturnValue({
@@ -195,7 +195,7 @@ describe("categories.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act & Assert
       await expect(createCategory(mockSupabase, { name: "Test" })).rejects.toThrow(
@@ -210,7 +210,7 @@ describe("categories.service", () => {
       vi.spyOn(mockSupabase.auth, "getUser").mockResolvedValue({
         data: { user: mockUser },
         error: null,
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       vi.spyOn(mockSupabase, "from").mockReturnValue({
         insert: vi.fn().mockReturnValue({
@@ -221,7 +221,7 @@ describe("categories.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act & Assert
       await expect(createCategory(mockSupabase, { name: "Test" })).rejects.toThrow(
@@ -242,7 +242,7 @@ describe("categories.service", () => {
       vi.spyOn(mockSupabase.auth, "getUser").mockResolvedValue({
         data: { user: mockUser },
         error: null,
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // First call: check if category exists
       // Second call: update the category
@@ -256,7 +256,7 @@ describe("categories.service", () => {
               }),
             }),
           }),
-        } as any)
+        } as unknown as ReturnType<typeof mockSupabase.from>)
         .mockReturnValueOnce({
           update: vi.fn().mockReturnValue({
             eq: vi.fn().mockReturnValue({
@@ -268,7 +268,7 @@ describe("categories.service", () => {
               }),
             }),
           }),
-        } as any);
+        } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act
       const result = await updateCategory(mockSupabase, categoryId, command);
@@ -285,7 +285,7 @@ describe("categories.service", () => {
       vi.spyOn(mockSupabase.auth, "getUser").mockResolvedValue({
         data: { user: mockUser },
         error: null,
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       vi.spyOn(mockSupabase, "from").mockReturnValueOnce({
         select: vi.fn().mockReturnValue({
@@ -296,7 +296,7 @@ describe("categories.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act & Assert
       await expect(updateCategory(mockSupabase, "cat-999", { name: "Test" })).rejects.toThrow("NOT_FOUND");
@@ -313,7 +313,7 @@ describe("categories.service", () => {
       vi.spyOn(mockSupabase.auth, "getUser").mockResolvedValue({
         data: { user: mockUser },
         error: null,
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // First call: check if category exists
       // Second call: delete the category
@@ -327,14 +327,14 @@ describe("categories.service", () => {
               }),
             }),
           }),
-        } as any)
+        } as unknown as ReturnType<typeof mockSupabase.from>)
         .mockReturnValueOnce({
           delete: vi.fn().mockReturnValue({
             eq: vi.fn().mockResolvedValue({
               error: null,
             }),
           }),
-        } as any);
+        } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act
       await deleteCategory(mockSupabase, categoryId);
@@ -350,7 +350,7 @@ describe("categories.service", () => {
       vi.spyOn(mockSupabase.auth, "getUser").mockResolvedValue({
         data: { user: mockUser },
         error: null,
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       vi.spyOn(mockSupabase, "from").mockReturnValueOnce({
         select: vi.fn().mockReturnValue({
@@ -361,11 +361,10 @@ describe("categories.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act & Assert
       await expect(deleteCategory(mockSupabase, "cat-999")).rejects.toThrow("NOT_FOUND");
     });
   });
 });
-

@@ -86,12 +86,12 @@ describe("parseCurrency", () => {
   });
 
   it("should return undefined for null", () => {
-    const result = parseCurrency(null as any);
+    const result = parseCurrency(null as unknown as string);
     expect(result).toBeUndefined();
   });
 
   it("should return undefined for undefined", () => {
-    const result = parseCurrency(undefined as any);
+    const result = parseCurrency(undefined as unknown as string);
     expect(result).toBeUndefined();
   });
 

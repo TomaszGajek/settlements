@@ -57,7 +57,7 @@ async function globalSetup() {
 
     if (!testUser) {
       console.log("👤 Creating test user...");
-      const { data, error } = await supabaseAdmin.auth.admin.createUser({
+      const { error } = await supabaseAdmin.auth.admin.createUser({
         email: TEST_USER.email,
         password: TEST_USER.password,
         email_confirm: true,
