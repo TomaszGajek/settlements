@@ -7,7 +7,14 @@ import { screen, waitFor } from "@testing-library/react";
 import { renderWithProviders, userEvent } from "../../utils/test-utils";
 
 // Mock komponent dla przykładu
-function TransactionForm({ onSubmit }: { onSubmit: (data: any) => void }) {
+interface TransactionFormData {
+  amount: number;
+  type: string | null;
+  date: string | null;
+  note: string | null;
+}
+
+function TransactionForm({ onSubmit }: { onSubmit: (data: TransactionFormData) => void }) {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);

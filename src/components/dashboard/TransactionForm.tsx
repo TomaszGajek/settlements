@@ -42,7 +42,7 @@ export interface TransactionFormProps {
  * @param onCancel - Cancel handler
  * @param isSubmitting - Whether form is currently submitting
  */
-export const TransactionForm: React.FC<TransactionFormProps> = ({ mode, form, onSubmit, onCancel, isSubmitting }) => {
+export const TransactionForm: React.FC<TransactionFormProps> = ({ form, onSubmit, onCancel, isSubmitting }) => {
   // Auto-focus on Amount field on mount
   useEffect(() => {
     // Focus on amount input after modal animation
@@ -164,10 +164,20 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({ mode, form, on
 
         {/* Action Buttons */}
         <div className="flex justify-end gap-3 pt-4">
-          <Button type="button" variant="ghost" onClick={onCancel} disabled={isSubmitting} data-testid="transaction-form-cancel">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onCancel}
+            disabled={isSubmitting}
+            data-testid="transaction-form-cancel"
+          >
             Anuluj
           </Button>
-          <Button type="submit" disabled={isSubmitting || !form.formState.isValid} data-testid="transaction-form-submit">
+          <Button
+            type="submit"
+            disabled={isSubmitting || !form.formState.isValid}
+            data-testid="transaction-form-submit"
+          >
             {isSubmitting ? (
               <>
                 <span className="mr-2">Zapisywanie...</span>

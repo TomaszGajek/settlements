@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createCategory, updateCategory, deleteCategory } from "@/lib/services/categories.client";
 import { toast } from "sonner";
-import type { CreateCategoryCommand, UpdateCategoryCommand } from "@/types";
+import type { UpdateCategoryCommand } from "@/types";
 
 /**
  * React Query mutations hook for category CRUD operations.

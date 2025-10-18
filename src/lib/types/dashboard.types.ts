@@ -74,9 +74,8 @@ export interface DashboardContentProps {
   initialYear: number;
 }
 
-export interface DatePeriodNavProps {
-  // używa useDatePeriod hook - brak propsów
-}
+// DatePeriodNav używa useDatePeriod hook - brak propsów
+export type DatePeriodNavProps = Record<string, never>;
 
 export interface SummaryCardsProps {
   income: number;

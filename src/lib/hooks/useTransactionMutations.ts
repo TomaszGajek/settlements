@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createTransaction, updateTransaction, deleteTransaction } from "@/lib/services/transactions.client";
 import { toast } from "sonner";
-import type { CreateTransactionCommand, UpdateTransactionCommand } from "@/types";
+import type { UpdateTransactionCommand } from "@/types";
 
 /**
  * React Query mutations hook for transaction CRUD operations.

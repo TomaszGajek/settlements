@@ -36,14 +36,25 @@ export const DailyChart: React.FC<DailyChartProps> = ({ data, isLoading }) => {
   }
 
   // Custom tooltip component
-  const CustomTooltip = ({ active, payload }: any) => {
+  interface TooltipPayload {
+    dataKey?: string;
+    value?: number;
+    payload?: { date?: string };
+  }
+
+  interface CustomTooltipProps {
+    active?: boolean;
+    payload?: TooltipPayload[];
+  }
+
+  const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
     if (!active || !payload || !payload.length) {
       return null;
     }
 
     const date = payload[0]?.payload?.date;
-    const income = payload.find((p: any) => p.dataKey === "income")?.value || 0;
-    const expenses = payload.find((p: any) => p.dataKey === "expenses")?.value || 0;
+    const income = payload.find((p) => p.dataKey === "income")?.value || 0;
+    const expenses = payload.find((p) => p.dataKey === "expenses")?.value || 0;
 
     return (
       <div className="bg-gray-900 border border-gray-700 rounded-lg p-3 shadow-lg">

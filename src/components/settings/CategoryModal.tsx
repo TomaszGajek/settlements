@@ -152,7 +152,11 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({ mode, isOpen, onCl
             <Button variant="ghost" onClick={handleClose} disabled={isSubmitting} data-testid="category-modal-cancel">
               Anuluj
             </Button>
-            <Button onClick={form.handleSubmit(onSubmit)} disabled={!form.formState.isValid || isSubmitting} data-testid="category-modal-submit">
+            <Button
+              onClick={form.handleSubmit(onSubmit)}
+              disabled={!form.formState.isValid || isSubmitting}
+              data-testid="category-modal-submit"
+            >
               {isSubmitting ? "Zapisywanie..." : mode === "create" ? "Dodaj" : "Zapisz"}
             </Button>
           </DialogFooter>

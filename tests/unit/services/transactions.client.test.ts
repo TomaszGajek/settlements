@@ -298,9 +298,7 @@ describe("transactions.client", () => {
       global.fetch = mockFetch;
 
       // Act & Assert
-      await expect(updateTransaction("txn-1", { amount: "100.00" })).rejects.toThrow(
-        "Failed to update transaction"
-      );
+      await expect(updateTransaction("txn-1", { amount: "100.00" })).rejects.toThrow("Failed to update transaction");
     });
   });
 
@@ -389,4 +387,3 @@ describe("transactions.client", () => {
     });
   });
 });
-

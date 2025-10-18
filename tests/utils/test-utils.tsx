@@ -79,7 +79,7 @@ export function createMockUser() {
 /**
  * Helper do tworzenia mock category
  */
-export function createMockCategory(overrides?: Partial<any>) {
+export function createMockCategory(overrides?: Partial<Record<string, unknown>>) {
   return {
     id: "category-id-1",
     name: "Test Category",
@@ -93,7 +93,7 @@ export function createMockCategory(overrides?: Partial<any>) {
 /**
  * Helper do tworzenia mock transaction
  */
-export function createMockTransaction(overrides?: Partial<any>) {
+export function createMockTransaction(overrides?: Partial<Record<string, unknown>>) {
   return {
     id: "transaction-id-1",
     amount: 100.5,

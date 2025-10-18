@@ -27,7 +27,7 @@ export interface CategoryFormProps {
  * @param mode - 'create' for new category, 'edit' for existing
  * @param form - React Hook Form instance
  */
-export const CategoryForm: React.FC<CategoryFormProps> = ({ mode, form }) => {
+export const CategoryForm: React.FC<CategoryFormProps> = ({ form }) => {
   // Auto-focus on Name field on mount
   useEffect(() => {
     // Focus on name input after modal animation

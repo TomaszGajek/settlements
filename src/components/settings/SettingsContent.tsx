@@ -129,7 +129,7 @@ export const SettingsContent: React.FC = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-100">Kategorie</h2>
             <p className="text-sm text-gray-400 mt-1">
-              Zarządzaj kategoriami transakcji. Kategoria "Inne" jest systemowa i nie może być usunięta.
+              Zarządzaj kategoriami transakcji. Kategoria &ldquo;Inne&rdquo; jest systemowa i nie może być usunięta.
             </p>
           </div>
           <Button onClick={handleAddCategory} aria-label="Dodaj kategorię" data-testid="add-category-button">

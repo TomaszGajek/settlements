@@ -68,7 +68,7 @@ export const DeleteTransactionDialog: React.FC<DeleteDialogProps> = ({ isOpen, o
                 </div>
                 {transaction.note && (
                   <p className="text-sm mt-2 italic text-foreground border-l-2 border-muted-foreground/30 pl-3">
-                    "{transaction.note}"
+                    &ldquo;{transaction.note}&rdquo;
                   </p>
                 )}
               </div>

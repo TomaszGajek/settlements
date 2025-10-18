@@ -66,7 +66,7 @@ export const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({ isOpen
       await deleteAccountMutation.mutateAsync(password);
       // Success handling is done in the hook (logout, redirect, toast)
       // Dialog will close automatically after redirect
-    } catch (error) {
+    } catch {
       // Error handling is done in the hook (toast)
       // Keep dialog open so user can try again
     }
