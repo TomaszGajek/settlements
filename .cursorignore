@@ -21,7 +21,6 @@ build/
 # Cache and temporary files
 .cache/
 .temp/
-.tmp/
 *.log
 *.log.*
 
@@ -63,4 +62,5 @@ supabase/.temp/
 *.zip
 *.tar.gz
 *.rar
+
 

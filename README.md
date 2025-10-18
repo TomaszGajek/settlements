@@ -40,6 +40,13 @@ A web-based MVP (Minimum Viable Product) application designed for simple and eff
   - Authentication
   - Backend-as-a-Service (BaaS)
 
+### Testing
+
+- **Unit & Integration Tests**: [Vitest](https://vitest.dev/) - Fast unit test framework for TypeScript
+- **Component Testing**: [Testing Library](https://testing-library.com/) - Testing utilities for React components
+- **API Mocking**: [MSW (Mock Service Worker)](https://mswjs.io/) - API mocking for tests
+- **E2E Tests**: [Playwright](https://playwright.dev/) - Browser automation and end-to-end testing
+
 ### CI/CD & Hosting
 
 - **CI/CD**: [GitHub Actions](https://github.com/features/actions)
@@ -119,7 +126,17 @@ In the project directory, you can run the following commands:
 - `npm run format`
   - Formats the code using Prettier.
 
+- `npm run test`
+  - Runs unit and integration tests with Vitest.
+
+- `npm run test:coverage`
+  - Runs tests with code coverage report.
+
+- `npm run test:e2e`
+  - Runs end-to-end tests with Playwright.
+
 For detailed API documentation, see [API_DOCUMENTATION.md](API_DOCUMENTATION.md).
+For detailed testing strategy, see [.ai/test-plan.md](.ai/test-plan.md).
 
 ## Project Scope
 
