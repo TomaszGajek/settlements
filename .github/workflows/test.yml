@@ -8,7 +8,7 @@ on:
 
 jobs:
   unit-and-integration:
-    name: Unit & Integration Tests
+    name: Unit & Integration Tests with Coverage
     runs-on: ubuntu-latest
 
     steps:
@@ -23,11 +23,30 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run unit tests
-        run: npm run test:unit
+      - name: Run tests with coverage
+        run: npm run test:coverage
 
-      - name: Run integration tests
-        run: npm run test:integration
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7
+
+      - name: Coverage summary
+        run: |
+          echo "## 📊 Test Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ All tests passed with coverage analysis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Requirements" >> $GITHUB_STEP_SUMMARY
+          echo "- Minimum coverage threshold: **80%**" >> $GITHUB_STEP_SUMMARY
+          echo "- Coverage focuses on business logic: services, utils, schemas" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📁 Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- HTML coverage report available in workflow artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- Download the \`coverage-report\` artifact to view detailed HTML report" >> $GITHUB_STEP_SUMMARY
 
   e2e:
     name: E2E Tests
@@ -55,12 +74,12 @@ jobs:
 
       - name: Setup environment variables
         run: |
-          echo "PUBLIC_SUPABASE_URL=http://127.0.0.1:54321" >> $GITHUB_ENV
+          echo "PUBLIC_SUPABASE_URL=https://bvvztrdwsdymjzvahpwa.supabase.co" >> $GITHUB_ENV
           echo "PUBLIC_SUPABASE_ANON_KEY=$(supabase status --output json | jq -r '.anon_key')" >> $GITHUB_ENV
           echo "SUPABASE_SERVICE_ROLE_KEY=$(supabase status --output json | jq -r '.service_role_key')" >> $GITHUB_ENV
           echo "BASE_URL=http://localhost:4322" >> $GITHUB_ENV
-          echo "E2E_TEST_USER_EMAIL=test-e2e@example.com" >> $GITHUB_ENV
-          echo "E2E_TEST_USER_PASSWORD=TestPassword123!" >> $GITHUB_ENV
+          echo "E2E_TEST_USER_EMAIL=e2etest@gmail.com" >> $GITHUB_ENV
+          echo "E2E_TEST_USER_PASSWORD=Example123" >> $GITHUB_ENV
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium

@@ -31,13 +31,31 @@ export default defineConfig({
         "**/mockData/**",
         "**/*.test.{ts,tsx}",
         "**/*.spec.{ts,tsx}",
+        // Exclude UI components (tested via E2E)
+        "src/components/**/*.{tsx,astro}",
+        // Exclude layouts (tested via E2E)
+        "src/layouts/**/*.astro",
+        // Exclude pages (tested via E2E)
+        "src/pages/**/*.{ts,astro}",
+        // Exclude middleware (tested via E2E)
+        "src/middleware/**/*.ts",
+        // Exclude database client wrappers
+        "src/db/supabase.*.ts",
+        // Exclude types (no logic to test)
+        "src/types.ts",
+        "src/lib/types/**/*.ts",
+        // Exclude React hooks that wrap API calls (tested via integration tests)
+        "src/lib/hooks/**/*.{ts,tsx}",
+        // Exclude contexts (tested via integration tests)
+        "src/lib/contexts/**/*.tsx",
       ],
-      // Minimum 80% pokrycia dla logiki biznesowej
+      // Focus on business logic: services, utils, schemas
+      // These directories should have 80%+ coverage
       thresholds: {
-        lines: 70,
-        functions: 70,
-        branches: 70,
-        statements: 70,
+        lines: 80,
+        functions: 80,
+        branches: 80,
+        statements: 80,
       },
     },
 
