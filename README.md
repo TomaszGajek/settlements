@@ -126,8 +126,19 @@ In the project directory, you can run the following commands:
 - `npm run format`
   - Formats the code using Prettier.
 
+### Testing Scripts
+
 - `npm run test`
-  - Runs unit and integration tests with Vitest.
+  - Runs all unit and integration tests with Vitest (watch mode).
+
+- `npm run test:ui`
+  - Opens Vitest UI for interactive test running.
+
+- `npm run test:unit`
+  - Runs unit tests only.
+
+- `npm run test:integration`
+  - Runs integration tests only.
 
 - `npm run test:coverage`
   - Runs tests with code coverage report.
@@ -135,8 +146,21 @@ In the project directory, you can run the following commands:
 - `npm run test:e2e`
   - Runs end-to-end tests with Playwright.
 
+- `npm run test:e2e:ui`
+  - Opens Playwright UI for interactive E2E testing.
+
+- `npm run test:e2e:debug`
+  - Runs E2E tests in debug mode.
+
+- `npm run test:all`
+  - Runs all types of tests (unit, integration, E2E).
+
+For detailed testing documentation, see:
+- [tests/README.md](tests/README.md) - Complete testing guide
+- [TESTING_SETUP_SUMMARY.md](TESTING_SETUP_SUMMARY.md) - Setup summary
+- [.ai/test-plan.md](.ai/test-plan.md) - Detailed test plan
+
 For detailed API documentation, see [API_DOCUMENTATION.md](API_DOCUMENTATION.md).
-For detailed testing strategy, see [.ai/test-plan.md](.ai/test-plan.md).
 
 ## Project Scope
 
