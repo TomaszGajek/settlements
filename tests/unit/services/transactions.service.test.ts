@@ -60,7 +60,7 @@ describe("transactions.service", () => {
       vi.spyOn(mockSupabase.auth, "getUser").mockResolvedValue({
         data: { user: mockUser },
         error: null,
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       vi.spyOn(mockSupabase, "from").mockReturnValue({
         insert: vi.fn().mockReturnValue({
@@ -71,7 +71,7 @@ describe("transactions.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act
       const result = await createTransaction(mockSupabase, command);
@@ -95,7 +95,7 @@ describe("transactions.service", () => {
       vi.spyOn(mockSupabase.auth, "getUser").mockResolvedValue({
         data: { user: null },
         error: null,
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act & Assert
       await expect(
@@ -116,7 +116,7 @@ describe("transactions.service", () => {
       vi.spyOn(mockSupabase.auth, "getUser").mockResolvedValue({
         data: { user: mockUser },
         error: null,
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       vi.spyOn(mockSupabase, "from").mockReturnValue({
         insert: vi.fn().mockReturnValue({
@@ -127,7 +127,7 @@ describe("transactions.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act & Assert
       await expect(
@@ -148,7 +148,7 @@ describe("transactions.service", () => {
       vi.spyOn(mockSupabase.auth, "getUser").mockResolvedValue({
         data: { user: mockUser },
         error: null,
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       vi.spyOn(mockSupabase, "from").mockReturnValue({
         insert: vi.fn().mockReturnValue({
@@ -159,7 +159,7 @@ describe("transactions.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act & Assert
       await expect(
@@ -196,7 +196,7 @@ describe("transactions.service", () => {
       vi.spyOn(mockSupabase.auth, "getUser").mockResolvedValue({
         data: { user: mockUser },
         error: null,
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       vi.spyOn(mockSupabase, "from").mockReturnValue({
         insert: vi.fn().mockReturnValue({
@@ -207,7 +207,7 @@ describe("transactions.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act
       const result = await createTransaction(mockSupabase, command);
@@ -227,7 +227,7 @@ describe("transactions.service", () => {
       vi.spyOn(mockSupabase.auth, "getUser").mockResolvedValue({
         data: { user: mockUser },
         error: null,
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       vi.spyOn(mockSupabase, "from").mockReturnValueOnce({
         select: vi.fn().mockReturnValue({
@@ -238,7 +238,7 @@ describe("transactions.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       vi.spyOn(mockSupabase, "from").mockReturnValueOnce({
         delete: vi.fn().mockReturnValue({
@@ -246,7 +246,7 @@ describe("transactions.service", () => {
             error: null,
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act
       await deleteTransaction(mockSupabase, transactionId);
@@ -261,7 +261,7 @@ describe("transactions.service", () => {
       vi.spyOn(mockSupabase.auth, "getUser").mockResolvedValue({
         data: { user: null },
         error: null,
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act & Assert
       await expect(deleteTransaction(mockSupabase, "txn-1")).rejects.toThrow("User not authenticated");
@@ -274,7 +274,7 @@ describe("transactions.service", () => {
       vi.spyOn(mockSupabase.auth, "getUser").mockResolvedValue({
         data: { user: mockUser },
         error: null,
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       vi.spyOn(mockSupabase, "from").mockReturnValue({
         select: vi.fn().mockReturnValue({
@@ -285,7 +285,7 @@ describe("transactions.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act & Assert
       await expect(deleteTransaction(mockSupabase, "txn-999")).rejects.toThrow("NOT_FOUND");
@@ -299,7 +299,7 @@ describe("transactions.service", () => {
       vi.spyOn(mockSupabase.auth, "getUser").mockResolvedValue({
         data: { user: mockUser },
         error: null,
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       vi.spyOn(mockSupabase, "from").mockReturnValue({
         select: vi.fn().mockReturnValue({
@@ -310,7 +310,7 @@ describe("transactions.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act & Assert
       await expect(deleteTransaction(mockSupabase, "txn-1")).rejects.toThrow("FORBIDDEN");
@@ -336,7 +336,7 @@ describe("transactions.service", () => {
       vi.spyOn(mockSupabase.auth, "getUser").mockResolvedValue({
         data: { user: mockUser },
         error: null,
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       vi.spyOn(mockSupabase, "from").mockReturnValue({
         update: vi.fn().mockReturnValue({
@@ -349,7 +349,7 @@ describe("transactions.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act
       const result = await updateTransaction(mockSupabase, transactionId, command);
@@ -365,7 +365,7 @@ describe("transactions.service", () => {
       vi.spyOn(mockSupabase.auth, "getUser").mockResolvedValue({
         data: { user: null },
         error: null,
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act & Assert
       await expect(updateTransaction(mockSupabase, "txn-1", { amount: "100.00" })).rejects.toThrow(
@@ -380,7 +380,7 @@ describe("transactions.service", () => {
       vi.spyOn(mockSupabase.auth, "getUser").mockResolvedValue({
         data: { user: mockUser },
         error: null,
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       vi.spyOn(mockSupabase, "from").mockReturnValue({
         update: vi.fn().mockReturnValue({
@@ -393,7 +393,7 @@ describe("transactions.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act & Assert
       await expect(updateTransaction(mockSupabase, "txn-1", { categoryId: "invalid-cat" })).rejects.toThrow(
@@ -419,7 +419,7 @@ describe("transactions.service", () => {
       vi.spyOn(mockSupabase.auth, "getUser").mockResolvedValue({
         data: { user: mockUser },
         error: null,
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       vi.spyOn(mockSupabase, "from").mockReturnValue({
         update: vi.fn().mockReturnValue({
@@ -432,7 +432,7 @@ describe("transactions.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act
       const result = await updateTransaction(mockSupabase, transactionId, command);
@@ -467,7 +467,7 @@ describe("transactions.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       vi.spyOn(mockSupabase, "from").mockReturnValueOnce({
         select: vi.fn().mockReturnValue({
@@ -482,7 +482,7 @@ describe("transactions.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act
       const result = await listTransactions(mockSupabase, 10, 2025, 1, 20);
@@ -508,7 +508,7 @@ describe("transactions.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       vi.spyOn(mockSupabase, "from").mockReturnValueOnce({
         select: vi.fn().mockReturnValue({
@@ -523,7 +523,7 @@ describe("transactions.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act
       const result = await listTransactions(mockSupabase, 10, 2025);
@@ -545,7 +545,7 @@ describe("transactions.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       vi.spyOn(mockSupabase, "from").mockReturnValueOnce({
         select: vi.fn().mockReturnValue({
@@ -560,7 +560,7 @@ describe("transactions.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act
       const result = await listTransactions(mockSupabase, 10, 2025, 2, 20);
@@ -585,7 +585,7 @@ describe("transactions.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act & Assert
       await expect(listTransactions(mockSupabase, 10, 2025)).rejects.toThrow(
@@ -604,7 +604,7 @@ describe("transactions.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       vi.spyOn(mockSupabase, "from").mockReturnValueOnce({
         select: vi.fn().mockReturnValue({
@@ -619,7 +619,7 @@ describe("transactions.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act & Assert
       await expect(listTransactions(mockSupabase, 10, 2025)).rejects.toThrow(
@@ -628,4 +628,3 @@ describe("transactions.service", () => {
     });
   });
 });
-

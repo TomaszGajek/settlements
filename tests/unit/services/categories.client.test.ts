@@ -1,10 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import {
-  fetchCategories,
-  createCategory,
-  updateCategory,
-  deleteCategory,
-} from "@/lib/services/categories.client";
+import { fetchCategories, createCategory, updateCategory, deleteCategory } from "@/lib/services/categories.client";
 
 describe("categories.client", () => {
   const originalFetch = global.fetch;
@@ -310,4 +305,3 @@ describe("categories.client", () => {
     });
   });
 });
-

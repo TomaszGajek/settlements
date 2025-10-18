@@ -54,7 +54,7 @@ export function UpdatePasswordForm({ onSuccess }: UpdatePasswordFormProps) {
         } else {
           setHasValidSession(true);
         }
-      } catch (err) {
+      } catch {
         setHasValidSession(false);
         setError("Wystąpił błąd podczas weryfikacji sesji");
       }

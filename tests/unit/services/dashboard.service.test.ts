@@ -43,7 +43,7 @@ describe("dashboard.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act
       const result = await getDashboardSummary(mockSupabase, 10, 2025);
@@ -78,7 +78,7 @@ describe("dashboard.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act
       const result = await getDashboardSummary(mockSupabase, 10, 2025);
@@ -108,7 +108,7 @@ describe("dashboard.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act
       const result = await getDashboardSummary(mockSupabase, 10, 2025);
@@ -137,7 +137,7 @@ describe("dashboard.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act
       const result = await getDashboardSummary(mockSupabase, 10, 2025);
@@ -168,7 +168,7 @@ describe("dashboard.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act
       const result = await getDashboardSummary(mockSupabase, 10, 2025);
@@ -200,7 +200,7 @@ describe("dashboard.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act
       const result = await getDashboardSummary(mockSupabase, 10, 2025);
@@ -232,7 +232,7 @@ describe("dashboard.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act
       const result = await getDashboardSummary(mockSupabase, 10, 2025);
@@ -257,7 +257,7 @@ describe("dashboard.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act & Assert
       await expect(getDashboardSummary(mockSupabase, 10, 2025)).rejects.toThrow(
@@ -278,7 +278,7 @@ describe("dashboard.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act
       const result = await getDashboardSummary(mockSupabase, 10, 2025);
@@ -292,9 +292,7 @@ describe("dashboard.service", () => {
 
     it("should handle February in leap year correctly", async () => {
       // Arrange
-      const mockTransactions = [
-        { id: "1", amount: "100.00", type: "income", date: "2024-02-15" },
-      ];
+      const mockTransactions = [{ id: "1", amount: "100.00", type: "income", date: "2024-02-15" }];
 
       vi.spyOn(mockSupabase, "from").mockReturnValue({
         select: vi.fn().mockReturnValue({
@@ -307,7 +305,7 @@ describe("dashboard.service", () => {
             }),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<typeof mockSupabase.from>);
 
       // Act
       const result = await getDashboardSummary(mockSupabase, 2, 2024); // February 2024 (leap year)
@@ -319,4 +317,3 @@ describe("dashboard.service", () => {
     });
   });
 });
-

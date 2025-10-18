@@ -4,7 +4,6 @@ import type {
   CreateCategoryResponseDto,
   UpdateCategoryCommand,
   UpdateCategoryResponseDto,
-  CategoryDto,
 } from "@/types";
 
 /**

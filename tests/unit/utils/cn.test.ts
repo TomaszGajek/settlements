@@ -13,7 +13,9 @@ describe("cn utility", () => {
   });
 
   it("should handle conditional classes", () => {
-    const result = cn("base-class", true && "conditional-class", false && "hidden-class");
+    const isActive = true;
+    const isHidden = false;
+    const result = cn("base-class", isActive && "conditional-class", isHidden && "hidden-class");
     expect(result).toBe("base-class conditional-class");
   });
 
@@ -68,4 +70,3 @@ describe("cn utility", () => {
     expect(result).toBe("hover:text-red-500 md:text-blue-500 lg:hover:text-green-500");
   });
 });
-

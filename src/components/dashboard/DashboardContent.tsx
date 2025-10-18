@@ -65,7 +65,9 @@ export const DashboardContent: React.FC = () => {
     });
   };
 
-  const handleDeleteTransaction = (transactionId: string) => {
+  // This function is currently not used but kept for future implementation
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleDeleteTransaction = (_transactionId: string) => {
     // Find transaction to show in delete dialog
     // Note: We need to find it from the transactions list
     // For now, we'll just set the ID and fetch details in the dialog

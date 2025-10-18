@@ -71,7 +71,8 @@ export const DeleteCategoryDialog: React.FC<DeleteCategoryDialogProps> = ({
           <AlertDialogDescription asChild>
             <div className="space-y-3">
               <p>
-                Czy na pewno chcesz usunąć kategorię <strong className="text-gray-100">"{category.name}"</strong>?
+                Czy na pewno chcesz usunąć kategorię{" "}
+                <strong className="text-gray-100">&ldquo;{category.name}&rdquo;</strong>?
               </p>
 
               {transactionCount > 0 && (
@@ -79,7 +80,7 @@ export const DeleteCategoryDialog: React.FC<DeleteCategoryDialogProps> = ({
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
                     Ta kategoria zawiera <strong>{transactionCount}</strong> {getTransactionText(transactionCount)}.
-                    Wszystkie zostaną automatycznie przeniesione do kategorii <strong>"Inne"</strong>.
+                    Wszystkie zostaną automatycznie przeniesione do kategorii <strong>&ldquo;Inne&rdquo;</strong>.
                   </AlertDescription>
                 </Alert>
               )}
@@ -94,8 +95,15 @@ export const DeleteCategoryDialog: React.FC<DeleteCategoryDialogProps> = ({
         </AlertDialogHeader>
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting} data-testid="delete-category-dialog-cancel">Anuluj</AlertDialogCancel>
-          <AlertDialogAction onClick={handleConfirm} disabled={isDeleting} className="bg-red-600 hover:bg-red-700" data-testid="delete-category-dialog-confirm">
+          <AlertDialogCancel disabled={isDeleting} data-testid="delete-category-dialog-cancel">
+            Anuluj
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleConfirm}
+            disabled={isDeleting}
+            className="bg-red-600 hover:bg-red-700"
+            data-testid="delete-category-dialog-confirm"
+          >
             {isDeleting ? "Usuwanie..." : "Usuń"}
           </AlertDialogAction>
         </AlertDialogFooter>

@@ -66,4 +66,3 @@ describe("getMonthName", () => {
     expect(getMonthName(100)).toBe("Nieprawidłowy miesiąc");
   });
 });
-

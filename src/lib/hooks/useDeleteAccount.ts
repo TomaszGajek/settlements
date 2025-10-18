@@ -66,6 +66,7 @@ export function useDeleteAccount() {
       toast.success("Konto zostało usunięte");
 
       // Redirect to home page (login)
+      // eslint-disable-next-line react-compiler/react-compiler
       window.location.href = "/";
     },
     onError: (error: Error) => {
