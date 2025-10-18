@@ -21,9 +21,7 @@ export const SettingsApp: React.FC = () => {
           {/* Page header */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-100">Ustawienia</h1>
-            <p className="text-gray-400 mt-2">
-              Zarządzaj kategoriami transakcji i ustawieniami konta.
-            </p>
+            <p className="text-gray-400 mt-2">Zarządzaj kategoriami transakcji i ustawieniami konta.</p>
           </div>
 
           {/* Settings content */}
@@ -35,4 +33,3 @@ export const SettingsApp: React.FC = () => {
     </AuthProvider>
   );
 };
-

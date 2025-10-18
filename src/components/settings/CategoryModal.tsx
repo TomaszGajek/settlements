@@ -50,12 +50,7 @@ export interface CategoryModalProps {
  * @param onClose - Callback to close modal
  * @param category - Category object (required for edit mode)
  */
-export const CategoryModal: React.FC<CategoryModalProps> = ({
-  mode,
-  isOpen,
-  onClose,
-  category,
-}) => {
+export const CategoryModal: React.FC<CategoryModalProps> = ({ mode, isOpen, onClose, category }) => {
   const { createMutation, updateMutation } = useCategoryMutations();
   const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
 
@@ -145,27 +140,20 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
       <Dialog open={isOpen} onOpenChange={handleClose}>
         <DialogContent className="sm:max-w-[450px]">
           <DialogHeader>
-            <DialogTitle>
-              {mode === "create" ? "Dodaj kategorię" : "Edytuj kategorię"}
-            </DialogTitle>
+            <DialogTitle>{mode === "create" ? "Dodaj kategorię" : "Edytuj kategorię"}</DialogTitle>
             <DialogDescription>
-              {mode === "create"
-                ? "Wprowadź nazwę nowej kategorii."
-                : "Zmodyfikuj nazwę kategorii."}
+              {mode === "create" ? "Wprowadź nazwę nowej kategorii." : "Zmodyfikuj nazwę kategorii."}
             </DialogDescription>
           </DialogHeader>
 
           <CategoryForm mode={mode} form={form} />
 
           <DialogFooter>
-            <Button variant="ghost" onClick={handleClose} disabled={isSubmitting}>
+            <Button variant="ghost" onClick={handleClose} disabled={isSubmitting} data-testid="category-modal-cancel">
               Anuluj
             </Button>
-            <Button
-              onClick={form.handleSubmit(onSubmit)}
-              disabled={!form.formState.isValid || isSubmitting}
-            >
-              {isSubmitting ? "Zapisywanie..." : "Zapisz"}
+            <Button onClick={form.handleSubmit(onSubmit)} disabled={!form.formState.isValid || isSubmitting} data-testid="category-modal-submit">
+              {isSubmitting ? "Zapisywanie..." : mode === "create" ? "Dodaj" : "Zapisz"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -177,18 +165,12 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Masz niezapisane zmiany</AlertDialogTitle>
             <AlertDialogDescription>
-              Czy na pewno chcesz zamknąć formularz? Wszystkie niezapisane zmiany
-              zostaną utracone.
+              Czy na pewno chcesz zamknąć formularz? Wszystkie niezapisane zmiany zostaną utracone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowUnsavedWarning(false)}>
-              Anuluj
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDiscardChanges}
-              className="bg-red-600 hover:bg-red-700"
-            >
+            <AlertDialogCancel onClick={() => setShowUnsavedWarning(false)}>Anuluj</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDiscardChanges} className="bg-red-600 hover:bg-red-700">
               Odrzuć zmiany
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -197,4 +179,3 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
     </>
   );
 };
-

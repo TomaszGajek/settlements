@@ -51,6 +51,7 @@ export const NoteTextarea: React.FC<NoteTextareaProps> = ({
         onChange={handleChange}
         disabled={disabled}
         maxLength={maxLength}
+        data-testid="transaction-note-input"
         aria-label="Notatka do transakcji"
         aria-invalid={!!error}
         aria-describedby={error ? "note-error" : "note-counter"}
@@ -71,4 +72,3 @@ export const NoteTextarea: React.FC<NoteTextareaProps> = ({
     </div>
   );
 };
-

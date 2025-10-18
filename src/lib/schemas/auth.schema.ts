@@ -44,9 +44,21 @@ export const resetPasswordFormSchema = z.object({
     .trim(),
 });
 
+/**
+ * Schema walidacji formularza zmiany hasła (po kliknięciu w link z emaila)
+ */
+export const updatePasswordFormSchema = z
+  .object({
+    password: z.string({ required_error: "Hasło jest wymagane" }).min(6, "Hasło musi mieć minimum 6 znaków"),
+    confirmPassword: z.string({ required_error: "Potwierdzenie hasła jest wymagane" }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Hasła muszą być identyczne",
+    path: ["confirmPassword"],
+  });
+
 // Type inference from schemas
 export type LoginFormData = z.infer<typeof loginFormSchema>;
 export type RegisterFormData = z.infer<typeof registerFormSchema>;
 export type ResetPasswordFormData = z.infer<typeof resetPasswordFormSchema>;
-
-
+export type UpdatePasswordFormData = z.infer<typeof updatePasswordFormSchema>;

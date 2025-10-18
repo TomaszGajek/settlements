@@ -14,4 +14,3 @@ export function formatDate(date: string, format: "DD.MM" | "DD.MM.YYYY"): string
 
   return `${day}.${month}.${year}`;
 }
-

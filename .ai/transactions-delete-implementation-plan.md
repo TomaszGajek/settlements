@@ -3,6 +3,7 @@
 ## Analysis
 
 ### Key Points from API Specification
+
 - **Endpoint**: `DELETE /api/transactions/{id}`
 - **Purpose**: Delete a specific transaction
 - **Authentication**: Required (JWT-based via Supabase)
@@ -11,14 +12,16 @@
   - No request body
 - **Response**: No content (empty response)
 - **Success**: 204 No Content
-- **Errors**: 
+- **Errors**:
   - 400 Bad Request (invalid UUID format)
   - 401 Unauthorized (not authenticated)
   - 403 Forbidden (trying to delete another user's transaction)
   - 404 Not Found (transaction doesn't exist)
 
 ### Required and Optional Parameters
+
 **Path Parameters:**
+
 - `id` (UUID, required): ID of the transaction to delete
 
 **Request Body:** None
@@ -26,27 +29,33 @@
 **Response Body:** None (204 No Content)
 
 ### Necessary DTOs and Command Models
+
 - No DTOs or command models needed (delete operation)
 - Only path parameter validation required
 
 ### Service Layer Extraction
+
 Service method to be added to: `src/lib/services/transactions.service.ts`
 
 This service will:
+
 - Accept `SupabaseClient` and transaction `id`
 - Verify transaction exists and belongs to user (via RLS)
 - Delete transaction from database
 - Return void (or throw error if failed)
 
 ### Input Validation Strategy
+
 Using Zod schemas:
+
 1. **Path Parameter Schema**: Validate id is valid UUID
 2. **No Body Validation**: DELETE requests have no body
 3. **Business Validation**: Verify transaction ownership via RLS
 
 ### Security Considerations
+
 - **Authentication**: User must be authenticated
-- **Authorization**: 
+- **Authorization**:
   - User can only delete their own transactions (RLS enforces)
   - Return 403 if trying to delete another user's transaction
   - Return 404 if transaction doesn't exist
@@ -54,6 +63,7 @@ Using Zod schemas:
 - **SQL Injection**: Prevented by Supabase parameterized queries
 
 ### Error Scenarios and Status Codes
+
 1. **400 Bad Request**:
    - Invalid UUID format for id
 
@@ -78,6 +88,7 @@ Using Zod schemas:
 The DELETE /transactions/{id} endpoint allows authenticated users to permanently delete their own transactions. This is a destructive operation that cannot be undone. The endpoint validates ownership through RLS policies and returns no content on success. Proper error responses distinguish between non-existent transactions (404) and unauthorized access attempts (403).
 
 **Key Features:**
+
 - Permanent deletion from `transactions` table
 - No cascading deletions (transactions have no dependents)
 - Validates ownership through RLS
@@ -90,34 +101,41 @@ The DELETE /transactions/{id} endpoint allows authenticated users to permanently
 ## 2. Request Details
 
 ### HTTP Method
+
 `DELETE`
 
 ### URL Structure
+
 ```
 /api/transactions/{id}
 ```
 
 ### Path Parameters
+
 - **id** (string, required)
   - Description: UUID of the transaction to delete
   - Format: Valid UUID
   - Example: `c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d`
 
 ### Request Headers
+
 - **Authorization**: `Bearer <JWT_TOKEN>` (required)
 
 ### Request Body
+
 None
 
 ### Example Requests
 
 #### Delete Transaction
+
 ```bash
 curl -X DELETE "https://api.example.com/api/transactions/c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d" \
   -H "Authorization: Bearer <JWT_TOKEN>"
 ```
 
 #### Delete with Verbose Output
+
 ```bash
 curl -X DELETE "https://api.example.com/api/transactions/c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d" \
   -H "Authorization: Bearer <JWT_TOKEN>" \
@@ -129,7 +147,9 @@ curl -X DELETE "https://api.example.com/api/transactions/c3e8a1d4-b8e0-4b1a-9b1a
 ## 3. Utilized Types
 
 ### Path Parameter Validation
+
 **Transaction ID Schema** (to be created with Zod):
+
 ```typescript
 const TransactionIdSchema = z.object({
   id: z.string().uuid("Invalid transaction ID format"),
@@ -137,12 +157,15 @@ const TransactionIdSchema = z.object({
 ```
 
 ### No DTOs Required
+
 - No request body DTO
 - No response body DTO
 - DELETE returns 204 No Content (empty response)
 
 ### Database Types
+
 Only database row identification:
+
 - `transactions.id` (UUID)
 - `transactions.user_id` (UUID, for RLS)
 
@@ -153,11 +176,13 @@ Only database row identification:
 ### Success Response (204 No Content)
 
 #### Structure
+
 - **Status Code**: 204
 - **Response Body**: Empty (no content)
 - **Content-Length**: 0
 
 #### Example
+
 ```
 HTTP/1.1 204 No Content
 Content-Length: 0
@@ -166,10 +191,13 @@ Content-Length: 0
 ### Error Responses
 
 #### 400 Bad Request (Invalid UUID)
+
 **Scenarios:**
+
 - Path parameter is not a valid UUID
 
 **Example Response:**
+
 ```json
 {
   "error": "Bad Request",
@@ -181,11 +209,14 @@ Content-Length: 0
 ```
 
 #### 401 Unauthorized
+
 **Scenarios:**
+
 - Missing Authorization header
 - Invalid or expired JWT token
 
 **Example Response:**
+
 ```json
 {
   "error": "Unauthorized",
@@ -194,11 +225,14 @@ Content-Length: 0
 ```
 
 #### 403 Forbidden
+
 **Scenarios:**
+
 - Transaction exists but belongs to different user
 - User attempting to delete another user's transaction
 
 **Example Response:**
+
 ```json
 {
   "error": "Forbidden",
@@ -207,11 +241,14 @@ Content-Length: 0
 ```
 
 #### 404 Not Found
+
 **Scenarios:**
+
 - Transaction with given id doesn't exist
 - Transaction was already deleted
 
 **Example Response:**
+
 ```json
 {
   "error": "Not Found",
@@ -220,11 +257,14 @@ Content-Length: 0
 ```
 
 #### 500 Internal Server Error
+
 **Scenarios:**
+
 - Database connection failure
 - Unexpected errors during deletion
 
 **Example Response:**
+
 ```json
 {
   "error": "Internal Server Error",
@@ -237,6 +277,7 @@ Content-Length: 0
 ## 5. Data Flow
 
 ### High-Level Flow
+
 1. **Request Reception**: Astro API endpoint receives DELETE request
 2. **Authentication Check**: Verify user is authenticated via Supabase
 3. **Path Validation**: Validate transaction ID from URL
@@ -248,6 +289,7 @@ Content-Length: 0
 ### Detailed Data Flow
 
 #### Step 1: API Route Handler (`src/pages/api/transactions/[id].ts`)
+
 ```
 1. Check HTTP method is DELETE
 2. Extract id from path params
@@ -261,6 +303,7 @@ Content-Length: 0
 ```
 
 #### Step 2: Service Layer (`src/lib/services/transactions.service.ts`)
+
 ```
 1. Receive supabase client and transaction id
 2. Execute DELETE query:
@@ -277,14 +320,16 @@ Content-Length: 0
 #### Step 3: Database Interaction (Supabase)
 
 **Delete Query:**
+
 ```sql
 DELETE FROM transactions
-WHERE 
+WHERE
   id = 'c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d'
   AND user_id = '<authenticated_user_id>'; -- Applied by RLS
 ```
 
 **RLS Check (automatic):**
+
 ```sql
 -- RLS DELETE policy on transactions:
 -- auth.uid() = user_id
@@ -293,6 +338,7 @@ WHERE
 ```
 
 **Existence Check (if delete affects 0 rows):**
+
 ```sql
 SELECT id, user_id
 FROM transactions
@@ -303,14 +349,11 @@ WHERE id = 'c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d';
 ```
 
 #### Step 4: Determining 404 vs 403
+
 ```typescript
 // After delete returns 0 rows affected
 // Check if transaction exists at all
-const { data: exists } = await supabase
-  .from("transactions")
-  .select("id, user_id")
-  .eq("id", transactionId)
-  .single();
+const { data: exists } = await supabase.from("transactions").select("id, user_id").eq("id", transactionId).single();
 
 if (!exists) {
   // Transaction doesn't exist → 404
@@ -326,32 +369,37 @@ if (!exists) {
 ## 6. Security Considerations
 
 ### Authentication
+
 - **Method**: JWT-based authentication via Supabase
-- **Implementation**: 
+- **Implementation**:
   - Extract user from `context.locals.supabase.auth.getUser()`
   - Reject request with 401 if user is null or token is invalid
   - Use authenticated user's ID for ownership verification
 
 ### Authorization
-- **Transaction Ownership**: 
+
+- **Transaction Ownership**:
   - RLS DELETE policy verifies `auth.uid() = user_id`
   - User cannot delete other users' transactions
   - Distinguish between 404 (doesn't exist) and 403 (exists but not yours)
   - Important for security: don't leak transaction existence to unauthorized users
 
 ### Data Integrity
+
 - **Soft Delete vs Hard Delete**: This is a hard delete (permanent)
 - **No Cascading Issues**: Transactions have no dependent records
 - **Referential Integrity**: No foreign keys reference transactions
 - **Audit Trail**: Consider logging deletions for audit purposes
 
 ### Preventing Common Attacks
+
 - **SQL Injection**: Supabase uses parameterized queries
 - **ID Enumeration**: 404 response doesn't leak existence to unauthorized users
 - **Privilege Escalation**: RLS prevents deleting other users' transactions
 - **Denial of Service**: Rate limiting should be implemented (future enhancement)
 
 ### Privacy Considerations
+
 - **Permanent Deletion**: Data is permanently removed from database
 - **No Recovery**: Deleted transactions cannot be recovered
 - **Compliance**: Ensure deletion complies with data retention policies
@@ -363,6 +411,7 @@ if (!exists) {
 ### Validation Errors (400 Bad Request)
 
 #### Scenario 1: Invalid Transaction ID Format
+
 ```typescript
 // URL: DELETE /api/transactions/invalid-uuid
 
@@ -377,6 +426,7 @@ Response: {
 ```
 
 #### Scenario 2: Malformed UUID
+
 ```typescript
 // URL: DELETE /api/transactions/123
 
@@ -393,6 +443,7 @@ Response: {
 ### Authentication Errors (401 Unauthorized)
 
 #### Scenario 1: Missing Authorization Header
+
 ```typescript
 Response: {
   statusCode: 401,
@@ -402,6 +453,7 @@ Response: {
 ```
 
 #### Scenario 2: Invalid or Expired Token
+
 ```typescript
 Response: {
   statusCode: 401,
@@ -413,6 +465,7 @@ Response: {
 ### Authorization Errors (403 Forbidden)
 
 #### Scenario 1: Transaction Belongs to Another User
+
 ```typescript
 // Transaction exists but user_id doesn't match
 
@@ -426,6 +479,7 @@ Response: {
 ### Not Found Errors (404 Not Found)
 
 #### Scenario 1: Transaction Doesn't Exist
+
 ```typescript
 // No transaction with given ID in database
 
@@ -437,6 +491,7 @@ Response: {
 ```
 
 #### Scenario 2: Transaction Already Deleted
+
 ```typescript
 // Transaction was deleted in previous request
 
@@ -450,6 +505,7 @@ Response: {
 ### Database Errors (500 Internal Server Error)
 
 #### Scenario 1: Database Connection Failure
+
 ```typescript
 Response: {
   statusCode: 500,
@@ -462,6 +518,7 @@ console.error("[Delete Transaction API] Database error:", error)
 ```
 
 #### Scenario 2: Unexpected Deletion Error
+
 ```typescript
 Response: {
   statusCode: 500,
@@ -474,6 +531,7 @@ console.error("[Delete Transaction API] Deletion failed:", error)
 ```
 
 ### Error Handling Best Practices
+
 1. **Distinguish 404 vs 403**: Critical for security and UX
 2. **No Information Leakage**: Don't reveal transaction existence to unauthorized users
 3. **Consistent Format**: Same error structure across all endpoints
@@ -487,6 +545,7 @@ console.error("[Delete Transaction API] Deletion failed:", error)
 ### Potential Bottlenecks
 
 #### 1. Two-Step Process on Failure
+
 - **Issue**: DELETE + existence check when delete affects 0 rows
 - **Impact**: Extra database query on failure
 - **Mitigation**:
@@ -495,6 +554,7 @@ console.error("[Delete Transaction API] Deletion failed:", error)
   - Can be optimized if needed
 
 #### 2. RLS Policy Evaluation
+
 - **Issue**: RLS policy evaluated on DELETE
 - **Impact**: Slight overhead per request
 - **Mitigation**:
@@ -505,6 +565,7 @@ console.error("[Delete Transaction API] Deletion failed:", error)
 ### Optimization Strategies
 
 #### 1. Index Usage
+
 ```sql
 -- Ensure composite index exists:
 CREATE INDEX idx_transactions_id_user ON transactions(id, user_id);
@@ -513,6 +574,7 @@ CREATE INDEX idx_transactions_id_user ON transactions(id, user_id);
 ```
 
 #### 2. Efficient 404 vs 403 Check
+
 ```typescript
 // Current approach: Two queries
 // 1. DELETE with RLS
@@ -523,6 +585,7 @@ CREATE INDEX idx_transactions_id_user ON transactions(id, user_id);
 ```
 
 #### 3. Batch Deletion (Future)
+
 - Support deleting multiple transactions at once
 - Single transaction for consistency
 - Reduces network round-trips
@@ -530,27 +593,32 @@ CREATE INDEX idx_transactions_id_user ON transactions(id, user_id);
 ### Expected Performance
 
 #### Best Case (Successful Deletion)
+
 - **Total Response Time**: < 100ms
 - **Validation Time**: < 5ms
 - **Database Delete**: < 50ms
 - **Response**: < 5ms
 
 #### Typical Case
+
 - **Total Response Time**: < 150ms
 - **Similar to best case**
 
 #### Failure Case (404/403)
+
 - **Total Response Time**: < 150ms
 - **Delete Attempt**: < 50ms (affects 0 rows)
 - **Existence Check**: < 50ms
 - **Error Response**: < 5ms
 
 #### Worst Case (Validation Error)
+
 - **Total Response Time**: < 50ms
 - **Fails Fast**: No database interaction
 - **Validation Only**: Quick UUID format check
 
 ### Monitoring Recommendations
+
 - **Log Deletion Times**: Track slow deletions (> 100ms)
 - **Track Error Rates**: Monitor 403, 404, 500 errors
 - **Deletion Patterns**: Track deletion frequency per user
@@ -561,6 +629,7 @@ CREATE INDEX idx_transactions_id_user ON transactions(id, user_id);
 ## 9. Implementation Steps
 
 ### Step 1: Add Validation Schema
+
 **File**: `src/pages/api/transactions/[id].ts`
 
 ```typescript
@@ -572,6 +641,7 @@ const TransactionIdSchema = z.object({
 ```
 
 ### Step 2: Add Service Method
+
 **File**: `src/lib/services/transactions.service.ts`
 
 ```typescript
@@ -587,10 +657,7 @@ export class TransactionsService {
    * @returns void
    * @throws Error if transaction not found or forbidden
    */
-  static async deleteTransaction(
-    supabase: SupabaseClient,
-    transactionId: string
-  ): Promise<void> {
+  static async deleteTransaction(supabase: SupabaseClient, transactionId: string): Promise<void> {
     // Get authenticated user
     const {
       data: { user },
@@ -602,10 +669,7 @@ export class TransactionsService {
     }
 
     // Delete transaction (RLS enforces user ownership)
-    const { error, count } = await supabase
-      .from("transactions")
-      .delete({ count: "exact" })
-      .eq("id", transactionId);
+    const { error, count } = await supabase.from("transactions").delete({ count: "exact" }).eq("id", transactionId);
 
     if (error) {
       throw new Error(`Failed to delete transaction: ${error.message}`);
@@ -636,6 +700,7 @@ export class TransactionsService {
 ```
 
 ### Step 3: Add DELETE Handler to API Route
+
 **File**: `src/pages/api/transactions/[id].ts`
 
 ```typescript
@@ -693,10 +758,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
     }
 
     // 3. Call service layer
-    await TransactionsService.deleteTransaction(
-      locals.supabase,
-      transactionId
-    );
+    await TransactionsService.deleteTransaction(locals.supabase, transactionId);
 
     // 4. Return success response (204 No Content)
     return new Response(null, {
@@ -750,55 +812,65 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 ```
 
 ### Step 4: Test Path Parameter Validation
+
 - Invalid UUID → 400 "Invalid transaction ID format"
 - Malformed UUID → 400
 - Valid UUID → proceeds to authentication
 
 ### Step 5: Test Authentication
+
 - No token → 401 "Authentication required"
 - Invalid token → 401
 - Expired token → 401
 - Valid token → proceeds to deletion
 
 ### Step 6: Test Successful Deletion
+
 - Delete own transaction → 204 No Content
 - Verify transaction removed from database
 - Verify empty response body
 - Verify Content-Length: 0
 
 ### Step 7: Test Authorization (403)
+
 - User A tries to delete User B's transaction → 403
 - Verify transaction still exists after failed attempt
 - Verify error message doesn't leak transaction details
 
 ### Step 8: Test Not Found (404)
+
 - Delete non-existent transaction → 404
 - Delete already-deleted transaction → 404
 - Verify consistent error response
 
 ### Step 9: Test Idempotency
+
 - Delete transaction twice
 - First request → 204 No Content
 - Second request → 404 Not Found
 - This is expected behavior (not true idempotency but acceptable)
 
 ### Step 10: Test Database State
+
 - Transaction removed from database
 - No orphaned records
 - Other user's transactions unaffected
 
 ### Step 11: Test Side Effects
+
 - Deleted transaction no longer in GET /transactions
 - Deleted transaction no longer affects GET /dashboard
 - Dashboard summary recalculated correctly
 
 ### Step 12: Integration Testing
+
 - Create transaction, then delete it
 - Verify complete lifecycle
 - Test with multiple users simultaneously
 - Verify no race conditions
 
 ### Step 13: Test Edge Cases
+
 - Delete with concurrent requests
 - Delete while transaction being updated
 - Delete transaction with null category
@@ -806,12 +878,14 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 - Delete newest transaction
 
 ### Step 14: Performance Testing
+
 - Measure deletion time
 - Should be < 100ms
 - Test with large number of deletions
 - Verify index usage
 
 ### Step 15: Security Testing
+
 - Try to delete other user's transaction → 403
 - Try to enumerate transactions by ID → appropriate 404/403
 - Verify RLS policies are enforced
@@ -822,6 +896,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 ## 10. Testing Checklist
 
 ### Unit Tests (Service Layer)
+
 - [ ] Deletes transaction successfully
 - [ ] Throws NOT_FOUND for non-existent transaction
 - [ ] Throws FORBIDDEN for other user's transaction
@@ -830,6 +905,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 - [ ] Verifies user authentication
 
 ### Integration Tests (API Route)
+
 - [ ] Returns 401 when not authenticated
 - [ ] Returns 400 for invalid transaction ID
 - [ ] Returns 403 for other user's transaction
@@ -839,6 +915,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 - [ ] Content-Length is 0
 
 ### Database Tests
+
 - [ ] Transaction removed from database
 - [ ] DELETE affects exactly 1 row (success case)
 - [ ] DELETE affects 0 rows (404/403 case)
@@ -846,12 +923,14 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 - [ ] No orphaned records after deletion
 
 ### Side Effects Tests
+
 - [ ] Deleted transaction not in GET /transactions
 - [ ] Dashboard summary updated after deletion
 - [ ] Daily breakdown recalculated correctly
 - [ ] Other user's data unaffected
 
 ### End-to-End Tests
+
 - [ ] Full DELETE request removes transaction
 - [ ] Second DELETE returns 404
 - [ ] Multiple users delete independently
@@ -863,27 +942,32 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 ## 11. Future Enhancements
 
 ### Soft Delete
+
 1. **Add deleted_at Column**: Timestamp for soft deletion
 2. **Filter Queries**: Exclude soft-deleted transactions from queries
 3. **Permanent Deletion**: Admin endpoint for hard delete
 4. **Recovery**: Endpoint to undelete transactions
 
 ### Audit Trail
+
 1. **Deletion Log**: Record who deleted what and when
 2. **Retention**: Keep deleted transaction data for X days
 3. **Compliance**: Meet data retention requirements
 
 ### Bulk Operations
+
 1. **Bulk Delete**: Delete multiple transactions at once
 2. **Delete by Filter**: Delete all transactions matching criteria
 3. **Undo Delete**: Support undo within time window
 
 ### Confirmation
+
 1. **Require Confirmation**: Two-step deletion for high-value transactions
 2. **Confirmation Token**: Time-limited token for deletion
 3. **Email Notification**: Notify user of deletion
 
 ### API Improvements
+
 1. **Return Deleted Object**: Return 200 with deleted transaction details
 2. **Cascade Options**: Specify cascade behavior (if dependencies added)
 3. **Archive**: Move to archive instead of delete
@@ -893,26 +977,32 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 ## Appendix A: Example Requests and Responses
 
 ### Successful Deletion
+
 **Request:**
+
 ```bash
 DELETE /api/transactions/c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d
 Authorization: Bearer <JWT_TOKEN>
 ```
 
 **Response (204 No Content):**
+
 ```
 HTTP/1.1 204 No Content
 Content-Length: 0
 ```
 
 ### Invalid Transaction ID
+
 **Request:**
+
 ```bash
 DELETE /api/transactions/invalid-uuid
 Authorization: Bearer <JWT_TOKEN>
 ```
 
 **Response (400 Bad Request):**
+
 ```json
 {
   "error": "Bad Request",
@@ -924,13 +1014,16 @@ Authorization: Bearer <JWT_TOKEN>
 ```
 
 ### Transaction Not Found
+
 **Request:**
+
 ```bash
 DELETE /api/transactions/00000000-0000-0000-0000-000000000000
 Authorization: Bearer <JWT_TOKEN>
 ```
 
 **Response (404 Not Found):**
+
 ```json
 {
   "error": "Not Found",
@@ -939,13 +1032,16 @@ Authorization: Bearer <JWT_TOKEN>
 ```
 
 ### Forbidden (Other User's Transaction)
+
 **Request:**
+
 ```bash
 DELETE /api/transactions/d5f9c2e6-c9f1-5c2b-ab2b-a0g8b8e8f8f8
 Authorization: Bearer <JWT_TOKEN>
 ```
 
 **Response (403 Forbidden):**
+
 ```json
 {
   "error": "Forbidden",
@@ -954,12 +1050,15 @@ Authorization: Bearer <JWT_TOKEN>
 ```
 
 ### Missing Authentication
+
 **Request:**
+
 ```bash
 DELETE /api/transactions/c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d
 ```
 
 **Response (401 Unauthorized):**
+
 ```json
 {
   "error": "Unauthorized",
@@ -968,24 +1067,29 @@ DELETE /api/transactions/c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d
 ```
 
 ### Second Delete (Idempotency)
+
 **Request (first time):**
+
 ```bash
 DELETE /api/transactions/c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d
 Authorization: Bearer <JWT_TOKEN>
 ```
 
 **Response (204 No Content):**
+
 ```
 HTTP/1.1 204 No Content
 ```
 
 **Request (second time - same ID):**
+
 ```bash
 DELETE /api/transactions/c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d
 Authorization: Bearer <JWT_TOKEN>
 ```
 
 **Response (404 Not Found):**
+
 ```json
 {
   "error": "Not Found",
@@ -998,9 +1102,10 @@ Authorization: Bearer <JWT_TOKEN>
 ## Appendix B: Database Queries
 
 ### Delete Query (with RLS)
+
 ```sql
 DELETE FROM transactions
-WHERE 
+WHERE
   id = 'c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d'
   AND user_id = '<authenticated_user_id>'; -- Applied by RLS
 
@@ -1008,6 +1113,7 @@ WHERE
 ```
 
 ### Existence Check (for 404 vs 403)
+
 ```sql
 SELECT id, user_id
 FROM transactions
@@ -1018,6 +1124,7 @@ WHERE id = 'c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d';
 ```
 
 ### Verify Deletion
+
 ```sql
 SELECT COUNT(*) as remaining
 FROM transactions
@@ -1031,31 +1138,37 @@ WHERE id = 'c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d';
 ## Appendix C: HTTP Status Codes Reference
 
 ### 204 No Content
+
 - **When**: Successful deletion
 - **Body**: None (empty)
 - **Meaning**: Request processed, transaction deleted, no content to return
 
 ### 400 Bad Request
+
 - **When**: Invalid UUID format
 - **Body**: Error details
 - **Meaning**: Client sent malformed request
 
 ### 401 Unauthorized
+
 - **When**: Not authenticated
 - **Body**: Error message
 - **Meaning**: Authentication required
 
 ### 403 Forbidden
+
 - **When**: Transaction belongs to other user
 - **Body**: Error message
 - **Meaning**: Authenticated but not authorized
 
 ### 404 Not Found
+
 - **When**: Transaction doesn't exist
 - **Body**: Error message
 - **Meaning**: Resource not found
 
 ### 500 Internal Server Error
+
 - **When**: Unexpected server error
 - **Body**: Generic error message
 - **Meaning**: Server encountered unexpected condition
@@ -1065,26 +1178,31 @@ WHERE id = 'c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d';
 ## Appendix D: Security Checklist
 
 ### Authentication
+
 - [ ] JWT token required
 - [ ] Token validated before processing
 - [ ] Invalid tokens rejected with 401
 
 ### Authorization
+
 - [ ] RLS policies enforced
 - [ ] User can only delete own transactions
 - [ ] 403 returned for unauthorized access
 
 ### Information Disclosure
+
 - [ ] 404 vs 403 properly distinguished
 - [ ] Error messages don't leak sensitive info
 - [ ] No transaction existence revealed to unauthorized users
 
 ### Data Integrity
+
 - [ ] Transaction permanently deleted
 - [ ] No orphaned records
 - [ ] Database constraints maintained
 
 ### Audit & Compliance
+
 - [ ] Deletions logged for audit
 - [ ] Complies with data retention policies
 - [ ] User aware deletion is permanent
@@ -1092,4 +1210,3 @@ WHERE id = 'c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d';
 ---
 
 This implementation plan provides comprehensive guidance for implementing the DELETE /transactions/{id} endpoint. Follow the steps sequentially, test thoroughly at each stage, and ensure proper handling of ownership verification, permanent deletion, and all error scenarios.
-

@@ -84,16 +84,35 @@ Follow these instructions to set up the project on your local machine.
     ```
 
 4.  **Set up environment variables:**
-    Create a `.env` file in the root of the project by copying the example file:
+
+    **Option A: Use local Supabase (Recommended for development)**
+
+    Install the Supabase CLI:
 
     ```sh
-    cp .env.example .env
+    npm install -g supabase
     ```
 
-    Then, add your Supabase project URL and Anon Key to the `.env` file:
+    Start the local Supabase instance:
+
+    ```sh
+    supabase start
+    ```
+
+    Create a `.env` file with local credentials:
+
+    ```sh
+    # Get the anon key from the output of 'supabase status'
+    echo "PUBLIC_SUPABASE_URL=http://127.0.0.1:54321" > .env
+    echo "PUBLIC_SUPABASE_ANON_KEY=<your-local-anon-key>" >> .env
+    ```
+
+    **Option B: Use hosted Supabase project**
+
+    Create a `.env` file with your Supabase project credentials:
 
     ```
-    PUBLIC_SUPABASE_URL="your-supabase-url"
+    PUBLIC_SUPABASE_URL="your-supabase-project-url"
     PUBLIC_SUPABASE_ANON_KEY="your-supabase-anon-key"
     ```
 
@@ -152,11 +171,16 @@ In the project directory, you can run the following commands:
 - `npm run test:e2e:debug`
   - Runs E2E tests in debug mode.
 
+- `npm run test:e2e:cleanup`
+  - Cleans up test data from E2E test database.
+
 - `npm run test:all`
   - Runs all types of tests (unit, integration, E2E).
 
 For detailed testing documentation, see:
+
 - [tests/README.md](tests/README.md) - Complete testing guide
+- [tests/E2E_TESTING_GUIDE.md](tests/E2E_TESTING_GUIDE.md) - **E2E testing with Supabase Cloud**
 - [TESTING_SETUP_SUMMARY.md](TESTING_SETUP_SUMMARY.md) - Setup summary
 - [.ai/test-plan.md](.ai/test-plan.md) - Detailed test plan
 

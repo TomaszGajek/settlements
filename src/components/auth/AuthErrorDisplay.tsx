@@ -29,5 +29,3 @@ export function AuthErrorDisplay({ error, onDismiss }: AuthErrorDisplayProps) {
     </Alert>
   );
 }
-
-

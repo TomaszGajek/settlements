@@ -3,7 +3,7 @@
  * Zgodnie z wytycznymi Playwright
  */
 
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator } from "@playwright/test";
 
 export class DashboardPage {
   readonly page: Page;
@@ -17,17 +17,17 @@ export class DashboardPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.fabButton = page.getByRole('button', { name: /dodaj transakcję/i });
-    this.logoutButton = page.getByRole('button', { name: /wyloguj/i });
-    this.incomeCard = page.getByTestId('income-card');
-    this.expensesCard = page.getByTestId('expenses-card');
-    this.balanceCard = page.getByTestId('balance-card');
-    this.transactionsList = page.getByTestId('transactions-list');
-    this.monthNavigation = page.getByTestId('month-navigation');
+    this.fabButton = page.getByRole("button", { name: /dodaj transakcję/i });
+    this.logoutButton = page.getByRole("button", { name: /wyloguj/i });
+    this.incomeCard = page.getByTestId("income-card");
+    this.expensesCard = page.getByTestId("expenses-card");
+    this.balanceCard = page.getByTestId("balance-card");
+    this.transactionsList = page.getByTestId("transactions-list");
+    this.monthNavigation = page.getByTestId("month-navigation");
   }
 
   async goto() {
-    await this.page.goto('/dashboard');
+    await this.page.goto("/dashboard");
   }
 
   async openTransactionModal() {
@@ -51,11 +51,10 @@ export class DashboardPage {
   }
 
   async navigateToPreviousMonth() {
-    await this.monthNavigation.getByRole('button', { name: /poprzedni/i }).click();
+    await this.monthNavigation.getByRole("button", { name: /poprzedni/i }).click();
   }
 
   async navigateToNextMonth() {
-    await this.monthNavigation.getByRole('button', { name: /następny/i }).click();
+    await this.monthNavigation.getByRole("button", { name: /następny/i }).click();
   }
 }
-

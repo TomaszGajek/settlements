@@ -22,4 +22,3 @@ export function parseCurrency(formatted: string): number | undefined {
 
   return isNaN(parsed) ? undefined : parsed;
 }
-

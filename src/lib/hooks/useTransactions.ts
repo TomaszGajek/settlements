@@ -25,4 +25,3 @@ export function useTransactions(month: number, year: number) {
     refetchOnWindowFocus: false,
   });
 }
-

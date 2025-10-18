@@ -10,4 +10,3 @@ export function formatCurrency(amount: number): string {
     currency: "PLN",
   }).format(amount);
 }
-

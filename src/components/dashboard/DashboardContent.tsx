@@ -146,6 +146,7 @@ export const DashboardContent: React.FC = () => {
                 size="sm"
                 className="text-gray-400 hover:text-gray-100 hover:bg-gray-800 rounded-md transition-colors"
                 aria-label="Dodaj transakcję (Ctrl+K)"
+                data-testid="add-transaction-button"
               >
                 Dodaj
                 <Plus className="w-4 h-4 ml-2" />
@@ -184,4 +185,3 @@ export const DashboardContent: React.FC = () => {
     </>
   );
 };
-

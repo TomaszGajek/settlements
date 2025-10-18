@@ -16,13 +16,10 @@ export const transactionFormSchema = z.object({
     .number({ required_error: "Kwota jest wymagana" })
     .positive("Kwota musi być większa od 0")
     .max(999999999.99, "Kwota jest zbyt duża")
-    .refine(
-      (val) => {
-        const decimals = val.toString().split(".")[1];
-        return !decimals || decimals.length <= 2;
-      },
-      "Maksymalnie 2 miejsca po przecinku"
-    ),
+    .refine((val) => {
+      const decimals = val.toString().split(".")[1];
+      return !decimals || decimals.length <= 2;
+    }, "Maksymalnie 2 miejsca po przecinku"),
 
   /**
    * Data transakcji.
@@ -40,9 +37,7 @@ export const transactionFormSchema = z.object({
    * - Wymagane
    * - Musi być prawidłowym UUID
    */
-  categoryId: z
-    .string({ required_error: "Kategoria jest wymagana" })
-    .uuid("Nieprawidłowa kategoria"),
+  categoryId: z.string({ required_error: "Kategoria jest wymagana" }).uuid("Nieprawidłowa kategoria"),
 
   /**
    * Typ transakcji.
@@ -58,11 +53,7 @@ export const transactionFormSchema = z.object({
    * - Opcjonalna
    * - Maksymalna długość: 500 znaków
    */
-  note: z
-    .string()
-    .max(500, "Notatka może mieć maksymalnie 500 znaków")
-    .optional()
-    .nullable(),
+  note: z.string().max(500, "Notatka może mieć maksymalnie 500 znaków").optional().nullable(),
 });
 
 /**
@@ -70,4 +61,3 @@ export const transactionFormSchema = z.object({
  * Używany w komponentach do określenia typu danych formularza.
  */
 export type TransactionFormSchema = z.infer<typeof transactionFormSchema>;
-

@@ -4,7 +4,12 @@
 
 ```
 tests/
+├── global.setup.ts     # Global setup dla Playwright (project dependencies)
+├── global.teardown.ts  # Global teardown dla Playwright (czyszczenie bazy)
 ├── setup/              # Pliki konfiguracyjne i setup
+│   ├── global-setup.ts      # Logika setupu E2E (używana przez global.setup.ts)
+│   ├── e2e-helpers.ts       # Pomocnicy dla E2E (cleanup, Supabase client)
+│   ├── cleanup-test-data.ts # Skrypt do ręcznego czyszczenia danych testowych
 │   ├── vitest.setup.ts      # Setup dla Vitest
 │   └── msw.setup.ts         # Setup dla Mock Service Worker
 ├── utils/              # Narzędzia pomocnicze
@@ -52,6 +57,38 @@ npm run test:integration
 
 ### Testy E2E (Playwright)
 
+#### Konfiguracja E2E testów
+
+Przed uruchomieniem testów E2E, utwórz plik `.env.e2e` z konfiguracją:
+
+```bash
+# Supabase Configuration
+PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
+# Test User Credentials
+E2E_TEST_USER_EMAIL=e2etest@gmail.com
+E2E_TEST_USER_PASSWORD=TestPassword123!
+
+# Base URL
+BASE_URL=http://localhost:4321
+```
+
+**⚠️ WAŻNE:** Używaj **prawdziwych domen email** (np. `@gmail.com`) w testach E2E!
+
+Supabase Auth API **odrzuca emaile** z domen takich jak:
+- ❌ `@example.com`
+- ❌ `@test.com`
+- ❌ `@localhost.com`
+
+Używaj zamiast tego:
+- ✅ `@gmail.com`
+- ✅ `@outlook.com`
+- ✅ Innych popularnych domen email
+
+#### Uruchamianie testów E2E
+
 ```bash
 # Uruchom wszystkie testy E2E
 npm run test:e2e
@@ -72,6 +109,34 @@ npm run test:e2e:report
 npm run test:e2e:codegen
 ```
 
+#### Global Setup i Teardown
+
+Projekt wykorzystuje **Project Dependencies** (rekomendowane podejście Playwright) do zarządzania globalnymi setup i teardown:
+
+**Setup (`tests/global.setup.ts`)** - Uruchamia się **przed wszystkimi testami**:
+- Waliduje konfigurację środowiska testowego
+- Sprawdza dostępność bazy danych testowej Supabase
+- Tworzy użytkownika testowego jeśli nie istnieje
+
+**Teardown (`tests/global.teardown.ts`)** - Uruchamia się **po wszystkich testach**:
+- Usuwa wszystkich użytkowników testowych (z domeną `@e2e-test.local`)
+- Usuwa wszystkie transakcje testowe
+- Usuwa wszystkie kategorie testowe
+- Zapewnia czysty stan bazy danych przed następnym uruchomieniem
+
+**Zalety tego podejścia:**
+- ✅ Setup i teardown widoczne w raporcie HTML jako osobne projekty
+- ✅ Pełne wsparcie dla trace recording
+- ✅ Możliwość użycia Playwright fixtures
+- ✅ Lepsze zarządzanie przeglądarką
+- ✅ Automatyczna integracja z konfiguracją testów
+
+**Pomijanie dependencies:**
+```bash
+# Uruchom testy bez setup/teardown
+npm run test:e2e -- --no-deps
+```
+
 ### Wszystkie testy
 
 ```bash
@@ -84,18 +149,18 @@ npm run test:all
 ### Testy jednostkowe (Vitest)
 
 ```typescript
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 
-describe('Feature name', () => {
-  it('should do something', () => {
+describe("Feature name", () => {
+  it("should do something", () => {
     // Arrange - przygotuj dane
-    const input = 'test';
-    
+    const input = "test";
+
     // Act - wykonaj akcję
     const result = functionToTest(input);
-    
+
     // Assert - sprawdź wynik
-    expect(result).toBe('expected');
+    expect(result).toBe("expected");
   });
 });
 ```
@@ -117,7 +182,7 @@ describe('MyComponent', () => {
   it('should handle user interaction', async () => {
     const user = userEvent.setup();
     renderWithProviders(<MyComponent />);
-    
+
     await user.click(screen.getByRole('button'));
     expect(screen.getByText('Clicked')).toBeInTheDocument();
   });
@@ -127,18 +192,18 @@ describe('MyComponent', () => {
 ### Testy E2E (Playwright)
 
 ```typescript
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test.describe('Feature', () => {
-  test('should do something', async ({ page }) => {
+test.describe("Feature", () => {
+  test("should do something", async ({ page }) => {
     // Nawigacja
-    await page.goto('/');
-    
+    await page.goto("/");
+
     // Interakcja
-    await page.getByRole('button', { name: 'Click me' }).click();
-    
+    await page.getByRole("button", { name: "Click me" }).click();
+
     // Asercja
-    await expect(page.getByText('Success')).toBeVisible();
+    await expect(page.getByText("Success")).toBeVisible();
   });
 });
 ```
@@ -146,17 +211,17 @@ test.describe('Feature', () => {
 ### Testy z Page Object Model
 
 ```typescript
-import { test, expect } from '@playwright/test';
-import { LoginPage } from './page-objects/LoginPage';
-import { DashboardPage } from './page-objects/DashboardPage';
+import { test, expect } from "@playwright/test";
+import { LoginPage } from "./page-objects/LoginPage";
+import { DashboardPage } from "./page-objects/DashboardPage";
 
-test('should login successfully', async ({ page }) => {
+test("should login successfully", async ({ page }) => {
   const loginPage = new LoginPage(page);
   const dashboardPage = new DashboardPage(page);
-  
+
   await loginPage.goto();
-  await loginPage.login('test@example.com', 'password');
-  
+  await loginPage.login("test@example.com", "password");
+
   await expect(page).toHaveURL(/dashboard/);
   await expect(dashboardPage.incomeCard).toBeVisible();
 });
@@ -239,4 +304,3 @@ Cel: **80%** dla logiki biznesowej.
 - [Playwright Documentation](https://playwright.dev/)
 - [MSW Documentation](https://mswjs.io/)
 - [Plan testów](../.ai/test-plan.md)
-

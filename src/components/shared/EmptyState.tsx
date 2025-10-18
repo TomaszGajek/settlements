@@ -12,13 +12,7 @@ import type { EmptyStateProps } from "@/lib/types/dashboard.types";
  * @param onAction - Optional button click handler
  * @param illustration - Optional custom illustration element
  */
-export const EmptyState: React.FC<EmptyStateProps> = ({
-  title,
-  description,
-  actionLabel,
-  onAction,
-  illustration,
-}) => {
+export const EmptyState: React.FC<EmptyStateProps> = ({ title, description, actionLabel, onAction, illustration }) => {
   return (
     <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
       {/* Illustration */}
@@ -58,4 +52,3 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     </div>
   );
 };
-

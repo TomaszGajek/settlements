@@ -37,6 +37,7 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, o
       tabIndex={0}
       role="button"
       aria-label={`Transakcja: ${transaction.category?.name || "Bez kategorii"}, ${formatCurrency(transaction.amount)}`}
+      data-testid="transaction-item"
     >
       {/* Left section: Date, Category, Note */}
       <div className="flex items-center gap-4 flex-1 min-w-0">
@@ -81,6 +82,7 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, o
             }}
             aria-label="Edytuj transakcję"
             className="h-8 w-8"
+            data-testid="transaction-edit-button"
           >
             <Pencil className="h-4 w-4" />
           </Button>
@@ -93,6 +95,7 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, o
             }}
             aria-label="Usuń transakcję"
             className="h-8 w-8 hover:text-red-500"
+            data-testid="transaction-delete-button"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -101,4 +104,3 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, o
     </div>
   );
 };
-

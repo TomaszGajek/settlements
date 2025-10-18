@@ -35,7 +35,9 @@ export const CategorySelect: React.FC<CategorySelectProps> = ({ value, onChange,
     if (!categories) return [];
 
     const others = categories.filter((c) => c.name.toLowerCase() === "inne");
-    const rest = categories.filter((c) => c.name.toLowerCase() !== "inne").sort((a, b) => a.name.localeCompare(b.name, "pl"));
+    const rest = categories
+      .filter((c) => c.name.toLowerCase() !== "inne")
+      .sort((a, b) => a.name.localeCompare(b.name, "pl"));
 
     return [...rest, ...others];
   }, [categories]);
@@ -70,6 +72,7 @@ export const CategorySelect: React.FC<CategorySelectProps> = ({ value, onChange,
   return (
     <Select value={value} onValueChange={onChange} disabled={disabled}>
       <SelectTrigger
+        data-testid="transaction-category-select"
         aria-label="Kategoria transakcji"
         aria-required="true"
         aria-invalid={!!error}
@@ -80,7 +83,7 @@ export const CategorySelect: React.FC<CategorySelectProps> = ({ value, onChange,
       </SelectTrigger>
       <SelectContent>
         {sortedCategories.map((category) => (
-          <SelectItem key={category.id} value={category.id}>
+          <SelectItem key={category.id} value={category.id} data-testid={`category-option-${category.id}`}>
             {category.name}
           </SelectItem>
         ))}
@@ -88,4 +91,3 @@ export const CategorySelect: React.FC<CategorySelectProps> = ({ value, onChange,
     </Select>
   );
 };
-

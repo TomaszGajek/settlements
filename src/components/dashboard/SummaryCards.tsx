@@ -21,4 +21,3 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({ income, expenses, ba
     </div>
   );
 };
-

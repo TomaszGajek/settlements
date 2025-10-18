@@ -22,10 +22,7 @@ export const AccountInfoCard: React.FC = () => {
   const { categoriesWithCounts, transactionCounts } = useCategoriesWithCount();
 
   // Calculate total transactions across all categories
-  const totalTransactions = Object.values(transactionCounts).reduce(
-    (sum, count) => sum + count,
-    0
-  );
+  const totalTransactions = Object.values(transactionCounts).reduce((sum, count) => sum + count, 0);
 
   // Format account creation date
   const accountCreated = user?.created_at
@@ -39,9 +36,7 @@ export const AccountInfoCard: React.FC = () => {
   return (
     <Card className="bg-gray-900 border-gray-800">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold text-gray-100">
-          Informacje o koncie
-        </CardTitle>
+        <CardTitle className="text-lg font-semibold text-gray-100">Informacje o koncie</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Email */}
@@ -51,9 +46,7 @@ export const AccountInfoCard: React.FC = () => {
           </div>
           <div className="flex-1">
             <p className="text-xs text-gray-400">Adres e-mail</p>
-            <p className="text-sm font-medium text-gray-100">
-              {user?.email || "Nie znaleziono"}
-            </p>
+            <p className="text-sm font-medium text-gray-100">{user?.email || "Nie znaleziono"}</p>
           </div>
         </div>
 
@@ -99,4 +92,3 @@ export const AccountInfoCard: React.FC = () => {
     </Card>
   );
 };
-

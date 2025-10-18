@@ -69,17 +69,16 @@ export function useDatePeriod() {
   // Navigate to next month
   const nextMonth = useCallback(() => {
     setPeriodState((current) => {
-      const newPeriod = current.month === 12 
-        ? { month: 1, year: current.year + 1 }
-        : { month: current.month + 1, year: current.year };
-      
+      const newPeriod =
+        current.month === 12 ? { month: 1, year: current.year + 1 } : { month: current.month + 1, year: current.year };
+
       // Update URL
       const newParams = new URLSearchParams();
       newParams.set("month", String(newPeriod.month));
       newParams.set("year", String(newPeriod.year));
       const newUrl = `${window.location.pathname}?${newParams.toString()}`;
       window.history.pushState({}, "", newUrl);
-      
+
       return newPeriod;
     });
   }, []);
@@ -89,21 +88,20 @@ export function useDatePeriod() {
     console.log("⏮️ prevMonth called");
     setPeriodState((current) => {
       console.log("⏮️ Current period:", current);
-      const newPeriod = current.month === 1
-        ? { month: 12, year: current.year - 1 }
-        : { month: current.month - 1, year: current.year };
-      
+      const newPeriod =
+        current.month === 1 ? { month: 12, year: current.year - 1 } : { month: current.month - 1, year: current.year };
+
       console.log("⏮️ New period:", newPeriod);
-      
+
       // Update URL
       const newParams = new URLSearchParams();
       newParams.set("month", String(newPeriod.month));
       newParams.set("year", String(newPeriod.year));
       const newUrl = `${window.location.pathname}?${newParams.toString()}`;
       window.history.pushState({}, "", newUrl);
-      
+
       console.log("⏮️ URL updated:", newUrl);
-      
+
       return newPeriod;
     });
   }, []);
@@ -134,4 +132,3 @@ export function useDatePeriod() {
     canGoNext,
   };
 }
-

@@ -48,7 +48,7 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ variant, value, isLoad
   const { label, icon: Icon, textColor, bgColor, iconColor } = config[variant];
 
   return (
-    <Card>
+    <Card data-testid={`summary-card-${variant}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-gray-400">{label}</CardTitle>
         <div className={`p-2 rounded-lg ${bgColor}`}>
@@ -56,9 +56,10 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ variant, value, isLoad
         </div>
       </CardHeader>
       <CardContent>
-        <div className={`text-3xl font-bold ${textColor}`}>{formatCurrency(value)}</div>
+        <div className={`text-3xl font-bold ${textColor}`} data-testid={`summary-card-${variant}-value`}>
+          {formatCurrency(value)}
+        </div>
       </CardContent>
     </Card>
   );
 };
-

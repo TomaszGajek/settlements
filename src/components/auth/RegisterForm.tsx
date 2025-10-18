@@ -37,10 +37,12 @@ function mapSupabaseError(error: unknown): string {
 export function RegisterForm({ onSuccess }: RegisterFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [shouldRedirect, setShouldRedirect] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [userEmail, setUserEmail] = useState<string>("");
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerFormSchema),
+    mode: "onChange", // Enable real-time validation
     defaultValues: {
       email: "",
       password: "",
@@ -58,21 +60,28 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
     }
   }, []);
 
-  // Handle redirect after successful registration
+  // Listen for auth state changes and redirect when session is established
   useEffect(() => {
-    if (shouldRedirect) {
-      const now = new Date();
-      const dashboardUrl = `/dashboard?month=${now.getMonth() + 1}&year=${now.getFullYear()}`;
-      window.location.href = dashboardUrl;
-    }
-  }, [shouldRedirect]);
+    const {
+      data: { subscription },
+    } = supabaseClient.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session) {
+        // Session is now established, safe to redirect
+        const now = new Date();
+        const dashboardUrl = `/dashboard?month=${now.getMonth() + 1}&year=${now.getFullYear()}`;
+        window.location.href = dashboardUrl;
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const onSubmit = async (data: RegisterFormData) => {
     setError(null);
     setIsSubmitting(true);
 
     try {
-      const { error: signUpError } = await supabaseClient.auth.signUp({
+      const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
         email: data.email,
         password: data.password,
       });
@@ -81,15 +90,24 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
         throw new Error(mapSupabaseError(signUpError));
       }
 
+      // Check if email confirmation is required
+      if (signUpData.user && !signUpData.session) {
+        // Email confirmation required
+        setUserEmail(data.email);
+        setRegistrationSuccess(true);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Session created immediately (no email confirmation required)
       toast.success("Konto utworzone pomyślnie! Witaj w Settlements 👋");
 
-      // Redirect do dashboard (handled by middleware/auth state change)
+      // Redirect will be handled by onAuthStateChange listener
+      // The SIGNED_IN event will trigger automatic redirect to dashboard
       if (onSuccess) {
         onSuccess();
-      } else {
-        // Trigger redirect via effect
-        setShouldRedirect(true);
       }
+      // Don't set isSubmitting to false here - let the redirect happen
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Wystąpił nieoczekiwany błąd";
       setError(errorMessage);
@@ -97,6 +115,42 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
       setIsSubmitting(false);
     }
   };
+
+  // Show success message if email confirmation is required
+  if (registrationSuccess) {
+    return (
+      <div className="space-y-4 text-center">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+          <svg
+            className="h-6 w-6 text-green-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+
+        <div className="space-y-2">
+          <h3 className="text-lg font-semibold">Konto utworzone pomyślnie!</h3>
+          <p className="text-sm text-muted-foreground">Wysłaliśmy link aktywacyjny na adres:</p>
+          <p className="text-sm font-medium">{userEmail}</p>
+        </div>
+
+        <div className="rounded-lg bg-blue-50 p-4 text-left">
+          <p className="text-sm text-blue-900">
+            <strong>Sprawdź swoją skrzynkę email</strong> i kliknij w link potwierdzający, aby aktywować konto i móc się
+            zalogować.
+          </p>
+        </div>
+
+        <p className="text-xs text-muted-foreground">
+          Nie otrzymałeś emaila? Sprawdź folder spam lub poczekaj kilka minut.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <Form {...form}>

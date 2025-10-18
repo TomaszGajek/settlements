@@ -19,18 +19,15 @@ import type {
 export async function fetchTransactions(
   month: number,
   year: number,
-  page: number = 1,
-  pageSize: number = 20
+  page = 1,
+  pageSize = 20
 ): Promise<ListTransactionsResponseDto> {
-  const response = await fetch(
-    `/api/transactions?month=${month}&year=${year}&page=${page}&pageSize=${pageSize}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
+  const response = await fetch(`/api/transactions?month=${month}&year=${year}&page=${page}&pageSize=${pageSize}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: "Failed to fetch transactions" }));
@@ -151,4 +148,3 @@ export async function fetchTransactionCounts(): Promise<Record<string, number>> 
   // For now, return empty object - will be implemented in the hook
   return {};
 }
-

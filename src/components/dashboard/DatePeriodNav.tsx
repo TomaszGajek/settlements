@@ -48,13 +48,7 @@ export const DatePeriodNav: React.FC = () => {
       {/* Period navigation */}
       <div className="flex items-center gap-4 justify-center">
         {/* Previous month button */}
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={prevMonth}
-          aria-label="Poprzedni miesiąc"
-          className="shrink-0"
-        >
+        <Button variant="outline" size="icon" onClick={prevMonth} aria-label="Poprzedni miesiąc" className="shrink-0">
           <ChevronLeft className="h-5 w-5" />
         </Button>
 
@@ -94,4 +88,3 @@ export const DatePeriodNav: React.FC = () => {
     </div>
   );
 };
-

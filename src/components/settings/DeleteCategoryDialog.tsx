@@ -71,43 +71,31 @@ export const DeleteCategoryDialog: React.FC<DeleteCategoryDialogProps> = ({
           <AlertDialogDescription asChild>
             <div className="space-y-3">
               <p>
-                Czy na pewno chcesz usunąć kategorię{" "}
-                <strong className="text-gray-100">"{category.name}"</strong>?
+                Czy na pewno chcesz usunąć kategorię <strong className="text-gray-100">"{category.name}"</strong>?
               </p>
 
               {transactionCount > 0 && (
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    Ta kategoria zawiera{" "}
-                    <strong>{transactionCount}</strong>{" "}
-                    {getTransactionText(transactionCount)}. Wszystkie zostaną
-                    automatycznie przeniesione do kategorii{" "}
-                    <strong>"Inne"</strong>.
+                    Ta kategoria zawiera <strong>{transactionCount}</strong> {getTransactionText(transactionCount)}.
+                    Wszystkie zostaną automatycznie przeniesione do kategorii <strong>"Inne"</strong>.
                   </AlertDescription>
                 </Alert>
               )}
 
               {transactionCount === 0 && (
-                <p className="text-sm text-gray-400">
-                  Ta kategoria nie zawiera żadnych transakcji.
-                </p>
+                <p className="text-sm text-gray-400">Ta kategoria nie zawiera żadnych transakcji.</p>
               )}
 
-              <p className="text-sm text-muted-foreground">
-                Ta operacja jest nieodwracalna.
-              </p>
+              <p className="text-sm text-muted-foreground">Ta operacja jest nieodwracalna.</p>
             </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Anuluj</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleConfirm}
-            disabled={isDeleting}
-            className="bg-red-600 hover:bg-red-700"
-          >
+          <AlertDialogCancel disabled={isDeleting} data-testid="delete-category-dialog-cancel">Anuluj</AlertDialogCancel>
+          <AlertDialogAction onClick={handleConfirm} disabled={isDeleting} className="bg-red-600 hover:bg-red-700" data-testid="delete-category-dialog-confirm">
             {isDeleting ? "Usuwanie..." : "Usuń"}
           </AlertDialogAction>
         </AlertDialogFooter>
@@ -115,4 +103,3 @@ export const DeleteCategoryDialog: React.FC<DeleteCategoryDialogProps> = ({
     </AlertDialog>
   );
 };
-

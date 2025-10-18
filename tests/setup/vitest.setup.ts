@@ -3,9 +3,9 @@
  * Wykonywany przed każdym testem
  */
 
-import '@testing-library/jest-dom';
-import { cleanup } from '@testing-library/react';
-import { afterEach, beforeAll, afterAll, vi } from 'vitest';
+import "@testing-library/jest-dom";
+import { cleanup } from "@testing-library/react";
+import { afterEach, beforeAll, afterAll, vi } from "vitest";
 
 // Cleanup po każdym teście
 afterEach(() => {
@@ -14,7 +14,7 @@ afterEach(() => {
 
 // Mock dla window.matchMedia (używany przez komponenty z media queries)
 beforeAll(() => {
-  Object.defineProperty(window, 'matchMedia', {
+  Object.defineProperty(window, "matchMedia", {
     writable: true,
     value: vi.fn().mockImplementation((query: string) => ({
       matches: false,
@@ -34,7 +34,7 @@ beforeAll(() => {
     unobserve: vi.fn(),
     disconnect: vi.fn(),
     root: null,
-    rootMargin: '',
+    rootMargin: "",
     thresholds: [],
     takeRecords: vi.fn(),
   }));
@@ -56,9 +56,9 @@ const originalError = console.error;
 beforeAll(() => {
   console.error = (...args: unknown[]) => {
     if (
-      typeof args[0] === 'string' &&
-      (args[0].includes('Warning: ReactDOM.render') ||
-        args[0].includes('Not implemented: HTMLFormElement.prototype.submit'))
+      typeof args[0] === "string" &&
+      (args[0].includes("Warning: ReactDOM.render") ||
+        args[0].includes("Not implemented: HTMLFormElement.prototype.submit"))
     ) {
       return;
     }
@@ -69,4 +69,3 @@ beforeAll(() => {
 afterAll(() => {
   console.error = originalError;
 });
-

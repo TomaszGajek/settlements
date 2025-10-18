@@ -27,12 +27,7 @@ interface CategoryItemProps {
  * @param onEdit - Callback when edit button is clicked
  * @param onDelete - Callback when delete button is clicked
  */
-export const CategoryItem: React.FC<CategoryItemProps> = ({
-  category,
-  transactionCount,
-  onEdit,
-  onDelete,
-}) => {
+export const CategoryItem: React.FC<CategoryItemProps> = ({ category, transactionCount, onEdit, onDelete }) => {
   // Handle keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!category.isDeletable) return;
@@ -66,6 +61,7 @@ export const CategoryItem: React.FC<CategoryItemProps> = ({
           ? `Kategoria: ${category.name}, ${transactionCountText}`
           : `Kategoria systemowa: ${category.name}, ${transactionCountText}`
       }
+      data-testid={`category-item-${category.name.toLowerCase().replace(/\s+/g, "-")}`}
     >
       {/* Left section: Name, Badges */}
       <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -73,21 +69,13 @@ export const CategoryItem: React.FC<CategoryItemProps> = ({
         <div className="text-base font-semibold text-gray-100">{category.name}</div>
 
         {/* Transaction Count Badge */}
-        <Badge
-          variant="secondary"
-          className="text-xs"
-          aria-label={`${transactionCount} transakcji w tej kategorii`}
-        >
+        <Badge variant="secondary" className="text-xs" aria-label={`${transactionCount} transakcji w tej kategorii`}>
           {transactionCountText}
         </Badge>
 
         {/* System Badge (for non-deletable categories) */}
         {!category.isDeletable && (
-          <Badge
-            variant="outline"
-            className="text-xs"
-            aria-label="Kategoria systemowa, nie można edytować ani usunąć"
-          >
+          <Badge variant="outline" className="text-xs" aria-label="Kategoria systemowa, nie można edytować ani usunąć">
             Systemowa
           </Badge>
         )}
@@ -103,6 +91,7 @@ export const CategoryItem: React.FC<CategoryItemProps> = ({
             onClick={() => onEdit(category)}
             aria-label={`Edytuj kategorię ${category.name}`}
             className="h-8 w-8 p-0"
+            data-testid={`edit-category-button-${category.name.toLowerCase().replace(/\s+/g, "-")}`}
           >
             <Pencil className="w-4 h-4" />
           </Button>
@@ -114,6 +103,7 @@ export const CategoryItem: React.FC<CategoryItemProps> = ({
             onClick={() => onDelete(category)}
             aria-label={`Usuń kategorię ${category.name}`}
             className="h-8 w-8 p-0 hover:text-red-500"
+            data-testid={`delete-category-button-${category.name.toLowerCase().replace(/\s+/g, "-")}`}
           >
             <Trash2 className="w-4 h-4" />
           </Button>
@@ -122,4 +112,3 @@ export const CategoryItem: React.FC<CategoryItemProps> = ({
     </div>
   );
 };
-

@@ -22,18 +22,15 @@ export interface TypeToggleProps {
  */
 export const TypeToggle: React.FC<TypeToggleProps> = ({ value, onChange, disabled = false }) => {
   return (
-    <Tabs
-      value={value}
-      onValueChange={(newValue) => onChange(newValue as "income" | "expense")}
-      disabled={disabled}
-    >
+    <Tabs value={value} onValueChange={(newValue) => onChange(newValue as "income" | "expense")} disabled={disabled}>
       <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="expense" disabled={disabled}>
+        <TabsTrigger value="expense" disabled={disabled} data-testid="transaction-type-expense">
           Wydatek
         </TabsTrigger>
         <TabsTrigger
           value="income"
           disabled={disabled}
+          data-testid="transaction-type-income"
           className="data-[state=active]:bg-green-500/10 data-[state=active]:text-green-700 dark:data-[state=active]:text-green-400"
         >
           Przychód
@@ -42,4 +39,3 @@ export const TypeToggle: React.FC<TypeToggleProps> = ({ value, onChange, disable
     </Tabs>
   );
 };
-

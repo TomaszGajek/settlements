@@ -3,6 +3,7 @@
 ## Analysis
 
 ### Key Points from API Specification
+
 - **Endpoint**: `PATCH /api/transactions/{id}`
 - **Purpose**: Update an existing transaction (partial update)
 - **Authentication**: Required (JWT-based via Supabase)
@@ -12,7 +13,7 @@
 - **Fields that can be updated**: amount, date, categoryId, type, note
 - **Response**: Updated transaction with full details including category info
 - **Success**: 200 OK
-- **Errors**: 
+- **Errors**:
   - 400 Bad Request (validation errors)
   - 401 Unauthorized (not authenticated)
   - 403 Forbidden (trying to update another user's transaction)
@@ -20,10 +21,13 @@
   - 422 Unprocessable Entity (invalid categoryId)
 
 ### Required and Optional Parameters
+
 **Path Parameters:**
+
 - `id` (UUID, required): ID of the transaction to update
 
 **Request Body Fields (all optional):**
+
 - `amount` (number): New amount, must be positive, max 2 decimal places
 - `date` (string): New date in ISO format (YYYY-MM-DD)
 - `categoryId` (UUID): New category ID
@@ -31,6 +35,7 @@
 - `note` (string): New note, max 500 characters
 
 ### Necessary DTOs and Command Models
+
 - `UpdateTransactionCommand` (already defined in `src/types.ts`):
   - Partial version of CreateTransactionCommand (all fields optional)
 - `UpdateTransactionResponseDto` (already defined in `src/types.ts`):
@@ -38,9 +43,11 @@
   - Contains: id, date, amount, type, note, category (nested), createdAt
 
 ### Service Layer Extraction
+
 Service method to be added to: `src/lib/services/transactions.service.ts`
 
 This service will:
+
 - Accept `SupabaseClient`, transaction `id`, and `UpdateTransactionCommand`
 - Validate that transaction exists and belongs to user (via RLS)
 - If categoryId provided, validate it belongs to user
@@ -49,7 +56,9 @@ This service will:
 - Return data in `UpdateTransactionResponseDto` format
 
 ### Input Validation Strategy
+
 Using Zod schemas:
+
 1. **Path Parameter Schema**: Validate id is valid UUID
 2. **Request Body Schema**: Validate optional fields
    - amount: if provided, must be positive with max 2 decimals
@@ -61,8 +70,9 @@ Using Zod schemas:
 4. **Business Validation**: Verify transaction and category ownership via RLS
 
 ### Security Considerations
+
 - **Authentication**: User must be authenticated
-- **Authorization**: 
+- **Authorization**:
   - User can only update their own transactions (RLS enforces)
   - User can only assign their own categories (RLS enforces)
   - Return 403 if trying to update another user's transaction
@@ -71,6 +81,7 @@ Using Zod schemas:
 - **SQL Injection**: Prevented by Supabase parameterized queries
 
 ### Error Scenarios and Status Codes
+
 1. **400 Bad Request**:
    - Invalid UUID format for id
    - Invalid field values (negative amount, invalid date, etc.)
@@ -101,6 +112,7 @@ Using Zod schemas:
 The PATCH /transactions/{id} endpoint allows authenticated users to update their existing transactions. This is a partial update endpoint, meaning clients can send only the fields they want to update. The endpoint validates ownership, ensures data integrity, and returns the complete updated transaction object including category details.
 
 **Key Features:**
+
 - Partial update (PATCH semantics)
 - Updates record in `transactions` table
 - Validates ownership through RLS
@@ -114,20 +126,24 @@ The PATCH /transactions/{id} endpoint allows authenticated users to update their
 ## 2. Request Details
 
 ### HTTP Method
+
 `PATCH`
 
 ### URL Structure
+
 ```
 /api/transactions/{id}
 ```
 
 ### Path Parameters
+
 - **id** (string, required)
   - Description: UUID of the transaction to update
   - Format: Valid UUID
   - Example: `c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d`
 
 ### Request Headers
+
 - **Content-Type**: `application/json` (required)
 - **Authorization**: `Bearer <JWT_TOKEN>` (required)
 
@@ -136,14 +152,16 @@ The PATCH /transactions/{id} endpoint allows authenticated users to update their
 All fields are optional, but at least one field must be provided.
 
 #### Structure
+
 ```json
 {
-  "amount": 205.00,
+  "amount": 205.0,
   "note": "New gaming headphones"
 }
 ```
 
 #### Field Descriptions
+
 - **amount** (number, optional)
   - Description: New transaction amount
   - Constraints: Must be > 0, max 2 decimal places
@@ -172,6 +190,7 @@ All fields are optional, but at least one field must be provided.
 ### Example Requests
 
 #### Update Amount and Note
+
 ```bash
 curl -X PATCH "https://api.example.com/api/transactions/c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d" \
   -H "Content-Type: application/json" \
@@ -183,6 +202,7 @@ curl -X PATCH "https://api.example.com/api/transactions/c3e8a1d4-b8e0-4b1a-9b1a-
 ```
 
 #### Change Category Only
+
 ```bash
 curl -X PATCH "https://api.example.com/api/transactions/c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d" \
   -H "Content-Type: application/json" \
@@ -193,6 +213,7 @@ curl -X PATCH "https://api.example.com/api/transactions/c3e8a1d4-b8e0-4b1a-9b1a-
 ```
 
 #### Clear Note (Set to Null)
+
 ```bash
 curl -X PATCH "https://api.example.com/api/transactions/c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d" \
   -H "Content-Type: application/json" \
@@ -203,6 +224,7 @@ curl -X PATCH "https://api.example.com/api/transactions/c3e8a1d4-b8e0-4b1a-9b1a-
 ```
 
 #### Change Type from Expense to Income
+
 ```bash
 curl -X PATCH "https://api.example.com/api/transactions/c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d" \
   -H "Content-Type: application/json" \
@@ -217,7 +239,9 @@ curl -X PATCH "https://api.example.com/api/transactions/c3e8a1d4-b8e0-4b1a-9b1a-
 ## 3. Utilized Types
 
 ### Command Model
+
 **UpdateTransactionCommand** (defined in `src/types.ts`):
+
 ```typescript
 export type UpdateTransactionCommand = Partial<CreateTransactionCommand>;
 
@@ -232,7 +256,9 @@ export type UpdateTransactionCommand = Partial<CreateTransactionCommand>;
 ```
 
 ### Response DTO
+
 **UpdateTransactionResponseDto** (defined in `src/types.ts`):
+
 ```typescript
 export type UpdateTransactionResponseDto = TransactionDto;
 
@@ -252,7 +278,9 @@ export type UpdateTransactionResponseDto = TransactionDto;
 ```
 
 ### Validation Schemas
+
 **Path Parameter Validation:**
+
 ```typescript
 const TransactionIdSchema = z.object({
   id: z.string().uuid("Invalid transaction ID format"),
@@ -260,6 +288,7 @@ const TransactionIdSchema = z.object({
 ```
 
 **Request Body Validation:**
+
 ```typescript
 const UpdateTransactionSchema = z
   .object({
@@ -271,29 +300,22 @@ const UpdateTransactionSchema = z
         return !decimals || decimals.length <= 2;
       }, "Amount can have at most 2 decimal places")
       .optional(),
-    
+
     date: z
       .string()
       .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
       .refine((date) => !isNaN(Date.parse(date)), "Invalid date")
       .optional(),
-    
-    categoryId: z
-      .string()
-      .uuid("Category ID must be a valid UUID")
-      .optional(),
-    
+
+    categoryId: z.string().uuid("Category ID must be a valid UUID").optional(),
+
     type: z
       .enum(["income", "expense"], {
         invalid_type_error: "Type must be either 'income' or 'expense'",
       })
       .optional(),
-    
-    note: z
-      .string()
-      .max(500, "Note must be at most 500 characters")
-      .optional()
-      .nullable(),
+
+    note: z.string().max(500, "Note must be at most 500 characters").optional().nullable(),
   })
   .refine((data) => Object.keys(data).length > 0, {
     message: "At least one field must be provided for update",
@@ -301,7 +323,9 @@ const UpdateTransactionSchema = z
 ```
 
 ### Database Types
+
 **TablesUpdate<"transactions">** (from `src/db/database.types.ts`):
+
 ```typescript
 {
   amount?: number;
@@ -322,11 +346,12 @@ const UpdateTransactionSchema = z
 ### Success Response (200 OK)
 
 #### Structure
+
 ```json
 {
   "id": "c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d",
   "date": "2025-10-12",
-  "amount": 205.00,
+  "amount": 205.0,
   "type": "expense",
   "note": "New gaming headphones",
   "category": {
@@ -338,6 +363,7 @@ const UpdateTransactionSchema = z
 ```
 
 #### Field Descriptions
+
 - **id**: Transaction UUID (unchanged)
 - **date**: Updated or original date
 - **amount**: Updated or original amount
@@ -349,12 +375,15 @@ const UpdateTransactionSchema = z
 ### Error Responses
 
 #### 400 Bad Request (Validation Errors)
+
 **Scenarios:**
+
 - Invalid UUID format for path parameter
 - Invalid field values
 - No fields provided for update
 
 **Example Response:**
+
 ```json
 {
   "error": "Bad Request",
@@ -367,11 +396,14 @@ const UpdateTransactionSchema = z
 ```
 
 #### 401 Unauthorized
+
 **Scenarios:**
+
 - Missing Authorization header
 - Invalid or expired JWT token
 
 **Example Response:**
+
 ```json
 {
   "error": "Unauthorized",
@@ -380,11 +412,14 @@ const UpdateTransactionSchema = z
 ```
 
 #### 403 Forbidden
+
 **Scenarios:**
+
 - Transaction exists but belongs to different user
 - RLS prevents update
 
 **Example Response:**
+
 ```json
 {
   "error": "Forbidden",
@@ -393,10 +428,13 @@ const UpdateTransactionSchema = z
 ```
 
 #### 404 Not Found
+
 **Scenarios:**
+
 - Transaction with given id doesn't exist
 
 **Example Response:**
+
 ```json
 {
   "error": "Not Found",
@@ -405,11 +443,14 @@ const UpdateTransactionSchema = z
 ```
 
 #### 422 Unprocessable Entity
+
 **Scenarios:**
+
 - categoryId doesn't exist
 - categoryId belongs to different user
 
 **Example Response:**
+
 ```json
 {
   "error": "Unprocessable Entity",
@@ -418,11 +459,14 @@ const UpdateTransactionSchema = z
 ```
 
 #### 500 Internal Server Error
+
 **Scenarios:**
+
 - Database connection failure
 - Unexpected errors during update
 
 **Example Response:**
+
 ```json
 {
   "error": "Internal Server Error",
@@ -435,6 +479,7 @@ const UpdateTransactionSchema = z
 ## 5. Data Flow
 
 ### High-Level Flow
+
 1. **Request Reception**: Astro API endpoint receives PATCH request
 2. **Authentication Check**: Verify user is authenticated via Supabase
 3. **Path Validation**: Validate transaction ID from URL
@@ -451,6 +496,7 @@ const UpdateTransactionSchema = z
 ### Detailed Data Flow
 
 #### Step 1: API Route Handler (`src/pages/api/transactions/[id].ts`)
+
 ```
 1. Check HTTP method is PATCH
 2. Extract id from path params
@@ -465,6 +511,7 @@ const UpdateTransactionSchema = z
 ```
 
 #### Step 2: Service Layer (`src/lib/services/transactions.service.ts`)
+
 ```
 1. Receive supabase client, transaction id, and UpdateTransactionCommand
 2. Prepare update data:
@@ -485,17 +532,19 @@ const UpdateTransactionSchema = z
 #### Step 3: Database Interaction (Supabase)
 
 **Update Query:**
+
 ```sql
 UPDATE transactions
-SET 
+SET
   amount = 205.00,
   note = 'New gaming headphones'
-WHERE 
+WHERE
   id = 'c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d'
   AND user_id = '<authenticated_user_id>'; -- Applied by RLS
 ```
 
 **RLS Check (automatic):**
+
 ```sql
 -- RLS UPDATE policy on transactions:
 -- auth.uid() = user_id
@@ -506,8 +555,9 @@ WHERE
 ```
 
 **Fetch Updated Transaction:**
+
 ```sql
-SELECT 
+SELECT
   t.id,
   t.date,
   t.amount,
@@ -523,14 +573,11 @@ WHERE t.id = 'c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d'
 ```
 
 #### Step 4: Determining 404 vs 403
+
 ```typescript
 // After update returns 0 rows affected
 // Check if transaction exists at all (without user filter)
-const { data: exists } = await supabase
-  .from("transactions")
-  .select("id, user_id")
-  .eq("id", transactionId)
-  .single();
+const { data: exists } = await supabase.from("transactions").select("id, user_id").eq("id", transactionId).single();
 
 if (!exists) {
   // Transaction doesn't exist → 404
@@ -546,14 +593,16 @@ if (!exists) {
 ## 6. Security Considerations
 
 ### Authentication
+
 - **Method**: JWT-based authentication via Supabase
-- **Implementation**: 
+- **Implementation**:
   - Extract user from `context.locals.supabase.auth.getUser()`
   - Reject request with 401 if user is null or token is invalid
   - Use authenticated user's ID for ownership verification
 
 ### Authorization
-- **Transaction Ownership**: 
+
+- **Transaction Ownership**:
   - RLS UPDATE policy verifies `auth.uid() = user_id`
   - User cannot update other users' transactions
   - Distinguish between 404 (doesn't exist) and 403 (exists but not yours)
@@ -563,6 +612,7 @@ if (!exists) {
   - If violation, return 422 error
 
 ### Input Validation
+
 - **Path Parameter**: UUID format validation
 - **Request Body Sanitization**:
   - Strict Zod schema validation
@@ -574,6 +624,7 @@ if (!exists) {
   - Cannot accidentally clear fields not intended
 
 ### Data Integrity
+
 - **Database Constraints**: Same as create
   - Amount CHECK constraint
   - Type ENUM constraint
@@ -584,6 +635,7 @@ if (!exists) {
   - `created_at` cannot be changed
 
 ### Preventing Common Attacks
+
 - **SQL Injection**: Supabase uses parameterized queries
 - **Mass Assignment**: Only accept defined fields from UpdateTransactionCommand
 - **Privilege Escalation**: RLS prevents updating other users' transactions
@@ -596,6 +648,7 @@ if (!exists) {
 ### Validation Errors (400 Bad Request)
 
 #### Scenario 1: Invalid Transaction ID
+
 ```typescript
 // URL: PATCH /api/transactions/invalid-id
 
@@ -610,6 +663,7 @@ Response: {
 ```
 
 #### Scenario 2: No Fields Provided
+
 ```typescript
 // Request body: {}
 
@@ -624,6 +678,7 @@ Response: {
 ```
 
 #### Scenario 3: Invalid Amount
+
 ```typescript
 // Request body: { "amount": -50 }
 
@@ -638,6 +693,7 @@ Response: {
 ```
 
 #### Scenario 4: Invalid Date
+
 ```typescript
 // Request body: { "date": "2025-13-45" }
 
@@ -652,6 +708,7 @@ Response: {
 ```
 
 #### Scenario 5: Invalid Category UUID
+
 ```typescript
 // Request body: { "categoryId": "not-a-uuid" }
 
@@ -666,6 +723,7 @@ Response: {
 ```
 
 #### Scenario 6: Invalid Type
+
 ```typescript
 // Request body: { "type": "transfer" }
 
@@ -680,6 +738,7 @@ Response: {
 ```
 
 #### Scenario 7: Note Too Long
+
 ```typescript
 // Request body: { "note": "<501 characters>" }
 
@@ -696,6 +755,7 @@ Response: {
 ### Authentication Errors (401 Unauthorized)
 
 #### Scenario 1: Missing Authorization Header
+
 ```typescript
 Response: {
   statusCode: 401,
@@ -705,6 +765,7 @@ Response: {
 ```
 
 #### Scenario 2: Invalid Token
+
 ```typescript
 Response: {
   statusCode: 401,
@@ -716,6 +777,7 @@ Response: {
 ### Authorization Errors (403 Forbidden)
 
 #### Scenario 1: Transaction Belongs to Another User
+
 ```typescript
 // Transaction exists but user_id doesn't match
 
@@ -729,6 +791,7 @@ Response: {
 ### Not Found Errors (404 Not Found)
 
 #### Scenario 1: Transaction Doesn't Exist
+
 ```typescript
 // No transaction with given ID in database
 
@@ -742,6 +805,7 @@ Response: {
 ### Business Logic Errors (422 Unprocessable Entity)
 
 #### Scenario 1: Category Doesn't Exist
+
 ```typescript
 // categoryId not found in database
 
@@ -753,6 +817,7 @@ Response: {
 ```
 
 #### Scenario 2: Category Belongs to Different User
+
 ```typescript
 // categoryId exists but belongs to another user
 
@@ -766,6 +831,7 @@ Response: {
 ### Database Errors (500 Internal Server Error)
 
 #### Scenario 1: Database Connection Failure
+
 ```typescript
 Response: {
   statusCode: 500,
@@ -778,6 +844,7 @@ console.error("[Update Transaction API] Database error:", error)
 ```
 
 #### Scenario 2: Update Failure
+
 ```typescript
 Response: {
   statusCode: 500,
@@ -790,6 +857,7 @@ console.error("[Update Transaction API] Update failed:", error)
 ```
 
 ### Error Handling Best Practices
+
 1. **Distinguish 404 vs 403**: Prevent information leakage
 2. **Specific Error Messages**: Help client understand what's wrong
 3. **Security**: Don't leak sensitive info about other users
@@ -803,13 +871,15 @@ console.error("[Update Transaction API] Update failed:", error)
 ### Potential Bottlenecks
 
 #### 1. Two Database Queries
+
 - **Issue**: Update query + fetch updated transaction
 - **Impact**: Two database round-trips
-- **Mitigation**: 
+- **Mitigation**:
   - Use RETURNING clause to get updated data
   - Minimal performance impact for single update
 
 #### 2. Existence vs Ownership Check
+
 - **Issue**: Additional query to distinguish 404 vs 403
 - **Impact**: Extra database round-trip on failure
 - **Mitigation**:
@@ -818,6 +888,7 @@ console.error("[Update Transaction API] Update failed:", error)
   - Can be optimized with single query if needed
 
 #### 3. Category Foreign Key Validation
+
 - **Issue**: Database verifies category during update
 - **Impact**: Additional lookup if category is being changed
 - **Mitigation**:
@@ -828,6 +899,7 @@ console.error("[Update Transaction API] Update failed:", error)
 ### Optimization Strategies
 
 #### 1. Use RETURNING Clause
+
 ```typescript
 // In service layer
 const { data, error } = await supabase
@@ -838,7 +910,8 @@ const { data, error } = await supabase
     // ... other fields
   })
   .eq("id", transactionId)
-  .select(`
+  .select(
+    `
     id,
     date,
     amount,
@@ -846,13 +919,15 @@ const { data, error } = await supabase
     note,
     created_at,
     category:categories (id, name)
-  `)
+  `
+  )
   .single();
 
 // Returns updated transaction with category in one query
 ```
 
 #### 2. Efficient 404 vs 403 Check
+
 ```typescript
 // Option 1: Separate query (current approach)
 // Simple but requires extra query on failure
@@ -863,11 +938,13 @@ const { data, error } = await supabase
 ```
 
 #### 3. Partial Update Optimization
+
 - Only send changed fields to database
 - Reduces data transfer
 - Database only updates modified columns
 
 #### 4. Index Usage
+
 ```sql
 -- Ensure indexes exist:
 CREATE INDEX idx_transactions_id_user ON transactions(id, user_id);
@@ -877,27 +954,32 @@ CREATE INDEX idx_transactions_category ON transactions(category_id);
 ### Expected Performance
 
 #### Best Case (Valid Update, No Category Change)
+
 - **Total Response Time**: < 150ms
 - **Validation Time**: < 5ms
 - **Database Update + Fetch**: < 100ms
 - **JSON Serialization**: < 5ms
 
 #### Typical Case
+
 - **Total Response Time**: < 200ms
 - **Similar to best case**
 
 #### Worst Case (Validation Error)
+
 - **Total Response Time**: < 50ms
 - **Fails Fast**: No database interaction
 - **Validation Only**: Quick Zod schema check
 
 #### Failure Case (404/403)
+
 - **Total Response Time**: < 150ms
 - **Update Attempt**: < 50ms (affects 0 rows)
 - **Existence Check**: < 50ms
 - **Error Response**: < 5ms
 
 ### Monitoring Recommendations
+
 - **Log Update Times**: Track slow updates (> 200ms)
 - **Track Error Rates**: Monitor 400, 403, 404, 422, 500 errors
 - **Field Update Patterns**: Track which fields updated most
@@ -908,6 +990,7 @@ CREATE INDEX idx_transactions_category ON transactions(category_id);
 ## 9. Implementation Steps
 
 ### Step 1: Create Zod Validation Schemas
+
 **File**: `src/pages/api/transactions/[id].ts`
 
 ```typescript
@@ -927,29 +1010,22 @@ const UpdateTransactionSchema = z
         return !decimals || decimals.length <= 2;
       }, "Amount can have at most 2 decimal places")
       .optional(),
-    
+
     date: z
       .string()
       .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
       .refine((date) => !isNaN(Date.parse(date)), "Invalid date")
       .optional(),
-    
-    categoryId: z
-      .string()
-      .uuid("Category ID must be a valid UUID")
-      .optional(),
-    
+
+    categoryId: z.string().uuid("Category ID must be a valid UUID").optional(),
+
     type: z
       .enum(["income", "expense"], {
         invalid_type_error: "Type must be either 'income' or 'expense'",
       })
       .optional(),
-    
-    note: z
-      .string()
-      .max(500, "Note must be at most 500 characters")
-      .optional()
-      .nullable(),
+
+    note: z.string().max(500, "Note must be at most 500 characters").optional().nullable(),
   })
   .refine((data) => Object.keys(data).length > 0, {
     message: "At least one field must be provided for update",
@@ -959,6 +1035,7 @@ type UpdateTransactionInput = z.infer<typeof UpdateTransactionSchema>;
 ```
 
 ### Step 2: Add Service Method
+
 **File**: `src/lib/services/transactions.service.ts`
 
 ```typescript
@@ -1006,7 +1083,8 @@ export class TransactionsService {
       .from("transactions")
       .update(updateData)
       .eq("id", transactionId)
-      .select(`
+      .select(
+        `
         id,
         date,
         amount,
@@ -1017,7 +1095,8 @@ export class TransactionsService {
           id,
           name
         )
-      `)
+      `
+      )
       .single();
 
     if (error) {
@@ -1025,7 +1104,7 @@ export class TransactionsService {
       if (error.code === "23503") {
         throw new Error("INVALID_CATEGORY");
       }
-      
+
       // Check if no rows were affected (404 or 403)
       if (error.code === "PGRST116") {
         // Query to check if transaction exists
@@ -1069,6 +1148,7 @@ export class TransactionsService {
 ```
 
 ### Step 3: Create Dynamic API Route Handler
+
 **File**: `src/pages/api/transactions/[id].ts`
 
 ```typescript
@@ -1101,11 +1181,7 @@ const UpdateTransactionSchema = z
         invalid_type_error: "Type must be either 'income' or 'expense'",
       })
       .optional(),
-    note: z
-      .string()
-      .max(500, "Note must be at most 500 characters")
-      .optional()
-      .nullable(),
+    note: z.string().max(500, "Note must be at most 500 characters").optional().nullable(),
   })
   .refine((data) => Object.keys(data).length > 0, {
     message: "At least one field must be provided for update",
@@ -1199,17 +1275,13 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     const validData = validationResult.data;
 
     // 5. Call service layer
-    const transaction = await TransactionsService.updateTransaction(
-      locals.supabase,
-      transactionId,
-      {
-        amount: validData.amount,
-        date: validData.date,
-        categoryId: validData.categoryId,
-        type: validData.type,
-        note: validData.note,
-      }
-    );
+    const transaction = await TransactionsService.updateTransaction(locals.supabase, transactionId, {
+      amount: validData.amount,
+      date: validData.date,
+      categoryId: validData.categoryId,
+      type: validData.type,
+      note: validData.note,
+    });
 
     // 6. Return success response
     return new Response(JSON.stringify(transaction), {
@@ -1277,14 +1349,17 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 ```
 
 ### Step 4: Create Dynamic Route File
+
 **File structure**: Ensure the file is at `src/pages/api/transactions/[id].ts` for Astro dynamic routing.
 
 ### Step 5: Test Path Parameter Validation
+
 - Invalid UUID → 400
 - Missing id → 404 (Astro routing)
 - Valid UUID → proceeds to body validation
 
 ### Step 6: Test Request Body Validation
+
 - Empty body `{}` → 400 "at least one field"
 - Invalid amount values → 400
 - Invalid date format → 400
@@ -1294,25 +1369,30 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 - Valid partial update → ✓
 
 ### Step 7: Test Authentication
+
 - No token → 401
 - Invalid token → 401
 - Expired token → 401
 - Valid token → ✓
 
 ### Step 8: Test Authorization (403)
+
 - User A tries to update User B's transaction → 403
 - User A updates own transaction → ✓ 200
 
 ### Step 9: Test Not Found (404)
+
 - Update non-existent transaction → 404
 - Update deleted transaction → 404
 
 ### Step 10: Test Category Validation (422)
+
 - Update with non-existent categoryId → 422
 - Update with another user's categoryId → 422
 - Update with own categoryId → ✓ 200
 
 ### Step 11: Test Partial Updates
+
 - Update only amount → verify only amount changed
 - Update only note → verify only note changed
 - Update multiple fields → verify all changed
@@ -1320,6 +1400,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 - Change type income↔expense → verify type changed
 
 ### Step 12: Test Response Format
+
 - Status code is 200
 - Response contains all fields
 - Updated fields reflect new values
@@ -1328,6 +1409,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 - Category object updated if categoryId changed
 
 ### Step 13: Test Database State
+
 - Transaction updated correctly
 - Only specified fields modified
 - created_at unchanged
@@ -1335,6 +1417,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 - id unchanged
 
 ### Step 14: Test Edge Cases
+
 - Update with same values (idempotent)
 - Update amount with 2 decimals
 - Update to different category
@@ -1342,6 +1425,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 - Update date to past/future
 
 ### Step 15: Integration Testing
+
 - Update transaction, then GET to verify
 - Update transaction, check in dashboard
 - Multiple updates to same transaction
@@ -1352,6 +1436,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 ## 10. Testing Checklist
 
 ### Unit Tests (Service Layer)
+
 - [ ] Updates transaction successfully with valid data
 - [ ] Updates only provided fields
 - [ ] Preserves unchanged fields
@@ -1364,6 +1449,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 - [ ] Preserves decimal precision
 
 ### Integration Tests (API Route)
+
 - [ ] Returns 401 when not authenticated
 - [ ] Returns 400 for invalid transaction ID
 - [ ] Returns 400 for empty request body
@@ -1375,6 +1461,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 - [ ] Response matches UpdateTransactionResponseDto structure
 
 ### Partial Update Tests
+
 - [ ] Update single field (amount only)
 - [ ] Update multiple fields
 - [ ] Clear optional field (note to null)
@@ -1385,6 +1472,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 - [ ] user_id never changes
 
 ### Database Tests
+
 - [ ] Only specified fields updated in database
 - [ ] Immutable fields (id, user_id, created_at) unchanged
 - [ ] FK constraint prevents invalid category_id
@@ -1392,6 +1480,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 - [ ] ENUM constraint enforces valid type
 
 ### End-to-End Tests
+
 - [ ] Full PATCH request updates transaction
 - [ ] Updated transaction visible in GET /transactions
 - [ ] Updated transaction affects GET /dashboard
@@ -1403,26 +1492,31 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 ## 11. Future Enhancements
 
 ### Optimistic Locking
+
 1. **Version Field**: Add version/updated_at for concurrency control
 2. **Conflict Detection**: Detect if transaction changed since last read
 3. **Conflict Resolution**: Return 409 Conflict if concurrent update detected
 
 ### Audit Trail
+
 1. **Update History**: Track all changes to transaction
 2. **Change Log**: Record who changed what and when
 3. **Rollback**: Ability to revert changes
 
 ### Batch Updates
+
 1. **Multiple Transactions**: Update many transactions at once
 2. **Bulk Category Change**: Reassign multiple transactions to new category
 3. **Bulk Type Change**: Change multiple transactions from expense to income
 
 ### Smart Updates
+
 1. **Validation Rules**: Prevent illogical updates (e.g., huge amount changes)
 2. **Confirmation**: Require confirmation for major changes
 3. **Undo**: Support undo within time window
 
 ### API Improvements
+
 1. **Partial Response**: Return only updated fields
 2. **Patch Operations**: JSON Patch (RFC 6902) support
 3. **ETags**: Support conditional updates with If-Match
@@ -1432,7 +1526,9 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 ## Appendix A: Example Requests and Responses
 
 ### Update Amount and Note
+
 **Request:**
+
 ```bash
 PATCH /api/transactions/c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d
 Content-Type: application/json
@@ -1445,11 +1541,12 @@ Authorization: Bearer <JWT_TOKEN>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": "c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d",
   "date": "2025-10-12",
-  "amount": 205.00,
+  "amount": 205.0,
   "type": "expense",
   "note": "New gaming headphones",
   "category": {
@@ -1461,7 +1558,9 @@ Authorization: Bearer <JWT_TOKEN>
 ```
 
 ### Change Category
+
 **Request:**
+
 ```bash
 PATCH /api/transactions/c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d
 
@@ -1471,11 +1570,12 @@ PATCH /api/transactions/c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": "c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d",
   "date": "2025-10-12",
-  "amount": 205.00,
+  "amount": 205.0,
   "type": "expense",
   "note": "New gaming headphones",
   "category": {
@@ -1487,7 +1587,9 @@ PATCH /api/transactions/c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d
 ```
 
 ### Empty Request Body
+
 **Request:**
+
 ```bash
 PATCH /api/transactions/c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d
 
@@ -1495,6 +1597,7 @@ PATCH /api/transactions/c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d
 ```
 
 **Response (400 Bad Request):**
+
 ```json
 {
   "error": "Bad Request",
@@ -1506,7 +1609,9 @@ PATCH /api/transactions/c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d
 ```
 
 ### Transaction Not Found
+
 **Request:**
+
 ```bash
 PATCH /api/transactions/00000000-0000-0000-0000-000000000000
 
@@ -1516,6 +1621,7 @@ PATCH /api/transactions/00000000-0000-0000-0000-000000000000
 ```
 
 **Response (404 Not Found):**
+
 ```json
 {
   "error": "Not Found",
@@ -1524,7 +1630,9 @@ PATCH /api/transactions/00000000-0000-0000-0000-000000000000
 ```
 
 ### Forbidden (Other User's Transaction)
+
 **Request:**
+
 ```bash
 PATCH /api/transactions/d5f9c2e6-c9f1-5c2b-ab2b-a0g8b8e8f8f8
 
@@ -1534,6 +1642,7 @@ PATCH /api/transactions/d5f9c2e6-c9f1-5c2b-ab2b-a0g8b8e8f8f8
 ```
 
 **Response (403 Forbidden):**
+
 ```json
 {
   "error": "Forbidden",
@@ -1542,7 +1651,9 @@ PATCH /api/transactions/d5f9c2e6-c9f1-5c2b-ab2b-a0g8b8e8f8f8
 ```
 
 ### Invalid Category
+
 **Request:**
+
 ```bash
 PATCH /api/transactions/c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d
 
@@ -1552,6 +1663,7 @@ PATCH /api/transactions/c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d
 ```
 
 **Response (422 Unprocessable Entity):**
+
 ```json
 {
   "error": "Unprocessable Entity",
@@ -1562,4 +1674,3 @@ PATCH /api/transactions/c3e8a1d4-b8e0-4b1a-9b1a-9f7a7d7f7e7d
 ---
 
 This implementation plan provides comprehensive guidance for implementing the PATCH /transactions/{id} endpoint. Follow the steps sequentially, test thoroughly at each stage, and ensure proper handling of partial updates, ownership verification, and all error scenarios.
-

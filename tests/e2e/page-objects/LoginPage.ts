@@ -3,7 +3,7 @@
  * Zgodnie z wytycznymi Playwright
  */
 
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator } from "@playwright/test";
 
 export class LoginPage {
   readonly page: Page;
@@ -16,14 +16,14 @@ export class LoginPage {
   constructor(page: Page) {
     this.page = page;
     this.emailInput = page.getByLabel(/email/i);
-    this.passwordInput = page.getByLabel(/hasło/i);
-    this.loginButton = page.getByRole('button', { name: /zaloguj/i });
-    this.registerTab = page.getByRole('tab', { name: /rejestracja/i });
-    this.errorMessage = page.getByRole('alert');
+    this.passwordInput = page.getByRole("textbox", { name: /hasło/i });
+    this.loginButton = page.getByRole("button", { name: /zaloguj/i });
+    this.registerTab = page.getByRole("tab", { name: /rejestracja/i });
+    this.errorMessage = page.getByRole("alert");
   }
 
   async goto() {
-    await this.page.goto('/');
+    await this.page.goto("/");
   }
 
   async login(email: string, password: string) {
@@ -40,4 +40,3 @@ export class LoginPage {
     await this.registerTab.click();
   }
 }
-

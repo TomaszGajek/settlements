@@ -3,6 +3,7 @@
 ## Analysis
 
 ### Key Points from API Specification
+
 - **Endpoint**: `POST /api/categories`
 - **Purpose**: Create a new category
 - **Authentication**: Required (JWT-based via Supabase)
@@ -10,18 +11,21 @@
   - Body: { name: string }
 - **Response**: Newly created category with id, name, isDeletable
 - **Success**: 201 Created
-- **Errors**: 
+- **Errors**:
   - 400 Bad Request (validation errors)
   - 401 Unauthorized (not authenticated)
   - 409 Conflict (category name already exists for user)
 
 ### Required and Optional Parameters
+
 **Required Request Body Fields:**
+
 - `name` (string): Category name, max 100 characters, must be unique per user
 
 **Optional Request Body Fields:** None
 
 ### Necessary DTOs and Command Models
+
 - `CreateCategoryCommand` (already defined in `src/types.ts`):
   - Contains: name
 - `CreateCategoryResponseDto` (already defined in `src/types.ts`):
@@ -29,16 +33,20 @@
   - Contains: id, name, isDeletable
 
 ### Service Layer Extraction
+
 Service method to be added to: `src/lib/services/categories.service.ts`
 
 This service will:
+
 - Accept `SupabaseClient` and `CreateCategoryCommand`
 - Validate category name
 - Insert new category into database
 - Return data in `CreateCategoryResponseDto` format
 
 ### Input Validation Strategy
+
 Using Zod schemas:
+
 1. **Request Body Schema**: Validate name field
    - name: required, non-empty string, max 100 characters
    - trim whitespace
@@ -48,8 +56,9 @@ Using Zod schemas:
    - Return 409 on duplicate name
 
 ### Security Considerations
+
 - **Authentication**: User must be authenticated
-- **Authorization**: 
+- **Authorization**:
   - User can only create categories for themselves
   - user_id automatically set from authenticated user
   - RLS enforces user_id matching
@@ -57,6 +66,7 @@ Using Zod schemas:
 - **SQL Injection**: Prevented by Supabase parameterized queries
 
 ### Error Scenarios and Status Codes
+
 1. **400 Bad Request**:
    - Missing name field
    - Empty name (or only whitespace)
@@ -81,6 +91,7 @@ Using Zod schemas:
 The POST /categories endpoint allows authenticated users to create new categories for organizing their transactions. Each category must have a unique name within the user's account. The endpoint validates the category name, ensures uniqueness, and returns the complete category object including the generated ID and deletable flag.
 
 **Key Features:**
+
 - Creates new record in `categories` table
 - Validates category name (length, non-empty)
 - Enforces uniqueness per user via database constraint
@@ -94,20 +105,24 @@ The POST /categories endpoint allows authenticated users to create new categorie
 ## 2. Request Details
 
 ### HTTP Method
+
 `POST`
 
 ### URL Structure
+
 ```
 /api/categories
 ```
 
 ### Request Headers
+
 - **Content-Type**: `application/json` (required)
 - **Authorization**: `Bearer <JWT_TOKEN>` (required)
 
 ### Request Body
 
 #### Structure
+
 ```json
 {
   "name": "Subscriptions"
@@ -115,6 +130,7 @@ The POST /categories endpoint allows authenticated users to create new categorie
 ```
 
 #### Field Descriptions
+
 - **name** (string, required)
   - Description: Category name
   - Constraints: Non-empty, max 100 characters, unique per user
@@ -123,6 +139,7 @@ The POST /categories endpoint allows authenticated users to create new categorie
 ### Example Requests
 
 #### Create Category
+
 ```bash
 curl -X POST "https://api.example.com/api/categories" \
   -H "Content-Type: application/json" \
@@ -133,6 +150,7 @@ curl -X POST "https://api.example.com/api/categories" \
 ```
 
 #### Create Category with Trimming
+
 ```bash
 curl -X POST "https://api.example.com/api/categories" \
   -H "Content-Type: application/json" \
@@ -147,7 +165,9 @@ curl -X POST "https://api.example.com/api/categories" \
 ## 3. Utilized Types
 
 ### Command Model
+
 **CreateCategoryCommand** (defined in `src/types.ts`):
+
 ```typescript
 export type CreateCategoryCommand = Pick<TablesInsert<"categories">, "name">;
 
@@ -158,7 +178,9 @@ export type CreateCategoryCommand = Pick<TablesInsert<"categories">, "name">;
 ```
 
 ### Response DTO
+
 **CreateCategoryResponseDto** (defined in `src/types.ts`):
+
 ```typescript
 export type CreateCategoryResponseDto = CategoryDto;
 
@@ -171,7 +193,9 @@ export type CreateCategoryResponseDto = CategoryDto;
 ```
 
 ### Validation Schema
+
 **Request Body Validation** (to be created with Zod):
+
 ```typescript
 const CreateCategorySchema = z.object({
   name: z
@@ -183,7 +207,9 @@ const CreateCategorySchema = z.object({
 ```
 
 ### Database Types
+
 **TablesInsert<"categories">** (from `src/db/database.types.ts`):
+
 ```typescript
 {
   created_at?: string;
@@ -201,6 +227,7 @@ const CreateCategorySchema = z.object({
 ### Success Response (201 Created)
 
 #### Structure
+
 ```json
 {
   "id": "c3d4e5f6-a7b8-9012-3456-7890abcdef12",
@@ -210,6 +237,7 @@ const CreateCategorySchema = z.object({
 ```
 
 #### Field Descriptions
+
 - **id**: Auto-generated UUID for the category
 - **name**: Category name as provided (after trimming)
 - **isDeletable**: Always `true` for user-created categories
@@ -217,13 +245,16 @@ const CreateCategorySchema = z.object({
 ### Error Responses
 
 #### 400 Bad Request (Validation Errors)
+
 **Scenarios:**
+
 - Missing name field
 - Empty name
 - Name only whitespace
 - Name exceeds 100 characters
 
 **Example Response:**
+
 ```json
 {
   "error": "Bad Request",
@@ -235,11 +266,14 @@ const CreateCategorySchema = z.object({
 ```
 
 #### 401 Unauthorized
+
 **Scenarios:**
+
 - Missing Authorization header
 - Invalid or expired JWT token
 
 **Example Response:**
+
 ```json
 {
   "error": "Unauthorized",
@@ -248,10 +282,13 @@ const CreateCategorySchema = z.object({
 ```
 
 #### 409 Conflict
+
 **Scenarios:**
+
 - Category with same name already exists for user
 
 **Example Response:**
+
 ```json
 {
   "error": "Conflict",
@@ -260,11 +297,14 @@ const CreateCategorySchema = z.object({
 ```
 
 #### 500 Internal Server Error
+
 **Scenarios:**
+
 - Database connection failure
 - Unexpected errors during insert
 
 **Example Response:**
+
 ```json
 {
   "error": "Internal Server Error",
@@ -277,6 +317,7 @@ const CreateCategorySchema = z.object({
 ## 5. Data Flow
 
 ### High-Level Flow
+
 1. **Request Reception**: Astro API endpoint receives POST request
 2. **Authentication Check**: Verify user is authenticated via Supabase
 3. **Body Parsing**: Parse JSON request body
@@ -290,6 +331,7 @@ const CreateCategorySchema = z.object({
 ### Detailed Data Flow
 
 #### Step 1: API Route Handler (`src/pages/api/categories.ts`)
+
 ```
 1. Check HTTP method is POST
 2. Get authenticated user from context.locals.supabase
@@ -301,6 +343,7 @@ const CreateCategorySchema = z.object({
 ```
 
 #### Step 2: Service Layer (`src/lib/services/categories.service.ts`)
+
 ```
 1. Receive supabase client and CreateCategoryCommand
 2. Extract user_id from authenticated session
@@ -320,6 +363,7 @@ const CreateCategorySchema = z.object({
 #### Step 3: Database Interaction (Supabase)
 
 **Insert Query:**
+
 ```sql
 INSERT INTO categories (
   user_id,
@@ -334,6 +378,7 @@ RETURNING id, name, is_deletable;
 ```
 
 **Unique Constraint Check (automatic):**
+
 ```sql
 -- UNIQUE (user_id, name) constraint
 -- Ensures category names are unique per user
@@ -341,18 +386,20 @@ RETURNING id, name, is_deletable;
 ```
 
 **RLS Check (automatic):**
+
 ```sql
 -- RLS INSERT policy on categories:
 -- auth.uid() = user_id ✓
 ```
 
 #### Step 4: Data Transformation
+
 ```typescript
 // Pseudo-code for transformation
 const categoryDto = {
   id: dbRow.id,
   name: dbRow.name,
-  isDeletable: dbRow.is_deletable // true for user-created
+  isDeletable: dbRow.is_deletable, // true for user-created
 };
 ```
 
@@ -361,19 +408,22 @@ const categoryDto = {
 ## 6. Security Considerations
 
 ### Authentication
+
 - **Method**: JWT-based authentication via Supabase
-- **Implementation**: 
+- **Implementation**:
   - Extract user from `context.locals.supabase.auth.getUser()`
   - Reject request with 401 if user is null or token is invalid
   - Use authenticated user's ID for `user_id` field
 
 ### Authorization
-- **Category Ownership**: 
+
+- **Category Ownership**:
   - `user_id` automatically set to authenticated user
   - User cannot create categories for other users
   - RLS INSERT policy verifies `auth.uid() = user_id`
 
 ### Input Validation
+
 - **Request Body Sanitization**:
   - Strict Zod schema validation
   - Type checking for name field
@@ -382,6 +432,7 @@ const categoryDto = {
   - Empty string prevention
 
 ### Data Integrity
+
 - **Database Constraints**:
   - UNIQUE constraint on (user_id, name)
   - NOT NULL constraint on name
@@ -392,6 +443,7 @@ const categoryDto = {
   - RLS layer (ownership)
 
 ### Preventing Common Attacks
+
 - **SQL Injection**: Supabase uses parameterized queries
 - **Mass Assignment**: Only accept name from CreateCategoryCommand
 - **Privilege Escalation**: RLS prevents creating for other users
@@ -404,6 +456,7 @@ const categoryDto = {
 ### Validation Errors (400 Bad Request)
 
 #### Scenario 1: Missing Name Field
+
 ```typescript
 // Request body: {}
 
@@ -418,6 +471,7 @@ Response: {
 ```
 
 #### Scenario 2: Empty Name
+
 ```typescript
 // Request body: { "name": "" }
 
@@ -432,6 +486,7 @@ Response: {
 ```
 
 #### Scenario 3: Name Only Whitespace
+
 ```typescript
 // Request body: { "name": "   " }
 // After trim: ""
@@ -447,6 +502,7 @@ Response: {
 ```
 
 #### Scenario 4: Name Too Long
+
 ```typescript
 // Request body: { "name": "<101 characters>" }
 
@@ -463,6 +519,7 @@ Response: {
 ### Authentication Errors (401 Unauthorized)
 
 #### Scenario 1: Missing Authorization Header
+
 ```typescript
 Response: {
   statusCode: 401,
@@ -472,6 +529,7 @@ Response: {
 ```
 
 #### Scenario 2: Invalid Token
+
 ```typescript
 Response: {
   statusCode: 401,
@@ -483,6 +541,7 @@ Response: {
 ### Conflict Errors (409 Conflict)
 
 #### Scenario 1: Duplicate Category Name
+
 ```typescript
 // User already has a category named "Food"
 // Request body: { "name": "Food" }
@@ -495,6 +554,7 @@ Response: {
 ```
 
 #### Scenario 2: Duplicate After Trimming
+
 ```typescript
 // User has category "Travel"
 // Request body: { "name": "  Travel  " }
@@ -510,6 +570,7 @@ Response: {
 ### Database Errors (500 Internal Server Error)
 
 #### Scenario 1: Database Connection Failure
+
 ```typescript
 Response: {
   statusCode: 500,
@@ -522,6 +583,7 @@ console.error("[Create Category API] Database error:", error)
 ```
 
 #### Scenario 2: Insert Failure
+
 ```typescript
 Response: {
   statusCode: 500,
@@ -534,6 +596,7 @@ console.error("[Create Category API] Insert failed:", error)
 ```
 
 ### Error Handling Best Practices
+
 1. **Distinguish Error Types**: 400 vs 409 vs 500
 2. **Specific Error Messages**: Help client understand what's wrong
 3. **Security**: Don't leak sensitive info
@@ -547,13 +610,15 @@ console.error("[Create Category API] Insert failed:", error)
 ### Potential Bottlenecks
 
 #### 1. Unique Constraint Check
+
 - **Issue**: Database must check for duplicate name
 - **Impact**: Additional lookup during insert
-- **Mitigation**: 
+- **Mitigation**:
   - UNIQUE index makes this check fast (O(log n))
   - Minimal performance impact
 
 #### 2. RLS Policy Evaluation
+
 - **Issue**: RLS policy evaluated on INSERT
 - **Impact**: Slight overhead per request
 - **Mitigation**:
@@ -563,6 +628,7 @@ console.error("[Create Category API] Insert failed:", error)
 ### Optimization Strategies
 
 #### 1. Database-Level Optimizations
+
 ```sql
 -- Ensure unique index exists (created by UNIQUE constraint):
 UNIQUE INDEX categories_user_id_name_key ON categories(user_id, name);
@@ -573,37 +639,44 @@ UNIQUE INDEX categories_user_id_name_key ON categories(user_id, name);
 ```
 
 #### 2. Efficient Duplicate Check
+
 - UNIQUE constraint provides fastest duplicate detection
 - Index-based lookup is O(log n)
 - No need for separate SELECT query
 
 #### 3. Minimal Data Transfer
+
 - Only send name in request
 - Only return id, name, isDeletable in response
 
 ### Expected Performance
 
 #### Best Case (Valid Request, No Duplicate)
+
 - **Total Response Time**: < 100ms
 - **Validation Time**: < 5ms
 - **Database Insert**: < 50ms
 - **JSON Serialization**: < 5ms
 
 #### Typical Case
+
 - **Total Response Time**: < 150ms
 - **Similar to best case**
 
 #### Worst Case (Validation Error)
+
 - **Total Response Time**: < 50ms
 - **Fails Fast**: No database interaction
 - **Validation Only**: Quick Zod schema check
 
 #### Conflict Case (409)
+
 - **Total Response Time**: < 100ms
 - **Unique Check**: Fast index lookup
 - **Returns early with 409**
 
 ### Monitoring Recommendations
+
 - **Log Insert Times**: Track slow inserts (> 100ms)
 - **Track Error Rates**: Monitor 400, 409, 500 errors
 - **Validation Failures**: Track common validation errors
@@ -614,6 +687,7 @@ UNIQUE INDEX categories_user_id_name_key ON categories(user_id, name);
 ## 9. Implementation Steps
 
 ### Step 1: Create Zod Validation Schema
+
 **File**: `src/pages/api/categories.ts` (or separate validation file)
 
 ```typescript
@@ -631,6 +705,7 @@ type CreateCategoryInput = z.infer<typeof CreateCategorySchema>;
 ```
 
 ### Step 2: Add Service Method
+
 **File**: `src/lib/services/categories.service.ts`
 
 ```typescript
@@ -695,6 +770,7 @@ export class CategoriesService {
 ```
 
 ### Step 3: Add POST Handler to API Route
+
 **File**: `src/pages/api/categories.ts`
 
 ```typescript
@@ -773,12 +849,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const validData = validationResult.data;
 
     // 4. Call service layer
-    const category = await CategoriesService.createCategory(
-      locals.supabase,
-      {
-        name: validData.name,
-      }
-    );
+    const category = await CategoriesService.createCategory(locals.supabase, {
+      name: validData.name,
+    });
 
     // 5. Return success response
     return new Response(JSON.stringify(category), {
@@ -818,6 +891,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 ```
 
 ### Step 4: Test Authentication
+
 - Valid token → expect 201
 - Missing token → expect 401
 - Invalid token → expect 401
@@ -826,6 +900,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 ### Step 5: Test Validation
 
 #### Name Validation
+
 - Missing name → 400 "Name is required"
 - Empty name `""` → 400 "Name cannot be empty"
 - Whitespace only `"   "` → 400 "Name cannot be empty"
@@ -834,18 +909,21 @@ export const POST: APIRoute = async ({ request, locals }) => {
 - Valid name → ✓ 201
 
 #### Whitespace Trimming
+
 - `"  Travel  "` → trimmed to `"Travel"` ✓
 - `"\n\tFood\t\n"` → trimmed to `"Food"` ✓
 
 ### Step 6: Test Duplicate Detection (409)
+
 - Create category "Food"
 - Try to create another "Food" → 409
-- Try to create "  Food  " (trims to "Food") → 409
+- Try to create " Food " (trims to "Food") → 409
 - Create "food" (lowercase) → ✓ 201 (case-sensitive)
 
 ### Step 7: Test Response Format
 
 #### Success Response
+
 - Status code is 201
 - Response contains id, name, isDeletable
 - id is a valid UUID
@@ -853,6 +931,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 - isDeletable is true
 
 #### Error Responses
+
 - 400 has error, message, details
 - 401 has error, message
 - 409 has error, message
@@ -861,6 +940,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 ### Step 8: Test Database State
 
 #### After Successful Creation
+
 - Category exists in database
 - user_id matches authenticated user
 - name stored correctly (trimmed)
@@ -869,6 +949,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 - id is generated automatically
 
 #### After Failed Creation
+
 - No category created on validation failure
 - No category created on 409 error
 - Database state unchanged
@@ -876,6 +957,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 ### Step 9: Integration Testing
 
 #### Complete Flow
+
 - Send valid POST request
 - Verify 201 response
 - Verify category in database
@@ -883,6 +965,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 - Use category in POST /transactions
 
 #### Multiple Categories
+
 - Create multiple categories with different names
 - Verify all created independently
 - Verify no interference between requests
@@ -890,22 +973,26 @@ export const POST: APIRoute = async ({ request, locals }) => {
 ### Step 10: Test Edge Cases
 
 #### Special Characters
+
 - Unicode: "Кафе ☕" → ✓
 - Quotes: 'Books "Reading"' → ✓
 - Apostrophe: "Children's toys" → ✓
 - Ampersand: "Coffee & Tea" → ✓
 
 #### Boundary Values
+
 - 1 character name → ✓
 - 100 character name → ✓
 - 101 character name → 400
 
 #### Concurrent Requests
+
 - Two simultaneous requests with same name
 - One should succeed (201)
 - One should fail (409)
 
 ### Step 11: Test Performance
+
 - Measure time for single category creation
 - Should be < 100ms
 - Test with many existing categories
@@ -914,20 +1001,24 @@ export const POST: APIRoute = async ({ request, locals }) => {
 ### Step 12: Security Testing
 
 #### SQL Injection Attempts
+
 - name = "'; DROP TABLE categories; --"
 - Verify parameterized query prevents injection
 
 #### User ID Manipulation
+
 - Try to send user_id in request body
 - Verify it's ignored (not in schema)
 - Verify authenticated user's ID is used
 
 ### Step 13: Test Default Categories
+
 - Verify new users have default categories
 - Verify cannot create duplicate of default category
 - Verify "Other" category exists and is not deletable
 
 ### Step 14: Code Quality
+
 - All types properly defined
 - No `any` types
 - DTOs match specification
@@ -936,6 +1027,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 - Code is DRY
 
 ### Step 15: Documentation
+
 - JSDoc for service method
 - Document validation rules
 - Document error codes
@@ -946,6 +1038,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 ## 10. Testing Checklist
 
 ### Unit Tests (Service Layer)
+
 - [ ] Creates category successfully with valid data
 - [ ] Sets user_id from authenticated user
 - [ ] Sets is_deletable to true
@@ -955,6 +1048,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 - [ ] Trims whitespace from name
 
 ### Integration Tests (API Route)
+
 - [ ] Returns 401 when not authenticated
 - [ ] Returns 400 for invalid JSON body
 - [ ] Returns 400 for missing name
@@ -966,6 +1060,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 - [ ] Trims whitespace from name before insertion
 
 ### Database Tests
+
 - [ ] Category inserted with correct user_id
 - [ ] Category inserted with correct name
 - [ ] is_deletable set to true
@@ -975,6 +1070,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 - [ ] CHECK constraint enforces name length
 
 ### End-to-End Tests
+
 - [ ] Full request from client creates category
 - [ ] Created category appears in GET /categories
 - [ ] Created category can be used in transactions
@@ -986,12 +1082,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
 ## 11. Future Enhancements
 
 ### Validation Improvements
+
 1. **Name Normalization**: Lowercase or normalize names
 2. **Forbidden Names**: Prevent certain reserved names
 3. **Profanity Filter**: Optional profanity checking
 4. **Suggestions**: Suggest similar existing categories
 
 ### Feature Additions
+
 1. **Bulk Create**: Create multiple categories at once
 2. **Category Color**: Add optional color field
 3. **Category Icon**: Add optional icon field
@@ -999,12 +1097,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
 5. **Category Templates**: Predefined category sets
 
 ### Business Logic
+
 1. **Limit Categories**: Set maximum categories per user
 2. **Premium Features**: More categories for paid users
 3. **Category Sharing**: Share categories between users
 4. **Category Import**: Import from templates or other users
 
 ### API Improvements
+
 1. **Batch Operations**: Create multiple categories in one request
 2. **Idempotency**: Support idempotency keys
 3. **Webhooks**: Trigger webhooks on category creation
@@ -1014,7 +1114,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
 ## Appendix A: Example Requests and Responses
 
 ### Successful Creation
+
 **Request:**
+
 ```bash
 POST /api/categories
 Content-Type: application/json
@@ -1026,6 +1128,7 @@ Authorization: Bearer <JWT_TOKEN>
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": "c3d4e5f6-a7b8-9012-3456-7890abcdef12",
@@ -1035,7 +1138,9 @@ Authorization: Bearer <JWT_TOKEN>
 ```
 
 ### Missing Name
+
 **Request:**
+
 ```bash
 POST /api/categories
 
@@ -1043,6 +1148,7 @@ POST /api/categories
 ```
 
 **Response (400 Bad Request):**
+
 ```json
 {
   "error": "Bad Request",
@@ -1054,7 +1160,9 @@ POST /api/categories
 ```
 
 ### Empty Name
+
 **Request:**
+
 ```bash
 POST /api/categories
 
@@ -1064,6 +1172,7 @@ POST /api/categories
 ```
 
 **Response (400 Bad Request):**
+
 ```json
 {
   "error": "Bad Request",
@@ -1075,7 +1184,9 @@ POST /api/categories
 ```
 
 ### Name Too Long
+
 **Request:**
+
 ```bash
 POST /api/categories
 
@@ -1085,6 +1196,7 @@ POST /api/categories
 ```
 
 **Response (400 Bad Request):**
+
 ```json
 {
   "error": "Bad Request",
@@ -1096,7 +1208,9 @@ POST /api/categories
 ```
 
 ### Duplicate Name
+
 **Request:**
+
 ```bash
 POST /api/categories
 
@@ -1106,6 +1220,7 @@ POST /api/categories
 ```
 
 **Response (409 Conflict):**
+
 ```json
 {
   "error": "Conflict",
@@ -1114,7 +1229,9 @@ POST /api/categories
 ```
 
 ### Whitespace Trimming
+
 **Request:**
+
 ```bash
 POST /api/categories
 
@@ -1124,6 +1241,7 @@ POST /api/categories
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": "d4e6f2g7-b8c9-0123-4567-890abcdef123",
@@ -1135,4 +1253,3 @@ POST /api/categories
 ---
 
 This implementation plan provides comprehensive guidance for implementing the POST /categories endpoint. Follow the steps sequentially, test thoroughly at each stage, and ensure proper handling of validation, uniqueness constraints, and all error scenarios.
-

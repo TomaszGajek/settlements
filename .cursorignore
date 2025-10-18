@@ -13,10 +13,7 @@ build/
 .output/
 
 # Environment variables (optional - remove if you want AI to see them)
-.env
-.env.local
-.env.production
-.env.*.local
+
 
 # Cache and temporary files
 .cache/

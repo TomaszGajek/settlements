@@ -189,4 +189,3 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     </>
   );
 };
-

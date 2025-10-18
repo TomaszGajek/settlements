@@ -27,5 +27,3 @@ export function PasswordRequirements({ password }: PasswordRequirementsProps) {
     </ul>
   );
 }
-
-

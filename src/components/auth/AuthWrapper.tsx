@@ -29,4 +29,3 @@ export function AuthWrapper({ defaultTab = "login", defaultEmail }: AuthWrapperP
     </Tabs>
   );
 }
-

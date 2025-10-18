@@ -28,4 +28,3 @@ export const DashboardApp: React.FC = () => {
     </AuthProvider>
   );
 };
-

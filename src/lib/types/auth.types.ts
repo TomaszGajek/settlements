@@ -25,6 +25,14 @@ export interface ResetPasswordFormData {
 }
 
 /**
+ * Dane formularza zmiany hasła (po kliknięciu w link z emaila)
+ */
+export interface UpdatePasswordFormData {
+  password: string;
+  confirmPassword: string;
+}
+
+/**
  * Typ błędów autentykacji
  */
 export type AuthErrorType =
@@ -76,6 +84,13 @@ export interface ResetPasswordFormProps {
 }
 
 /**
+ * Props komponentu UpdatePasswordForm
+ */
+export interface UpdatePasswordFormProps {
+  onSuccess?: () => void;
+}
+
+/**
  * Props komponentu PasswordInput
  */
 export interface PasswordInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -100,5 +115,3 @@ export interface AuthErrorDisplayProps {
 
 // Re-export Supabase types for convenience
 export type { User, Session };
-
-

@@ -78,7 +78,9 @@ export const DeleteTransactionDialog: React.FC<DeleteDialogProps> = ({ isOpen, o
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Anuluj</AlertDialogCancel>
+          <AlertDialogCancel disabled={isDeleting} data-testid="delete-transaction-dialog-cancel">
+            Anuluj
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={(e) => {
               e.preventDefault();
@@ -86,6 +88,7 @@ export const DeleteTransactionDialog: React.FC<DeleteDialogProps> = ({ isOpen, o
             }}
             disabled={isDeleting}
             className="bg-destructive hover:bg-destructive/90"
+            data-testid="delete-transaction-dialog-confirm"
           >
             {isDeleting ? "Usuwanie..." : "Usuń"}
           </AlertDialogAction>
@@ -97,4 +100,3 @@ export const DeleteTransactionDialog: React.FC<DeleteDialogProps> = ({ isOpen, o
 
 // Export as DeleteDialog for backward compatibility
 export const DeleteDialog = DeleteTransactionDialog;
-

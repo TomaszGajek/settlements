@@ -33,13 +33,10 @@ export async function deleteUserAccount(): Promise<void> {
   });
 
   if (!response.ok) {
-    const error = await response
-      .json()
-      .catch(() => ({ message: "Failed to delete account" }));
+    const error = await response.json().catch(() => ({ message: "Failed to delete account" }));
 
     throw new Error(error.message || "Nie udało się usunąć konta");
   }
 
   // 204 No Content - success
 }
-

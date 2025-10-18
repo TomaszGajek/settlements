@@ -19,4 +19,3 @@ export function useDashboard(month: number, year: number) {
     refetchOnWindowFocus: false,
   });
 }
-

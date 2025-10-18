@@ -3,6 +3,7 @@
 ## Analysis
 
 ### Key Points from API Specification
+
 - **Endpoint**: `PATCH /api/categories/{id}`
 - **Purpose**: Update an existing category's name
 - **Authentication**: Required (JWT-based via Supabase)
@@ -11,7 +12,7 @@
   - Body: { name: string }
 - **Response**: Updated category with id, name, isDeletable
 - **Success**: 200 OK
-- **Errors**: 
+- **Errors**:
   - 400 Bad Request (validation errors)
   - 401 Unauthorized (not authenticated)
   - 403 Forbidden (trying to update non-editable category like "Other" or another user's category)
@@ -19,13 +20,17 @@
   - 409 Conflict (new name already exists for user)
 
 ### Required and Optional Parameters
+
 **Path Parameters:**
+
 - `id` (UUID, required): ID of the category to update
 
 **Request Body Fields:**
+
 - `name` (string, required): New category name, max 100 characters, must be unique per user
 
 ### Necessary DTOs and Command Models
+
 - `UpdateCategoryCommand` (already defined in `src/types.ts`):
   - Contains: name
 - `UpdateCategoryResponseDto` (already defined in `src/types.ts`):
@@ -33,9 +38,11 @@
   - Contains: id, name, isDeletable
 
 ### Service Layer Extraction
+
 Service method to be added to: `src/lib/services/categories.service.ts`
 
 This service will:
+
 - Accept `SupabaseClient`, category `id`, and `UpdateCategoryCommand`
 - Validate that category exists and belongs to user
 - Validate that category is editable (is_deletable = true)
@@ -44,7 +51,9 @@ This service will:
 - Return data in `UpdateCategoryResponseDto` format
 
 ### Input Validation Strategy
+
 Using Zod schemas:
+
 1. **Path Parameter Schema**: Validate id is valid UUID
 2. **Request Body Schema**: Validate name field
    - name: required, non-empty string, max 100 characters
@@ -56,8 +65,9 @@ Using Zod schemas:
    - Return 403 if trying to edit "Other" category
 
 ### Security Considerations
+
 - **Authentication**: User must be authenticated
-- **Authorization**: 
+- **Authorization**:
   - User can only update their own categories (RLS enforces)
   - User cannot update non-editable categories (is_deletable = false)
   - Return 403 if trying to update another user's category
@@ -67,6 +77,7 @@ Using Zod schemas:
 - **SQL Injection**: Prevented by Supabase parameterized queries
 
 ### Error Scenarios and Status Codes
+
 1. **400 Bad Request**:
    - Invalid UUID format for id
    - Missing name field
@@ -98,6 +109,7 @@ Using Zod schemas:
 The PATCH /categories/{id} endpoint allows authenticated users to rename their editable categories. Users cannot rename the system "Other" category or categories belonging to other users. The endpoint validates ownership, ensures the category is editable, checks for name uniqueness, and returns the updated category object.
 
 **Key Features:**
+
 - Updates category name in `categories` table
 - Validates ownership through RLS
 - Prevents editing non-deletable categories ("Other")
@@ -111,26 +123,31 @@ The PATCH /categories/{id} endpoint allows authenticated users to rename their e
 ## 2. Request Details
 
 ### HTTP Method
+
 `PATCH`
 
 ### URL Structure
+
 ```
 /api/categories/{id}
 ```
 
 ### Path Parameters
+
 - **id** (string, required)
   - Description: UUID of the category to update
   - Format: Valid UUID
   - Example: `c3d4e5f6-a7b8-9012-3456-7890abcdef12`
 
 ### Request Headers
+
 - **Content-Type**: `application/json` (required)
 - **Authorization**: `Bearer <JWT_TOKEN>` (required)
 
 ### Request Body
 
 #### Structure
+
 ```json
 {
   "name": "Monthly Subscriptions"
@@ -138,6 +155,7 @@ The PATCH /categories/{id} endpoint allows authenticated users to rename their e
 ```
 
 #### Field Descriptions
+
 - **name** (string, required)
   - Description: New category name
   - Constraints: Non-empty, max 100 characters, unique per user
@@ -146,6 +164,7 @@ The PATCH /categories/{id} endpoint allows authenticated users to rename their e
 ### Example Requests
 
 #### Rename Category
+
 ```bash
 curl -X PATCH "https://api.example.com/api/categories/c3d4e5f6-a7b8-9012-3456-7890abcdef12" \
   -H "Content-Type: application/json" \
@@ -156,6 +175,7 @@ curl -X PATCH "https://api.example.com/api/categories/c3d4e5f6-a7b8-9012-3456-78
 ```
 
 #### Rename with Trimming
+
 ```bash
 curl -X PATCH "https://api.example.com/api/categories/c3d4e5f6-a7b8-9012-3456-7890abcdef12" \
   -H "Content-Type: application/json" \
@@ -170,7 +190,9 @@ curl -X PATCH "https://api.example.com/api/categories/c3d4e5f6-a7b8-9012-3456-78
 ## 3. Utilized Types
 
 ### Command Model
+
 **UpdateCategoryCommand** (defined in `src/types.ts`):
+
 ```typescript
 export type UpdateCategoryCommand = Pick<TablesUpdate<"categories"], "name">;
 
@@ -181,7 +203,9 @@ export type UpdateCategoryCommand = Pick<TablesUpdate<"categories"], "name">;
 ```
 
 ### Response DTO
+
 **UpdateCategoryResponseDto** (defined in `src/types.ts`):
+
 ```typescript
 export type UpdateCategoryResponseDto = CategoryDto;
 
@@ -194,7 +218,9 @@ export type UpdateCategoryResponseDto = CategoryDto;
 ```
 
 ### Validation Schemas
+
 **Path Parameter Validation:**
+
 ```typescript
 const CategoryIdSchema = z.object({
   id: z.string().uuid("Invalid category ID format"),
@@ -202,6 +228,7 @@ const CategoryIdSchema = z.object({
 ```
 
 **Request Body Validation:**
+
 ```typescript
 const UpdateCategorySchema = z.object({
   name: z
@@ -213,7 +240,9 @@ const UpdateCategorySchema = z.object({
 ```
 
 ### Database Types
+
 **TablesUpdate<"categories">** (from `src/db/database.types.ts`):
+
 ```typescript
 {
   created_at?: string;
@@ -231,6 +260,7 @@ const UpdateCategorySchema = z.object({
 ### Success Response (200 OK)
 
 #### Structure
+
 ```json
 {
   "id": "c3d4e5f6-a7b8-9012-3456-7890abcdef12",
@@ -240,6 +270,7 @@ const UpdateCategorySchema = z.object({
 ```
 
 #### Field Descriptions
+
 - **id**: Category UUID (unchanged)
 - **name**: Updated category name
 - **isDeletable**: Whether category is deletable (unchanged)
@@ -247,13 +278,16 @@ const UpdateCategorySchema = z.object({
 ### Error Responses
 
 #### 400 Bad Request (Validation Errors)
+
 **Scenarios:**
+
 - Invalid UUID format for path parameter
 - Missing name field
 - Empty name
 - Name too long
 
 **Example Response:**
+
 ```json
 {
   "error": "Bad Request",
@@ -266,11 +300,14 @@ const UpdateCategorySchema = z.object({
 ```
 
 #### 401 Unauthorized
+
 **Scenarios:**
+
 - Missing Authorization header
 - Invalid or expired JWT token
 
 **Example Response:**
+
 ```json
 {
   "error": "Unauthorized",
@@ -279,11 +316,14 @@ const UpdateCategorySchema = z.object({
 ```
 
 #### 403 Forbidden
+
 **Scenarios:**
+
 - Category exists but belongs to different user
 - Category is not editable (is_deletable = false)
 
 **Example Response:**
+
 ```json
 {
   "error": "Forbidden",
@@ -292,6 +332,7 @@ const UpdateCategorySchema = z.object({
 ```
 
 **For Non-Editable Category:**
+
 ```json
 {
   "error": "Forbidden",
@@ -300,10 +341,13 @@ const UpdateCategorySchema = z.object({
 ```
 
 #### 404 Not Found
+
 **Scenarios:**
+
 - Category with given id doesn't exist
 
 **Example Response:**
+
 ```json
 {
   "error": "Not Found",
@@ -312,10 +356,13 @@ const UpdateCategorySchema = z.object({
 ```
 
 #### 409 Conflict
+
 **Scenarios:**
+
 - New name already exists for user
 
 **Example Response:**
+
 ```json
 {
   "error": "Conflict",
@@ -324,11 +371,14 @@ const UpdateCategorySchema = z.object({
 ```
 
 #### 500 Internal Server Error
+
 **Scenarios:**
+
 - Database connection failure
 - Unexpected errors during update
 
 **Example Response:**
+
 ```json
 {
   "error": "Internal Server Error",
@@ -341,6 +391,7 @@ const UpdateCategorySchema = z.object({
 ## 5. Data Flow
 
 ### High-Level Flow
+
 1. **Request Reception**: Astro API endpoint receives PATCH request
 2. **Authentication Check**: Verify user is authenticated via Supabase
 3. **Path Validation**: Validate category ID from URL
@@ -357,6 +408,7 @@ const UpdateCategorySchema = z.object({
 ### Detailed Data Flow
 
 #### Step 1: API Route Handler (`src/pages/api/categories/[id].ts`)
+
 ```
 1. Check HTTP method is PATCH
 2. Extract id from path params
@@ -371,6 +423,7 @@ const UpdateCategorySchema = z.object({
 ```
 
 #### Step 2: Service Layer (`src/lib/services/categories.service.ts`)
+
 ```
 1. Receive supabase client, category id, and UpdateCategoryCommand
 2. Check if category exists and get its data:
@@ -392,25 +445,28 @@ const UpdateCategorySchema = z.object({
 #### Step 3: Database Interaction (Supabase)
 
 **Check Category Existence and Editability:**
+
 ```sql
 SELECT id, user_id, is_deletable, name
 FROM categories
-WHERE 
+WHERE
   id = 'c3d4e5f6-a7b8-9012-3456-7890abcdef12'
   AND user_id = '<authenticated_user_id>'; -- Applied by RLS
 ```
 
 **Update Query:**
+
 ```sql
 UPDATE categories
 SET name = 'Monthly Subscriptions'
-WHERE 
+WHERE
   id = 'c3d4e5f6-a7b8-9012-3456-7890abcdef12'
   AND user_id = '<authenticated_user_id>' -- Applied by RLS
   AND is_deletable = true; -- Additional safety check
 ```
 
 **Unique Constraint Check (automatic):**
+
 ```sql
 -- UNIQUE (user_id, name) constraint
 -- Ensures new name is unique per user
@@ -418,6 +474,7 @@ WHERE
 ```
 
 #### Step 4: Determining Error Codes
+
 ```typescript
 // Category not found or belongs to other user
 if (!existingCategory) {
@@ -440,14 +497,16 @@ if (error.code === "23505") {
 ## 6. Security Considerations
 
 ### Authentication
+
 - **Method**: JWT-based authentication via Supabase
-- **Implementation**: 
+- **Implementation**:
   - Extract user from `context.locals.supabase.auth.getUser()`
   - Reject request with 401 if user is null or token is invalid
   - Use authenticated user's ID for ownership verification
 
 ### Authorization
-- **Category Ownership**: 
+
+- **Category Ownership**:
   - RLS ensures user can only see/update their own categories
   - Cannot update categories belonging to other users
   - Distinguish between 404 (doesn't exist) and 403 (not editable)
@@ -457,6 +516,7 @@ if (error.code === "23505") {
   - Return 403 for non-editable categories
 
 ### Input Validation
+
 - **Path Parameter**: UUID format validation
 - **Request Body Sanitization**:
   - Strict Zod schema validation
@@ -466,6 +526,7 @@ if (error.code === "23505") {
   - Empty string prevention
 
 ### Data Integrity
+
 - **Database Constraints**:
   - UNIQUE constraint on (user_id, name)
   - NOT NULL constraint on name
@@ -477,6 +538,7 @@ if (error.code === "23505") {
   - created_at cannot be changed
 
 ### Preventing Common Attacks
+
 - **SQL Injection**: Supabase uses parameterized queries
 - **Mass Assignment**: Only accept name from UpdateCategoryCommand
 - **Privilege Escalation**: RLS prevents updating other users' categories
@@ -489,6 +551,7 @@ if (error.code === "23505") {
 ### Validation Errors (400 Bad Request)
 
 #### Scenario 1: Invalid Category ID
+
 ```typescript
 // URL: PATCH /api/categories/invalid-id
 
@@ -503,6 +566,7 @@ Response: {
 ```
 
 #### Scenario 2: Missing Name Field
+
 ```typescript
 // Request body: {}
 
@@ -517,6 +581,7 @@ Response: {
 ```
 
 #### Scenario 3: Empty Name
+
 ```typescript
 // Request body: { "name": "" }
 
@@ -531,6 +596,7 @@ Response: {
 ```
 
 #### Scenario 4: Name Too Long
+
 ```typescript
 // Request body: { "name": "<101 characters>" }
 
@@ -547,6 +613,7 @@ Response: {
 ### Authentication Errors (401 Unauthorized)
 
 #### Scenario 1: Missing Authorization Header
+
 ```typescript
 Response: {
   statusCode: 401,
@@ -556,6 +623,7 @@ Response: {
 ```
 
 #### Scenario 2: Invalid Token
+
 ```typescript
 Response: {
   statusCode: 401,
@@ -567,6 +635,7 @@ Response: {
 ### Authorization Errors (403 Forbidden)
 
 #### Scenario 1: Category Belongs to Another User
+
 ```typescript
 // Category exists but user_id doesn't match
 
@@ -578,6 +647,7 @@ Response: {
 ```
 
 #### Scenario 2: Non-Editable Category ("Other")
+
 ```typescript
 // is_deletable = false
 
@@ -591,6 +661,7 @@ Response: {
 ### Not Found Errors (404 Not Found)
 
 #### Scenario 1: Category Doesn't Exist
+
 ```typescript
 // No category with given ID in database
 
@@ -604,6 +675,7 @@ Response: {
 ### Conflict Errors (409 Conflict)
 
 #### Scenario 1: Duplicate Name
+
 ```typescript
 // User already has a category with new name
 // Request: { "name": "Food" }
@@ -616,6 +688,7 @@ Response: {
 ```
 
 #### Scenario 2: Duplicate After Trimming
+
 ```typescript
 // User has category "Travel"
 // Request: { "name": "  Travel  " }
@@ -630,6 +703,7 @@ Response: {
 ### Database Errors (500 Internal Server Error)
 
 #### Scenario 1: Database Connection Failure
+
 ```typescript
 Response: {
   statusCode: 500,
@@ -642,6 +716,7 @@ console.error("[Update Category API] Database error:", error)
 ```
 
 ### Error Handling Best Practices
+
 1. **Distinguish Error Types**: 403 for not editable vs not owned
 2. **Specific Error Messages**: Help client understand what's wrong
 3. **Security**: Don't leak info about other users' categories
@@ -655,20 +730,23 @@ console.error("[Update Category API] Database error:", error)
 ### Potential Bottlenecks
 
 #### 1. Two Database Queries
+
 - **Issue**: SELECT to check editability + UPDATE
 - **Impact**: Two database round-trips
-- **Mitigation**: 
+- **Mitigation**:
   - Could use single UPDATE with WHERE clause
   - Current approach is clearer for error handling
 
 #### 2. Unique Constraint Check
+
 - **Issue**: Database must check for duplicate name during update
 - **Impact**: Additional lookup
-- **Mitigation**: 
+- **Mitigation**:
   - UNIQUE index makes this check fast
   - Skip check if name unchanged
 
 #### 3. RLS Policy Evaluation
+
 - **Issue**: RLS evaluated on SELECT and UPDATE
 - **Impact**: Slight overhead per request
 - **Mitigation**:
@@ -679,6 +757,7 @@ console.error("[Update Category API] Database error:", error)
 ### Optimization Strategies
 
 #### 1. Skip Update if Name Unchanged
+
 ```typescript
 // In service layer
 if (existingCategory.name === command.name) {
@@ -692,6 +771,7 @@ if (existingCategory.name === command.name) {
 ```
 
 #### 2. Combined Query Approach (Alternative)
+
 ```typescript
 // Single UPDATE with complex WHERE clause
 const { data, error } = await supabase
@@ -706,6 +786,7 @@ const { data, error } = await supabase
 ```
 
 #### 3. Index Optimization
+
 ```sql
 -- Ensure indexes exist:
 CREATE INDEX idx_categories_user ON categories(user_id);
@@ -716,6 +797,7 @@ CREATE INDEX idx_categories_id_user ON categories(id, user_id);
 ### Expected Performance
 
 #### Best Case (Valid Update, No Duplicate)
+
 - **Total Response Time**: < 150ms
 - **Validation Time**: < 5ms
 - **Check Query**: < 30ms
@@ -723,23 +805,27 @@ CREATE INDEX idx_categories_id_user ON categories(id, user_id);
 - **JSON Serialization**: < 5ms
 
 #### No-Op Case (Name Unchanged)
+
 - **Total Response Time**: < 100ms
 - **Check Query**: < 30ms
 - **No update executed**
 - **Fast return**
 
 #### Conflict Case (409)
+
 - **Total Response Time**: < 150ms
 - **Check Query**: < 30ms
 - **Update Attempt**: < 50ms (fails on constraint)
 - **Error Response**: < 5ms
 
 #### Worst Case (Validation Error)
+
 - **Total Response Time**: < 50ms
 - **Fails Fast**: No database interaction
 - **Validation Only**: Quick Zod schema check
 
 ### Monitoring Recommendations
+
 - **Log Update Times**: Track slow updates (> 200ms)
 - **Track Error Rates**: Monitor 400, 403, 404, 409, 500 errors
 - **No-Op Updates**: Track how often name unchanged
@@ -750,6 +836,7 @@ CREATE INDEX idx_categories_id_user ON categories(id, user_id);
 ## 9. Implementation Steps
 
 ### Step 1: Create Zod Validation Schemas
+
 **File**: `src/pages/api/categories/[id].ts`
 
 ```typescript
@@ -771,6 +858,7 @@ type UpdateCategoryInput = z.infer<typeof UpdateCategorySchema>;
 ```
 
 ### Step 2: Add Service Method
+
 **File**: `src/lib/services/categories.service.ts`
 
 ```typescript
@@ -864,6 +952,7 @@ export class CategoriesService {
 ```
 
 ### Step 3: Create Dynamic API Route Handler
+
 **File**: `src/pages/api/categories/[id].ts`
 
 ```typescript
@@ -966,13 +1055,9 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     const validData = validationResult.data;
 
     // 5. Call service layer
-    const category = await CategoriesService.updateCategory(
-      locals.supabase,
-      categoryId,
-      {
-        name: validData.name,
-      }
-    );
+    const category = await CategoriesService.updateCategory(locals.supabase, categoryId, {
+      name: validData.name,
+    });
 
     // 6. Return success response
     return new Response(JSON.stringify(category), {
@@ -1053,11 +1138,13 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 ```
 
 ### Step 4: Test Path Parameter Validation
+
 - Invalid UUID → 400
 - Missing id → 404 (Astro routing)
 - Valid UUID → proceeds to body validation
 
 ### Step 5: Test Request Body Validation
+
 - Missing name → 400
 - Empty name → 400
 - Whitespace only → 400
@@ -1065,32 +1152,38 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 - Valid name → proceeds to service
 
 ### Step 6: Test Authentication
+
 - No token → 401
 - Invalid token → 401
 - Expired token → 401
 - Valid token → proceeds
 
 ### Step 7: Test Authorization (403)
+
 - User A tries to update User B's category → 403
 - User tries to update "Other" category → 403 "Cannot update non-editable category"
 - User updates own editable category → ✓ 200
 
 ### Step 8: Test Not Found (404)
+
 - Update non-existent category → 404
 - Update deleted category → 404
 
 ### Step 9: Test Duplicate Detection (409)
+
 - User has categories "Food" and "Bills"
 - Rename "Bills" to "Food" → 409
-- Rename "Bills" to "  Food  " → 409 (after trim)
+- Rename "Bills" to " Food " → 409 (after trim)
 - Rename "Bills" to "bills" → ✓ 200 (case-sensitive)
 
 ### Step 10: Test No-Op Update
+
 - Rename category to its current name → 200
 - Verify no database UPDATE executed
 - Verify response contains unchanged data
 
 ### Step 11: Test Response Format
+
 - Status code is 200
 - Response contains id, name, isDeletable
 - name is updated
@@ -1098,21 +1191,25 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 - isDeletable unchanged
 
 ### Step 12: Test Database State
+
 - Category name updated correctly
 - Other fields unchanged (id, user_id, is_deletable, created_at)
 
 ### Step 13: Test Edge Cases
+
 - Rename with special characters
 - Rename to very long name (100 chars)
 - Concurrent updates to same category
 - Update category currently in use by transactions
 
 ### Step 14: Test "Other" Category Protection
+
 - Try to rename "Other" category → 403
 - Verify "Other" remains unchanged
 - Verify error message is clear
 
 ### Step 15: Integration Testing
+
 - Update category, then GET to verify
 - Update category, verify transactions still linked
 - Multiple updates to same category
@@ -1123,6 +1220,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 ## 10. Testing Checklist
 
 ### Unit Tests (Service Layer)
+
 - [ ] Updates category successfully with valid data
 - [ ] Returns unchanged category if name same (no-op)
 - [ ] Throws NOT_FOUND for non-existent category
@@ -1133,6 +1231,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 - [ ] Trims whitespace from name
 
 ### Integration Tests (API Route)
+
 - [ ] Returns 401 when not authenticated
 - [ ] Returns 400 for invalid category ID
 - [ ] Returns 400 for missing/invalid name
@@ -1143,12 +1242,14 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 - [ ] Returns 200 with updated data for valid request
 
 ### Database Tests
+
 - [ ] Only name field updated in database
 - [ ] Immutable fields unchanged
 - [ ] UNIQUE constraint prevents duplicates
 - [ ] is_deletable = false blocks update (via app logic)
 
 ### End-to-End Tests
+
 - [ ] Full PATCH request updates category
 - [ ] Updated category visible in GET /categories
 - [ ] Transactions still linked to renamed category
@@ -1160,20 +1261,24 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 ## 11. Future Enhancements
 
 ### Optimistic Locking
+
 1. **Version Field**: Add version for concurrency control
 2. **Conflict Detection**: Detect concurrent modifications
 3. **Conflict Resolution**: Return 409 if version mismatch
 
 ### Bulk Updates
+
 1. **Rename Multiple**: Rename several categories at once
 2. **Batch Operations**: Update with transaction safety
 
 ### Smart Features
+
 1. **Case-Insensitive Names**: Prevent "Food" and "food"
 2. **Name Suggestions**: Suggest similar names
 3. **Rename History**: Track name changes
 
 ### API Improvements
+
 1. **Partial Response**: Return only changed fields
 2. **ETags**: Support conditional updates
 
@@ -1182,7 +1287,9 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 ## Appendix A: Example Requests and Responses
 
 ### Successful Update
+
 **Request:**
+
 ```bash
 PATCH /api/categories/c3d4e5f6-a7b8-9012-3456-7890abcdef12
 Content-Type: application/json
@@ -1194,6 +1301,7 @@ Authorization: Bearer <JWT_TOKEN>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": "c3d4e5f6-a7b8-9012-3456-7890abcdef12",
@@ -1203,7 +1311,9 @@ Authorization: Bearer <JWT_TOKEN>
 ```
 
 ### Try to Rename "Other" Category
+
 **Request:**
+
 ```bash
 PATCH /api/categories/<other-category-id>
 
@@ -1213,6 +1323,7 @@ PATCH /api/categories/<other-category-id>
 ```
 
 **Response (403 Forbidden):**
+
 ```json
 {
   "error": "Forbidden",
@@ -1221,7 +1332,9 @@ PATCH /api/categories/<other-category-id>
 ```
 
 ### Duplicate Name
+
 **Request:**
+
 ```bash
 PATCH /api/categories/c3d4e5f6-a7b8-9012-3456-7890abcdef12
 
@@ -1231,6 +1344,7 @@ PATCH /api/categories/c3d4e5f6-a7b8-9012-3456-7890abcdef12
 ```
 
 **Response (409 Conflict):**
+
 ```json
 {
   "error": "Conflict",
@@ -1239,7 +1353,9 @@ PATCH /api/categories/c3d4e5f6-a7b8-9012-3456-7890abcdef12
 ```
 
 ### Category Not Found
+
 **Request:**
+
 ```bash
 PATCH /api/categories/00000000-0000-0000-0000-000000000000
 
@@ -1249,6 +1365,7 @@ PATCH /api/categories/00000000-0000-0000-0000-000000000000
 ```
 
 **Response (404 Not Found):**
+
 ```json
 {
   "error": "Not Found",
@@ -1259,4 +1376,3 @@ PATCH /api/categories/00000000-0000-0000-0000-000000000000
 ---
 
 This implementation plan provides comprehensive guidance for implementing the PATCH /categories/{id} endpoint. Follow the steps sequentially, test thoroughly, and ensure proper handling of the non-editable "Other" category.
-

@@ -16,7 +16,12 @@ import type { TransactionsListProps } from "@/lib/types/dashboard.types";
  * - Inline spinner for loading more pages
  * - "End of list" message
  */
-export const TransactionsList: React.FC<TransactionsListProps> = ({ month, year, onEditTransaction, onDeleteTransaction }) => {
+export const TransactionsList: React.FC<TransactionsListProps> = ({
+  month,
+  year,
+  onEditTransaction,
+  onDeleteTransaction,
+}) => {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } = useTransactions(month, year);
 
   const observerTarget = useRef<HTMLDivElement>(null);
@@ -75,7 +80,7 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({ month, year,
   }
 
   return (
-    <div className="space-y-0">
+    <div className="space-y-0" data-testid="transactions-list">
       {/* Transactions list */}
       {transactions.map((transaction) => (
         <TransactionItem
@@ -103,4 +108,3 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({ month, year,
     </div>
   );
 };
-

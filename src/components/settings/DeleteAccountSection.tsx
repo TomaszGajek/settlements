@@ -18,9 +18,7 @@ export interface DeleteAccountSectionProps {
  *
  * @param onDeleteAccount - Callback when user clicks "Usuń konto"
  */
-export const DeleteAccountSection: React.FC<DeleteAccountSectionProps> = ({
-  onDeleteAccount,
-}) => {
+export const DeleteAccountSection: React.FC<DeleteAccountSectionProps> = ({ onDeleteAccount }) => {
   return (
     <div className="space-y-4">
       {/* Warning Alert */}
@@ -28,21 +26,16 @@ export const DeleteAccountSection: React.FC<DeleteAccountSectionProps> = ({
         <AlertTriangle className="h-4 w-4" />
         <AlertTitle>Strefa niebezpieczna</AlertTitle>
         <AlertDescription>
-          Usunięcie konta spowoduje trwałe usunięcie wszystkich Twoich danych, w tym
-          transakcji, kategorii i ustawień. Ta operacja jest nieodwracalna.
+          Usunięcie konta spowoduje trwałe usunięcie wszystkich Twoich danych, w tym transakcji, kategorii i ustawień.
+          Ta operacja jest nieodwracalna.
         </AlertDescription>
       </Alert>
 
       {/* Delete Account Button */}
-      <Button
-        variant="destructive"
-        onClick={onDeleteAccount}
-        className="w-full sm:w-auto"
-      >
+      <Button variant="destructive" onClick={onDeleteAccount} className="w-full sm:w-auto">
         <Trash2 className="w-4 h-4 mr-2" />
         Usuń konto
       </Button>
     </div>
   );
 };
-

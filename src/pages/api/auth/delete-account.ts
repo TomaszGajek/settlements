@@ -62,9 +62,7 @@ export const DELETE: APIRoute = async ({ locals }) => {
 
     // 2. Delete user using Supabase Admin client
     // This will cascade delete all user data via database foreign key constraints
-    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(
-      user.id
-    );
+    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
 
     if (deleteError) {
       // eslint-disable-next-line no-console
@@ -93,4 +91,3 @@ export const DELETE: APIRoute = async ({ locals }) => {
     );
   }
 };
-

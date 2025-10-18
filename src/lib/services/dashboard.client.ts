@@ -24,4 +24,3 @@ export async function fetchDashboardSummary(month: number, year: number): Promis
 
   return response.json();
 }
-

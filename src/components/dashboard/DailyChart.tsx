@@ -29,9 +29,7 @@ export const DailyChart: React.FC<DailyChartProps> = ({ data, isLoading }) => {
           <CardTitle>Dzienny wykres przychodów i wydatków</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-64 text-gray-400">
-            Brak danych do wyświetlenia
-          </div>
+          <div className="flex items-center justify-center h-64 text-gray-400">Brak danych do wyświetlenia</div>
         </CardContent>
       </Card>
     );
@@ -107,4 +105,3 @@ export const DailyChart: React.FC<DailyChartProps> = ({ data, isLoading }) => {
     </Card>
   );
 };
-

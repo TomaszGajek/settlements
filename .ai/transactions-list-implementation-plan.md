@@ -3,6 +3,7 @@
 ## Analysis
 
 ### Key Points from API Specification
+
 - **Endpoint**: `GET /api/transactions`
 - **Purpose**: Retrieve a paginated list of transactions for a specific month and year
 - **Authentication**: Required (JWT-based via Supabase)
@@ -14,15 +15,19 @@
 - **Errors**: 400 Bad Request (invalid params), 401 Unauthorized
 
 ### Required and Optional Parameters
+
 **Required Query Parameters:**
+
 - `month` (number): Month to retrieve data for (1-12)
 - `year` (number): Year to retrieve data for (e.g., 2025)
 
 **Optional Query Parameters:**
+
 - `page` (number): Page number for pagination (default: 1)
 - `pageSize` (number): Number of items per page (default: 20)
 
 ### Necessary DTOs and Command Models
+
 - `TransactionDto` (already defined in `src/types.ts`):
   - Contains: id, date, amount, type, note, category (nested), createdAt
   - Omits: category_id, user_id (replaced/hidden)
@@ -32,9 +37,11 @@
   - Contains: id, name
 
 ### Service Layer Extraction
+
 A new service will be created or added to: `src/lib/services/transactions.service.ts`
 
 This service will:
+
 - Accept `SupabaseClient`, `month`, `year`, `page`, and `pageSize` as parameters
 - Query transactions for the specified period with pagination
 - Join with categories table to get category details
@@ -42,13 +49,16 @@ This service will:
 - Return data in `ListTransactionsResponseDto` format
 
 ### Input Validation Strategy
+
 Using Zod schemas:
+
 1. **Query Parameter Schema**: Validate month (1-12), year (valid year), page (>= 1), pageSize (1-100)
 2. **Date Range Validation**: Ensure the month/year combination is valid
 3. **Type Coercion**: Convert string query params to numbers
 4. **Pagination Limits**: Enforce maximum pageSize to prevent abuse
 
 ### Security Considerations
+
 - **Authentication**: User must be authenticated (checked via `context.locals.supabase.auth.getUser()`)
 - **RLS Policies**: Database RLS automatically filters transactions by user_id
 - **No SQL Injection Risk**: Using Supabase client with parameterized queries
@@ -56,6 +66,7 @@ Using Zod schemas:
 - **Rate Limiting**: Consider limiting pageSize to reasonable maximum (e.g., 100)
 
 ### Error Scenarios and Status Codes
+
 1. **400 Bad Request**:
    - Missing `month` or `year` parameter
    - Invalid `month` value (not 1-12)
@@ -79,6 +90,7 @@ Using Zod schemas:
 The GET /transactions endpoint provides users with a paginated list of their transactions for a specific month and year. Each transaction includes full details such as amount, type, date, note, and associated category information. The endpoint supports pagination to handle large datasets efficiently and returns transactions sorted by date in descending order (newest first).
 
 **Key Features:**
+
 - Retrieves transactions from the `transactions` table
 - Filters by authenticated user (via RLS) and date range
 - Joins with `categories` table to include category name
@@ -92,9 +104,11 @@ The GET /transactions endpoint provides users with a paginated list of their tra
 ## 2. Request Details
 
 ### HTTP Method
+
 `GET`
 
 ### URL Structure
+
 ```
 /api/transactions?month={month}&year={year}&page={page}&pageSize={pageSize}
 ```
@@ -102,6 +116,7 @@ The GET /transactions endpoint provides users with a paginated list of their tra
 ### Query Parameters
 
 #### Required Parameters
+
 - **month** (number)
   - Description: The month to retrieve data for
   - Constraints: Must be between 1 and 12 (inclusive)
@@ -113,6 +128,7 @@ The GET /transactions endpoint provides users with a paginated list of their tra
   - Example: `2025`
 
 #### Optional Parameters
+
 - **page** (number)
   - Description: The page number for pagination
   - Constraints: Must be >= 1
@@ -126,21 +142,25 @@ The GET /transactions endpoint provides users with a paginated list of their tra
   - Example: `50`
 
 ### Request Headers
+
 - **Authorization**: `Bearer <JWT_TOKEN>` (required)
   - JWT token obtained from Supabase authentication
 
 ### Request Body
+
 None (GET request)
 
 ### Example Requests
 
 #### Basic Request
+
 ```
 GET /api/transactions?month=10&year=2025
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
 #### With Pagination
+
 ```
 GET /api/transactions?month=10&year=2025&page=2&pageSize=50
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
@@ -151,7 +171,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ## 3. Utilized Types
 
 ### Response DTOs
+
 **TransactionDto** (defined in `src/types.ts`):
+
 ```typescript
 export type TransactionDto = Omit<Tables<"transactions">, "created_at" | "category_id" | "user_id"> & {
   createdAt: Tables<"transactions">["created_at"];
@@ -160,11 +182,13 @@ export type TransactionDto = Omit<Tables<"transactions">, "created_at" | "catego
 ```
 
 **NestedCategoryDto** (defined in `src/types.ts`):
+
 ```typescript
 export type NestedCategoryDto = Pick<Tables<"categories">, "id" | "name">;
 ```
 
 **ListTransactionsResponseDto** (defined in `src/types.ts`):
+
 ```typescript
 export interface ListTransactionsResponseDto {
   transactions: TransactionDto[];
@@ -178,7 +202,9 @@ export interface ListTransactionsResponseDto {
 ```
 
 ### Validation Schema
+
 **Query Parameters Validation** (to be created with Zod):
+
 ```typescript
 const TransactionsQuerySchema = z.object({
   month: z.coerce.number().int().min(1).max(12),
@@ -189,13 +215,16 @@ const TransactionsQuerySchema = z.object({
 ```
 
 ### Database Types
+
 **Tables** (from `src/db/database.types.ts`):
+
 - `Tables<"transactions">` - Main transaction data
   - Fields: id, amount, type, date, note, category_id, user_id, created_at
 - `Tables<"categories">` - Category data for joining
   - Fields: id, name, description, user_id
 
 **Enums**:
+
 - `transaction_type`: "income" | "expense"
 
 ---
@@ -205,6 +234,7 @@ const TransactionsQuerySchema = z.object({
 ### Success Response (200 OK)
 
 #### Structure
+
 ```json
 {
   "transactions": [
@@ -223,7 +253,7 @@ const TransactionsQuerySchema = z.object({
     {
       "id": "d5f9c2e6-c9f1-5c2b-ab2b-a0g8b8e8f8f8",
       "date": "2025-10-10",
-      "amount": 50.00,
+      "amount": 50.0,
       "type": "income",
       "note": "Freelance work",
       "category": {
@@ -243,7 +273,9 @@ const TransactionsQuerySchema = z.object({
 ```
 
 #### Field Descriptions
+
 **Transaction Object:**
+
 - **id**: Unique identifier (UUID)
 - **date**: Transaction date (ISO date string, YYYY-MM-DD)
 - **amount**: Transaction amount (number with max 2 decimals)
@@ -255,13 +287,16 @@ const TransactionsQuerySchema = z.object({
 - **createdAt**: Timestamp when transaction was created (ISO 8601)
 
 **Pagination Object:**
+
 - **page**: Current page number (starts at 1)
 - **pageSize**: Number of items per page
 - **totalItems**: Total number of transactions in the period
 - **totalPages**: Total number of pages (calculated as `Math.ceil(totalItems / pageSize)`)
 
 ### Edge Cases
+
 - **Empty Result**: When no transactions exist for the period
+
   ```json
   {
     "transactions": [],
@@ -281,7 +316,9 @@ const TransactionsQuerySchema = z.object({
 ### Error Responses
 
 #### 400 Bad Request
+
 **Scenarios:**
+
 - Missing required query parameters
 - Invalid month value (not 1-12)
 - Invalid year format
@@ -289,6 +326,7 @@ const TransactionsQuerySchema = z.object({
 - Invalid pageSize (< 1 or > 100)
 
 **Example Response:**
+
 ```json
 {
   "error": "Bad Request",
@@ -301,12 +339,15 @@ const TransactionsQuerySchema = z.object({
 ```
 
 #### 401 Unauthorized
+
 **Scenarios:**
+
 - Missing Authorization header
 - Invalid or expired JWT token
 - User not authenticated
 
 **Example Response:**
+
 ```json
 {
   "error": "Unauthorized",
@@ -315,11 +356,14 @@ const TransactionsQuerySchema = z.object({
 ```
 
 #### 500 Internal Server Error
+
 **Scenarios:**
+
 - Database connection failure
 - Unexpected server errors
 
 **Example Response:**
+
 ```json
 {
   "error": "Internal Server Error",
@@ -332,6 +376,7 @@ const TransactionsQuerySchema = z.object({
 ## 5. Data Flow
 
 ### High-Level Flow
+
 1. **Request Reception**: Astro API endpoint receives GET request
 2. **Authentication Check**: Verify user is authenticated via Supabase
 3. **Input Validation**: Validate query parameters using Zod schema
@@ -345,6 +390,7 @@ const TransactionsQuerySchema = z.object({
 ### Detailed Data Flow
 
 #### Step 1: API Route Handler (`src/pages/api/transactions.ts`)
+
 ```
 1. Extract month, year, page, pageSize from URL query params
 2. Validate query parameters using Zod schema
@@ -356,6 +402,7 @@ const TransactionsQuerySchema = z.object({
 ```
 
 #### Step 2: Service Layer (`src/lib/services/transactions.service.ts`)
+
 ```
 1. Receive supabase client, month, year, page, pageSize
 2. Calculate date range (first day to last day of month)
@@ -381,18 +428,20 @@ const TransactionsQuerySchema = z.object({
 #### Step 3: Database Interaction (Supabase)
 
 **Count Query:**
+
 ```sql
 SELECT COUNT(*) as total
 FROM transactions
-WHERE 
-  date >= '2025-10-01' 
+WHERE
+  date >= '2025-10-01'
   AND date <= '2025-10-31'
   AND user_id = <authenticated_user_id> -- Applied by RLS
 ```
 
 **Main Query:**
+
 ```sql
-SELECT 
+SELECT
   t.id,
   t.date,
   t.amount,
@@ -403,8 +452,8 @@ SELECT
   c.name as category_name
 FROM transactions t
 LEFT JOIN categories c ON t.category_id = c.id
-WHERE 
-  t.date >= '2025-10-01' 
+WHERE
+  t.date >= '2025-10-01'
   AND t.date <= '2025-10-31'
   AND t.user_id = <authenticated_user_id> -- Applied by RLS
 ORDER BY t.date DESC
@@ -412,19 +461,22 @@ LIMIT 20 OFFSET 0
 ```
 
 #### Step 4: Data Transformation
+
 ```typescript
 // Pseudo-code for transformation
-const transactionDtos = dbRows.map(row => ({
+const transactionDtos = dbRows.map((row) => ({
   id: row.id,
   date: row.date,
   amount: row.amount,
   type: row.type,
   note: row.note,
-  category: row.category_id ? {
-    id: row.category_id,
-    name: row.category_name
-  } : null,
-  createdAt: row.created_at
+  category: row.category_id
+    ? {
+        id: row.category_id,
+        name: row.category_name,
+      }
+    : null,
+  createdAt: row.created_at,
 }));
 
 const totalPages = Math.ceil(totalCount / pageSize);
@@ -435,8 +487,8 @@ return {
     page,
     pageSize,
     totalItems: totalCount,
-    totalPages
-  }
+    totalPages,
+  },
 };
 ```
 
@@ -445,14 +497,16 @@ return {
 ## 6. Security Considerations
 
 ### Authentication
+
 - **Method**: JWT-based authentication via Supabase
-- **Implementation**: 
+- **Implementation**:
   - Extract user from `context.locals.supabase.auth.getUser()`
   - Reject request with 401 if user is null or token is invalid
   - JWT token must be included in `Authorization` header as Bearer token
 
 ### Authorization
-- **User Data Isolation**: 
+
+- **User Data Isolation**:
   - Database RLS policies ensure users only access their own transactions
   - Policy: `auth.uid() = user_id` on transactions table
   - JOIN with categories also protected by RLS on categories table
@@ -460,6 +514,7 @@ return {
 - **Scope**: Read-only operation with SELECT permission
 
 ### Input Validation
+
 - **Query Parameter Sanitization**:
   - Use Zod schema validation to ensure type safety
   - Coerce string params to numbers
@@ -468,6 +523,7 @@ return {
   - Use prepared statements via Supabase client
 
 ### Data Exposure Prevention
+
 - **No Sensitive Data Leakage**:
   - Remove `user_id` from transaction responses
   - Category details limited to id and name only
@@ -475,11 +531,13 @@ return {
   - No internal database structure exposed
 
 ### Pagination Abuse Prevention
+
 - **Maximum Page Size**: Enforce maximum pageSize of 100
 - **Reasonable Defaults**: Default pageSize of 20 prevents excessive data transfer
 - **Rate Limiting (Future)**: Consider implementing rate limiting to prevent abuse
 
 ### Category Access Control
+
 - **JOIN Security**: LEFT JOIN with categories ensures:
   - Only categories belonging to the user are accessible
   - RLS on categories table enforces user_id filtering
@@ -492,6 +550,7 @@ return {
 ### Validation Errors (400 Bad Request)
 
 #### Scenario 1: Missing Required Parameters
+
 ```typescript
 // Request: GET /api/transactions?month=10
 // Missing: year parameter
@@ -507,13 +566,14 @@ Response: {
 ```
 
 #### Scenario 2: Invalid Month Value
+
 ```typescript
 // Request: GET /api/transactions?month=13&year=2025
 // month is out of range
 
 Response: {
   statusCode: 400,
-  error: "Bad Request", 
+  error: "Bad Request",
   message: "Validation failed",
   details: {
     month: "Number must be less than or equal to 12"
@@ -522,6 +582,7 @@ Response: {
 ```
 
 #### Scenario 3: Invalid Page Number
+
 ```typescript
 // Request: GET /api/transactions?month=10&year=2025&page=0
 // page must be >= 1
@@ -537,6 +598,7 @@ Response: {
 ```
 
 #### Scenario 4: Invalid Page Size
+
 ```typescript
 // Request: GET /api/transactions?month=10&year=2025&pageSize=200
 // pageSize exceeds maximum
@@ -552,6 +614,7 @@ Response: {
 ```
 
 #### Scenario 5: Invalid Data Types
+
 ```typescript
 // Request: GET /api/transactions?month=October&year=2025
 // month should be a number
@@ -569,6 +632,7 @@ Response: {
 ### Authentication Errors (401 Unauthorized)
 
 #### Scenario 1: Missing Authorization Header
+
 ```typescript
 Response: {
   statusCode: 401,
@@ -578,6 +642,7 @@ Response: {
 ```
 
 #### Scenario 2: Invalid or Expired Token
+
 ```typescript
 Response: {
   statusCode: 401,
@@ -589,6 +654,7 @@ Response: {
 ### Database Errors (500 Internal Server Error)
 
 #### Scenario 1: Database Connection Failure
+
 ```typescript
 Response: {
   statusCode: 500,
@@ -601,6 +667,7 @@ console.error("[Transactions API] Database error:", error)
 ```
 
 #### Scenario 2: Query Execution Error
+
 ```typescript
 Response: {
   statusCode: 500,
@@ -615,6 +682,7 @@ console.error("[Transactions API] Query error:", error)
 ### Edge Case Handling
 
 #### Scenario 1: Page Beyond Total Pages
+
 ```typescript
 // Request: page=10 when only 3 pages exist
 // Not an error - return empty array
@@ -634,6 +702,7 @@ Response: {
 ```
 
 #### Scenario 2: No Transactions for Period
+
 ```typescript
 // No transactions found for the month
 // Not an error - return empty array
@@ -653,6 +722,7 @@ Response: {
 ```
 
 ### Error Handling Best Practices
+
 1. **Never expose internal error details** to client in production
 2. **Log all errors** with context for debugging
 3. **Return consistent error format** across all endpoints
@@ -667,15 +737,17 @@ Response: {
 ### Potential Bottlenecks
 
 #### 1. JOIN Performance
+
 - **Issue**: LEFT JOIN with categories could be slow without proper indexes
 - **Impact**: Slower response times as dataset grows
-- **Solution**: 
+- **Solution**:
   - Index on `transactions.category_id` (should exist from FK)
   - Index on `categories.id` (PK, already indexed)
   - Database query planner should use nested loop join efficiently
 
 #### 2. COUNT Query Performance
-- **Issue**: COUNT(*) can be slow on large tables
+
+- **Issue**: COUNT(\*) can be slow on large tables
 - **Impact**: Additional latency for pagination metadata
 - **Solution**:
   - Index on `(user_id, date)` enables efficient count
@@ -683,6 +755,7 @@ Response: {
   - For very large datasets, consider approximate counts
 
 #### 3. Large Page Sizes
+
 - **Issue**: Requesting 100 items returns large JSON payloads
 - **Impact**: Increased memory, serialization time, network transfer
 - **Solution**:
@@ -691,6 +764,7 @@ Response: {
   - Consider pagination limits based on user tier
 
 #### 4. OFFSET Performance
+
 - **Issue**: Large OFFSET values (e.g., page 100) can be slow
 - **Impact**: Later pages load slower than first pages
 - **Solution**:
@@ -701,28 +775,32 @@ Response: {
 ### Optimization Strategies
 
 #### 1. Database-Level Optimizations
+
 ```sql
 -- Ensure composite index exists (should be in migrations):
-CREATE INDEX idx_transactions_user_date 
+CREATE INDEX idx_transactions_user_date
 ON transactions(user_id, date DESC);
 
 -- Ensure foreign key index exists:
-CREATE INDEX idx_transactions_category 
+CREATE INDEX idx_transactions_category
 ON transactions(category_id);
 ```
 
 #### 2. Query Optimization
+
 - **Single Connection**: Reuse same Supabase client for count and data query
-- **Select Specific Fields**: Only select needed columns (avoid SELECT *)
+- **Select Specific Fields**: Only select needed columns (avoid SELECT \*)
 - **Efficient JOIN**: LEFT JOIN is necessary but indexed properly
 - **Prepared Statements**: Supabase client uses parameterized queries
 
 #### 3. Response Optimization
+
 - **Minimal Data Transfer**: Only return necessary fields
 - **Efficient JSON Serialization**: Keep objects flat where possible
 - **Compression**: Consider enabling gzip for responses > 1KB
 
 #### 4. Caching Strategy (Future Enhancement)
+
 - **Query Results**: Cache first page for 30-60 seconds
 - **Count Results**: Cache total count for 1-2 minutes
 - **Invalidation**: Clear cache on transaction create/update/delete
@@ -731,24 +809,28 @@ ON transactions(category_id);
 ### Expected Performance
 
 #### Best Case (First Page, < 100 transactions/month)
+
 - **Total Response Time**: < 150ms
 - **Database Query Time**: < 30ms (count + data)
 - **JSON Serialization**: < 5ms
 - **Network Transfer**: < 10ms (local network)
 
 #### Typical Case (Any Page, 100-500 transactions/month)
+
 - **Total Response Time**: < 300ms
 - **Database Query Time**: < 100ms
 - **JSON Serialization**: < 10ms
 - **Network Transfer**: < 20ms
 
 #### Worst Case (High Page Number, > 1000 transactions/month)
+
 - **Total Response Time**: < 500ms
 - **Database Query Time**: < 200ms (due to large OFFSET)
 - **JSON Serialization**: < 15ms
 - **Network Transfer**: < 30ms
 
 ### Monitoring Recommendations
+
 - **Query Performance**: Log slow queries (> 200ms)
 - **Endpoint Metrics**: Track P50, P95, P99 response times
 - **Error Rates**: Monitor 4xx and 5xx errors
@@ -760,6 +842,7 @@ ON transactions(category_id);
 ## 9. Implementation Steps
 
 ### Step 1: Create Zod Validation Schema
+
 **File**: `src/pages/api/transactions.ts` (or separate validation file)
 
 ```typescript
@@ -776,12 +859,7 @@ const TransactionsQuerySchema = z.object({
     .int()
     .min(1900, "Year must be at least 1900")
     .max(2100, "Year must be at most 2100"),
-  page: z.coerce
-    .number()
-    .int()
-    .min(1, "Page must be at least 1")
-    .default(1)
-    .optional(),
+  page: z.coerce.number().int().min(1, "Page must be at least 1").default(1).optional(),
   pageSize: z.coerce
     .number()
     .int()
@@ -795,6 +873,7 @@ type TransactionsQuery = z.infer<typeof TransactionsQuerySchema>;
 ```
 
 ### Step 2: Create Transactions Service
+
 **File**: `src/lib/services/transactions.service.ts`
 
 ```typescript
@@ -821,7 +900,7 @@ export class TransactionsService {
     // Calculate date range
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 0);
-    
+
     const startDateStr = startDate.toISOString().split("T")[0];
     const endDateStr = endDate.toISOString().split("T")[0];
 
@@ -845,7 +924,8 @@ export class TransactionsService {
     // Query transactions with category join
     const { data: transactions, error } = await supabase
       .from("transactions")
-      .select(`
+      .select(
+        `
         id,
         date,
         amount,
@@ -856,7 +936,8 @@ export class TransactionsService {
           id,
           name
         )
-      `)
+      `
+      )
       .gte("date", startDateStr)
       .lte("date", endDateStr)
       .order("date", { ascending: false })
@@ -897,6 +978,7 @@ export class TransactionsService {
 ```
 
 ### Step 3: Create API Route Handler
+
 **File**: `src/pages/api/transactions.ts`
 
 ```typescript
@@ -915,12 +997,7 @@ const TransactionsQuerySchema = z.object({
     .int()
     .min(1900, "Year must be at least 1900")
     .max(2100, "Year must be at most 2100"),
-  page: z.coerce
-    .number()
-    .int()
-    .min(1, "Page must be at least 1")
-    .default(1)
-    .optional(),
+  page: z.coerce.number().int().min(1, "Page must be at least 1").default(1).optional(),
   pageSize: z.coerce
     .number()
     .int()
@@ -984,12 +1061,7 @@ export const GET: APIRoute = async ({ url, locals }) => {
       );
     }
 
-    const {
-      month: validMonth,
-      year: validYear,
-      page: validPage,
-      pageSize: validPageSize,
-    } = validationResult.data;
+    const { month: validMonth, year: validYear, page: validPage, pageSize: validPageSize } = validationResult.data;
 
     // 3. Call service layer
     const result = await TransactionsService.listTransactions(
@@ -1024,6 +1096,7 @@ export const GET: APIRoute = async ({ url, locals }) => {
 ```
 
 ### Step 4: Verify Dependencies
+
 ```bash
 # Zod should already be installed from dashboard endpoint
 # If not:
@@ -1031,6 +1104,7 @@ npm install zod
 ```
 
 ### Step 5: Test Authentication Flow
+
 - **Valid Token**: Test with authenticated user
 - **Missing Token**: Test without Authorization header → expect 401
 - **Invalid Token**: Test with malformed token → expect 401
@@ -1039,28 +1113,33 @@ npm install zod
 ### Step 6: Test Validation
 
 #### Required Parameters
+
 - Missing `month` → expect 400 with error message
 - Missing `year` → expect 400 with error message
 - Missing both → expect 400 with both errors
 
 #### Month Validation
+
 - `month=0` → expect 400 ("at least 1")
 - `month=13` → expect 400 ("at most 12")
 - `month=-5` → expect 400
 - `month=abc` → expect 400 ("expected number")
 
 #### Year Validation
+
 - `year=1899` → expect 400 ("at least 1900")
 - `year=2101` → expect 400 ("at most 2100")
 - `year=abc` → expect 400
 
 #### Page Validation
+
 - `page=0` → expect 400 ("at least 1")
 - `page=-1` → expect 400
 - `page=1.5` → expect 400 ("expected integer")
 - No page parameter → should default to 1
 
 #### PageSize Validation
+
 - `pageSize=0` → expect 400 ("at least 1")
 - `pageSize=101` → expect 400 ("at most 100")
 - `pageSize=-10` → expect 400
@@ -1069,12 +1148,14 @@ npm install zod
 ### Step 7: Test Service Layer
 
 #### Basic Functionality
+
 - Create test transactions in database for specific month
 - Query with valid parameters
 - Verify response structure matches `ListTransactionsResponseDto`
 - Verify transactions array contains `TransactionDto` objects
 
 #### Data Accuracy
+
 - Verify correct transactions are returned (filtered by date)
 - Verify transactions are sorted by date DESC
 - Verify category information is included
@@ -1082,6 +1163,7 @@ npm install zod
 - Verify `user_id` is NOT in response
 
 #### Pagination
+
 - Test page 1 with default pageSize (20)
 - Test page 2 to verify offset works
 - Test custom pageSize (e.g., 5, 50, 100)
@@ -1089,6 +1171,7 @@ npm install zod
 - Verify `totalPages` calculation: `Math.ceil(totalItems / pageSize)`
 
 #### Edge Cases
+
 - Empty month (no transactions) → empty array, totalItems=0
 - Single transaction → array with one item
 - Exactly pageSize transactions → totalPages=1
@@ -1098,10 +1181,12 @@ npm install zod
 ### Step 8: Test Category JOIN
 
 #### Normal Cases
+
 - Transaction with category → category object present with id and name
 - Multiple transactions with same category → category repeated correctly
 
 #### Edge Cases
+
 - Transaction with deleted category (category_id is null) → category: null
 - Category exists but has no name → handle gracefully
 - Verify only user's own categories are joined (RLS on categories)
@@ -1109,6 +1194,7 @@ npm install zod
 ### Step 9: Test RLS Policies
 
 #### User Isolation
+
 - Create transactions for User A and User B
 - Authenticate as User A
 - Query transactions
@@ -1116,6 +1202,7 @@ npm install zod
 - Verify User B's transactions are NOT visible
 
 #### Category RLS
+
 - Create category for User A
 - Create transaction for User A with that category
 - Authenticate as User B
@@ -1124,17 +1211,20 @@ npm install zod
 ### Step 10: Test Pagination Logic
 
 #### Offset Calculation
+
 - page=1, pageSize=20 → offset=0, range(0, 19)
 - page=2, pageSize=20 → offset=20, range(20, 39)
 - page=3, pageSize=10 → offset=20, range(20, 29)
 
 #### Boundary Cases
+
 - 19 items, pageSize=20, page=1 → all items, totalPages=1
 - 20 items, pageSize=20, page=1 → all items, totalPages=1
 - 21 items, pageSize=20, page=1 → 20 items, totalPages=2
 - 21 items, pageSize=20, page=2 → 1 item, totalPages=2
 
 #### Large Datasets
+
 - Create 100+ transactions
 - Test various page/pageSize combinations
 - Verify no duplicates across pages
@@ -1143,17 +1233,20 @@ npm install zod
 ### Step 11: Performance Testing
 
 #### Query Performance
+
 - Create 1000+ transactions for a single month
 - Measure response time for first page
 - Measure response time for last page
 - Verify both are acceptable (< 500ms)
 
 #### Index Usage
+
 - Use database query planner to verify index usage
 - Should use `idx_transactions_user_date` index
 - JOIN should use index on `category_id` and `categories.id`
 
 #### Memory Usage
+
 - Test with maximum pageSize (100)
 - Monitor memory during request processing
 - Ensure no memory leaks
@@ -1161,6 +1254,7 @@ npm install zod
 ### Step 12: Integration Testing
 
 #### Full Request Flow
+
 - Send request from client/Postman
 - Verify complete request/response cycle
 - Test with various month/year combinations
@@ -1169,6 +1263,7 @@ npm install zod
 - Test leap year February (month=2, year=2024)
 
 #### Response Format
+
 - Verify JSON is valid
 - Verify all fields are present
 - Verify data types are correct
@@ -1178,17 +1273,20 @@ npm install zod
 ### Step 13: Error Handling Testing
 
 #### Database Errors
+
 - Simulate database connection failure
 - Verify 500 error response
 - Verify error is logged
 - Verify no sensitive information leaked
 
 #### Validation Errors
+
 - Test all validation scenarios from Step 6
 - Verify error messages are user-friendly
 - Verify error format is consistent
 
 #### Edge Cases
+
 - Very old dates (year=1900)
 - Future dates (year=2100)
 - Leap years
@@ -1197,18 +1295,21 @@ npm install zod
 ### Step 14: Code Quality
 
 #### Type Safety
+
 - Ensure all types are properly defined
 - No `any` types used
 - All DTOs match specification
 - Service returns correct types
 
 #### Code Organization
+
 - Service layer is separate from route handler
 - Validation schema is clearly defined
 - Error handling is consistent
 - Code is DRY (no duplication)
 
 #### Documentation
+
 - Add JSDoc comments to service methods
 - Document query parameters
 - Add usage examples
@@ -1217,6 +1318,7 @@ npm install zod
 ### Step 15: Deployment Checklist
 
 #### Pre-Deployment
+
 - [ ] All tests pass
 - [ ] Linter errors resolved
 - [ ] TypeScript compiles without errors
@@ -1225,6 +1327,7 @@ npm install zod
 - [ ] Indexes exist and are used
 
 #### Post-Deployment
+
 - [ ] Test in staging environment
 - [ ] Smoke test: basic GET request works
 - [ ] Authentication works
@@ -1238,6 +1341,7 @@ npm install zod
 ## 10. Testing Checklist
 
 ### Unit Tests (Service Layer)
+
 - [ ] Returns correct transactions for given month/year
 - [ ] Returns empty array for month with no transactions
 - [ ] Correctly calculates pagination offset
@@ -1250,6 +1354,7 @@ npm install zod
 - [ ] Throws error on database failure
 
 ### Integration Tests (API Route)
+
 - [ ] Returns 401 when not authenticated
 - [ ] Returns 400 for missing month
 - [ ] Returns 400 for missing year
@@ -1264,6 +1369,7 @@ npm install zod
 - [ ] Only returns authenticated user's data (RLS)
 
 ### Pagination Tests
+
 - [ ] Page 1 returns first pageSize items
 - [ ] Page 2 returns next pageSize items
 - [ ] No duplicates across pages
@@ -1274,6 +1380,7 @@ npm install zod
 - [ ] Works with various pageSize values
 
 ### Category JOIN Tests
+
 - [ ] Transactions with categories include category object
 - [ ] Transactions without categories have category: null
 - [ ] Category object has id and name
@@ -1281,6 +1388,7 @@ npm install zod
 - [ ] Multiple transactions share same category correctly
 
 ### End-to-End Tests
+
 - [ ] Full request from client returns correct data
 - [ ] Multiple users see only their own data
 - [ ] Response time is acceptable
@@ -1293,6 +1401,7 @@ npm install zod
 ## 11. Future Enhancements
 
 ### Optimization Opportunities
+
 1. **Cursor-Based Pagination**: Replace offset with cursor for better performance on large datasets
 2. **Query Caching**: Cache frequent queries (first page) for 30-60 seconds
 3. **Count Caching**: Cache total count for 1-2 minutes, invalidate on changes
@@ -1300,6 +1409,7 @@ npm install zod
 5. **Lazy Loading**: Implement infinite scroll with progressive loading
 
 ### Feature Additions
+
 1. **Filtering**: Add filters by category, type (income/expense), amount range
 2. **Search**: Full-text search in transaction notes
 3. **Sorting**: Allow sorting by amount, date, category
@@ -1308,6 +1418,7 @@ npm install zod
 6. **Bulk Operations**: Support selecting multiple transactions
 
 ### API Enhancements
+
 1. **ETags**: Implement ETags for caching at HTTP level
 2. **Compression**: Enable gzip compression for large responses
 3. **Partial Responses**: Allow clients to request specific fields only
@@ -1315,6 +1426,7 @@ npm install zod
 5. **GraphQL**: Consider GraphQL endpoint for flexible querying
 
 ### Monitoring and Analytics
+
 1. **Query Performance**: Log slow queries for optimization
 2. **Usage Analytics**: Track most common page sizes and page numbers
 3. **Error Tracking**: Detailed error tracking with context
@@ -1326,12 +1438,14 @@ npm install zod
 ## Appendix A: Example Queries
 
 ### Successful Request (Default Pagination)
+
 ```bash
 curl -X GET "https://api.example.com/api/transactions?month=10&year=2025" \
   -H "Authorization: Bearer <JWT_TOKEN>"
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "transactions": [
@@ -1350,7 +1464,7 @@ curl -X GET "https://api.example.com/api/transactions?month=10&year=2025" \
     {
       "id": "d5f9c2e6-c9f1-5c2b-ab2b-a0g8b8e8f8f8",
       "date": "2025-10-10",
-      "amount": 2500.00,
+      "amount": 2500.0,
       "type": "income",
       "note": "Monthly salary",
       "category": {
@@ -1370,19 +1484,21 @@ curl -X GET "https://api.example.com/api/transactions?month=10&year=2025" \
 ```
 
 ### Request with Custom Pagination
+
 ```bash
 curl -X GET "https://api.example.com/api/transactions?month=10&year=2025&page=2&pageSize=5" \
   -H "Authorization: Bearer <JWT_TOKEN>"
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "transactions": [
     {
       "id": "e6g0d3f7-d0g2-6d3c-bc3c-b1h9c9f9g9g9",
       "date": "2025-10-05",
-      "amount": 45.00,
+      "amount": 45.0,
       "type": "expense",
       "note": "Coffee",
       "category": {
@@ -1402,12 +1518,14 @@ curl -X GET "https://api.example.com/api/transactions?month=10&year=2025&page=2&
 ```
 
 ### Empty Result (No Transactions)
+
 ```bash
 curl -X GET "https://api.example.com/api/transactions?month=1&year=2025" \
   -H "Authorization: Bearer <JWT_TOKEN>"
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "transactions": [],
@@ -1421,12 +1539,14 @@ curl -X GET "https://api.example.com/api/transactions?month=1&year=2025" \
 ```
 
 ### Invalid Month
+
 ```bash
 curl -X GET "https://api.example.com/api/transactions?month=13&year=2025" \
   -H "Authorization: Bearer <JWT_TOKEN>"
 ```
 
 **Response (400 Bad Request):**
+
 ```json
 {
   "error": "Bad Request",
@@ -1438,12 +1558,14 @@ curl -X GET "https://api.example.com/api/transactions?month=13&year=2025" \
 ```
 
 ### Invalid Page Size
+
 ```bash
 curl -X GET "https://api.example.com/api/transactions?month=10&year=2025&pageSize=200" \
   -H "Authorization: Bearer <JWT_TOKEN>"
 ```
 
 **Response (400 Bad Request):**
+
 ```json
 {
   "error": "Bad Request",
@@ -1455,11 +1577,13 @@ curl -X GET "https://api.example.com/api/transactions?month=10&year=2025&pageSiz
 ```
 
 ### Missing Authentication
+
 ```bash
 curl -X GET "https://api.example.com/api/transactions?month=10&year=2025"
 ```
 
 **Response (401 Unauthorized):**
+
 ```json
 {
   "error": "Unauthorized",
@@ -1472,18 +1596,20 @@ curl -X GET "https://api.example.com/api/transactions?month=10&year=2025"
 ## Appendix B: Database Query Examples
 
 ### Count Query (for Pagination Metadata)
+
 ```sql
 SELECT COUNT(*) as total
 FROM transactions
-WHERE 
-  date >= '2025-10-01' 
+WHERE
+  date >= '2025-10-01'
   AND date <= '2025-10-31'
   AND user_id = '123e4567-e89b-12d3-a456-426614174000' -- Applied by RLS
 ```
 
 ### Main Query with JOIN (Page 1, PageSize 20)
+
 ```sql
-SELECT 
+SELECT
   t.id,
   t.date,
   t.amount,
@@ -1494,8 +1620,8 @@ SELECT
   c.name as category_name
 FROM transactions t
 LEFT JOIN categories c ON t.category_id = c.id
-WHERE 
-  t.date >= '2025-10-01' 
+WHERE
+  t.date >= '2025-10-01'
   AND t.date <= '2025-10-31'
   AND t.user_id = '123e4567-e89b-12d3-a456-426614174000' -- Applied by RLS
 ORDER BY t.date DESC
@@ -1503,6 +1629,7 @@ LIMIT 20 OFFSET 0
 ```
 
 ### Query Plan Analysis
+
 ```sql
 EXPLAIN ANALYZE
 SELECT t.id, t.date, t.amount, t.type, t.note, t.created_at, c.id, c.name
@@ -1527,6 +1654,7 @@ LIMIT 20;
 ## Appendix C: Type Definitions Reference
 
 ### TransactionDto
+
 ```typescript
 // From src/types.ts
 export type TransactionDto = Omit<
@@ -1553,6 +1681,7 @@ export type TransactionDto = Omit<
 ```
 
 ### ListTransactionsResponseDto
+
 ```typescript
 // From src/types.ts
 export interface ListTransactionsResponseDto {
@@ -1567,6 +1696,7 @@ export interface ListTransactionsResponseDto {
 ```
 
 ### Database Row Type (from Supabase)
+
 ```typescript
 // What Supabase returns from database
 {
@@ -1584,4 +1714,3 @@ export interface ListTransactionsResponseDto {
 ---
 
 This implementation plan provides comprehensive guidance for implementing the GET /transactions endpoint with pagination support. Follow the steps sequentially, test thoroughly at each stage, and ensure all security, performance, and pagination considerations are properly addressed.
-

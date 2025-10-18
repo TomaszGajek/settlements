@@ -10,59 +10,71 @@ jobs:
   unit-and-integration:
     name: Unit & Integration Tests
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          cache: 'npm'
-      
+          node-version: "22"
+          cache: "npm"
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Run unit tests
         run: npm run test:unit
-      
+
       - name: Run integration tests
         run: npm run test:integration
-      
-      - name: Generate coverage report
-        run: npm run test:coverage
-      
-      - name: Upload coverage to artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage/
-          retention-days: 7
 
   e2e:
     name: E2E Tests
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          cache: 'npm'
-      
+          node-version: "22"
+          cache: "npm"
+
       - name: Install dependencies
         run: npm ci
-      
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start Supabase local instance
+        run: supabase start
+
+      - name: Setup environment variables
+        run: |
+          echo "PUBLIC_SUPABASE_URL=http://127.0.0.1:54321" >> $GITHUB_ENV
+          echo "PUBLIC_SUPABASE_ANON_KEY=$(supabase status --output json | jq -r '.anon_key')" >> $GITHUB_ENV
+          echo "SUPABASE_SERVICE_ROLE_KEY=$(supabase status --output json | jq -r '.service_role_key')" >> $GITHUB_ENV
+          echo "BASE_URL=http://localhost:4322" >> $GITHUB_ENV
+          echo "E2E_TEST_USER_EMAIL=test-e2e@example.com" >> $GITHUB_ENV
+          echo "E2E_TEST_USER_PASSWORD=TestPassword123!" >> $GITHUB_ENV
+
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium
-      
+
       - name: Run E2E tests
         run: npm run test:e2e
         env:
-          BASE_URL: http://localhost:4321
-      
+          PUBLIC_SUPABASE_URL: ${{ env.PUBLIC_SUPABASE_URL }}
+          PUBLIC_SUPABASE_ANON_KEY: ${{ env.PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ env.SUPABASE_SERVICE_ROLE_KEY }}
+          BASE_URL: ${{ env.BASE_URL }}
+          E2E_TEST_USER_EMAIL: ${{ env.E2E_TEST_USER_EMAIL }}
+          E2E_TEST_USER_PASSWORD: ${{ env.E2E_TEST_USER_PASSWORD }}
+
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
         if: always()
@@ -70,7 +82,7 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
-      
+
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
         if: always()
@@ -79,3 +91,6 @@ jobs:
           path: playwright-results/
           retention-days: 7
 
+      - name: Stop Supabase
+        if: always()
+        run: supabase stop

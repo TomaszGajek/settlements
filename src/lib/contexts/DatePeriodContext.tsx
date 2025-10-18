@@ -110,14 +110,14 @@ export function DatePeriodProvider({ children }: { children: React.ReactNode }) 
   const setYear = useCallback((newYear: number) => {
     setPeriodState((current) => {
       const newPeriod = { month: current.month, year: newYear };
-      
+
       // Update URL
       const newParams = new URLSearchParams();
       newParams.set("month", String(newPeriod.month));
       newParams.set("year", String(newPeriod.year));
       const newUrl = `${window.location.pathname}?${newParams.toString()}`;
       window.history.pushState({}, "", newUrl);
-      
+
       return newPeriod;
     });
   }, []);
@@ -149,11 +149,10 @@ export function DatePeriodProvider({ children }: { children: React.ReactNode }) 
  */
 export function useDatePeriod() {
   const context = useContext(DatePeriodContext);
-  
+
   if (!context) {
     throw new Error("useDatePeriod must be used within DatePeriodProvider");
   }
-  
+
   return context;
 }
-

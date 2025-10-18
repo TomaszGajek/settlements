@@ -22,4 +22,3 @@ export function getMonthName(month: number): string {
 
   return months[month - 1] || "Nieprawidłowy miesiąc";
 }
-

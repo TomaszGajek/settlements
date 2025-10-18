@@ -43,10 +43,7 @@ export interface DeleteAccountDialogProps {
  * @param isOpen - Whether dialog is visible
  * @param onClose - Callback to close dialog
  */
-export const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({
-  isOpen,
-  onClose,
-}) => {
+export const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({ isOpen, onClose }) => {
   const [password, setPassword] = useState("");
   const [confirmed, setConfirmed] = useState(false);
   const deleteAccountMutation = useDeleteAccount();
@@ -79,9 +76,7 @@ export const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({
   useEffect(() => {
     if (isOpen) {
       const timer = setTimeout(() => {
-        const passwordInput = document.getElementById(
-          "delete-account-password"
-        ) as HTMLInputElement;
+        const passwordInput = document.getElementById("delete-account-password") as HTMLInputElement;
         if (passwordInput) {
           passwordInput.focus();
         }
@@ -118,9 +113,7 @@ export const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({
               {/* Password Confirmation */}
               <div className="space-y-3">
                 <div className="space-y-2">
-                  <Label htmlFor="delete-account-password">
-                    Potwierdź hasłem
-                  </Label>
+                  <Label htmlFor="delete-account-password">Potwierdź hasłem</Label>
                   <Input
                     id="delete-account-password"
                     type="password"
@@ -131,10 +124,7 @@ export const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({
                     aria-label="Hasło"
                     aria-describedby="password-description"
                   />
-                  <p
-                    id="password-description"
-                    className="text-xs text-gray-400"
-                  >
+                  <p id="password-description" className="text-xs text-gray-400">
                     Wprowadź swoje hasło, aby potwierdzić tożsamość
                   </p>
                 </div>
@@ -148,10 +138,7 @@ export const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({
                     disabled={deleteAccountMutation.isPending}
                     aria-describedby="confirm-description"
                   />
-                  <Label
-                    htmlFor="delete-account-confirm"
-                    className="text-sm cursor-pointer font-normal"
-                  >
+                  <Label htmlFor="delete-account-confirm" className="text-sm cursor-pointer font-normal">
                     Rozumiem, że ta operacja jest nieodwracalna
                   </Label>
                 </div>
@@ -161,17 +148,10 @@ export const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({
         </AlertDialogHeader>
 
         <AlertDialogFooter>
-          <AlertDialogCancel
-            onClick={onClose}
-            disabled={deleteAccountMutation.isPending}
-          >
+          <AlertDialogCancel onClick={onClose} disabled={deleteAccountMutation.isPending}>
             Anuluj
           </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleDelete}
-            disabled={!canDelete}
-            className="bg-red-600 hover:bg-red-700"
-          >
+          <AlertDialogAction onClick={handleDelete} disabled={!canDelete} className="bg-red-600 hover:bg-red-700">
             {deleteAccountMutation.isPending ? "Usuwanie..." : "Usuń konto"}
           </AlertDialogAction>
         </AlertDialogFooter>
@@ -179,4 +159,3 @@ export const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({
     </AlertDialog>
   );
 };
-

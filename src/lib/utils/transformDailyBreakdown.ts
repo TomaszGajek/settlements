@@ -18,4 +18,3 @@ export function transformDailyBreakdown(
     expenses: item.expenses,
   }));
 }
-

@@ -34,4 +34,3 @@ export { DeleteAccountDialog } from "./DeleteAccountDialog";
 export type { CategoryModalProps } from "./CategoryModal";
 export type { DeleteCategoryDialogProps } from "./DeleteCategoryDialog";
 export type { DeleteAccountDialogProps } from "./DeleteAccountDialog";
-

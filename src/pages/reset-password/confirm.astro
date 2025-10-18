@@ -1,0 +1,17 @@
+---
+import AuthLayout from "../../layouts/AuthLayout.astro";
+import { UpdatePasswordForm } from "../../components/auth/UpdatePasswordForm";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
+---
+
+<AuthLayout title="Ustaw nowe hasło - Settlements">
+  <Card className="w-full max-w-md">
+    <CardHeader>
+      <CardTitle>Ustaw nowe hasło</CardTitle>
+      <CardDescription> Wprowadź nowe hasło do swojego konta </CardDescription>
+    </CardHeader>
+    <CardContent>
+      <UpdatePasswordForm client:load />
+    </CardContent>
+  </Card>
+</AuthLayout>

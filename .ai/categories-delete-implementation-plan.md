@@ -3,6 +3,7 @@
 ## Analysis
 
 ### Key Points from API Specification
+
 - **Endpoint**: `DELETE /api/categories/{id}`
 - **Purpose**: Delete a specific category
 - **Authentication**: Required (JWT-based via Supabase)
@@ -12,14 +13,16 @@
 - **Response**: No content (empty response)
 - **Business Logic**: Database trigger automatically reassigns associated transactions to "Other" category before deletion
 - **Success**: 204 No Content
-- **Errors**: 
+- **Errors**:
   - 400 Bad Request (invalid UUID format)
   - 401 Unauthorized (not authenticated)
   - 403 Forbidden (trying to delete "Other" category or another user's category)
   - 404 Not Found (category doesn't exist)
 
 ### Required and Optional Parameters
+
 **Path Parameters:**
+
 - `id` (UUID, required): ID of the category to delete
 
 **Request Body:** None
@@ -27,13 +30,16 @@
 **Response Body:** None (204 No Content)
 
 ### Necessary DTOs and Command Models
+
 - No DTOs or command models needed (delete operation)
 - Only path parameter validation required
 
 ### Service Layer Extraction
+
 Service method to be added to: `src/lib/services/categories.service.ts`
 
 This service will:
+
 - Accept `SupabaseClient` and category `id`
 - Verify category exists and belongs to user (via RLS)
 - Verify category is deletable (is_deletable = true)
@@ -42,16 +48,19 @@ This service will:
 - Return void (or throw error if failed)
 
 ### Input Validation Strategy
+
 Using Zod schemas:
+
 1. **Path Parameter Schema**: Validate id is valid UUID
 2. **No Body Validation**: DELETE requests have no body
-3. **Business Validation**: 
+3. **Business Validation**:
    - Verify category ownership via RLS
    - Verify category is deletable (is_deletable = true)
 
 ### Security Considerations
+
 - **Authentication**: User must be authenticated
-- **Authorization**: 
+- **Authorization**:
   - User can only delete their own categories (RLS enforces)
   - User cannot delete "Other" category (is_deletable = false)
   - Return 403 if trying to delete another user's category
@@ -61,6 +70,7 @@ Using Zod schemas:
 - **SQL Injection**: Prevented by Supabase parameterized queries
 
 ### Error Scenarios and Status Codes
+
 1. **400 Bad Request**:
    - Invalid UUID format for id
 
@@ -87,6 +97,7 @@ Using Zod schemas:
 The DELETE /categories/{id} endpoint allows authenticated users to permanently delete their own deletable categories. The system "Other" category cannot be deleted. Before deletion, a database trigger automatically reassigns all transactions associated with the deleted category to the user's "Other" category, ensuring no transactions are orphaned. The endpoint validates ownership and deletability through RLS policies and application logic.
 
 **Key Features:**
+
 - Permanent deletion from `categories` table
 - Cannot delete "Other" category (is_deletable = false)
 - Database trigger reassigns transactions to "Other" before deletion
@@ -100,34 +111,41 @@ The DELETE /categories/{id} endpoint allows authenticated users to permanently d
 ## 2. Request Details
 
 ### HTTP Method
+
 `DELETE`
 
 ### URL Structure
+
 ```
 /api/categories/{id}
 ```
 
 ### Path Parameters
+
 - **id** (string, required)
   - Description: UUID of the category to delete
   - Format: Valid UUID
   - Example: `c3d4e5f6-a7b8-9012-3456-7890abcdef12`
 
 ### Request Headers
+
 - **Authorization**: `Bearer <JWT_TOKEN>` (required)
 
 ### Request Body
+
 None
 
 ### Example Requests
 
 #### Delete Category
+
 ```bash
 curl -X DELETE "https://api.example.com/api/categories/c3d4e5f6-a7b8-9012-3456-7890abcdef12" \
   -H "Authorization: Bearer <JWT_TOKEN>"
 ```
 
 #### Delete with Verbose Output
+
 ```bash
 curl -X DELETE "https://api.example.com/api/categories/c3d4e5f6-a7b8-9012-3456-7890abcdef12" \
   -H "Authorization: Bearer <JWT_TOKEN>" \
@@ -139,7 +157,9 @@ curl -X DELETE "https://api.example.com/api/categories/c3d4e5f6-a7b8-9012-3456-7
 ## 3. Utilized Types
 
 ### Path Parameter Validation
+
 **Category ID Schema** (to be created with Zod):
+
 ```typescript
 const CategoryIdSchema = z.object({
   id: z.string().uuid("Invalid category ID format"),
@@ -147,12 +167,15 @@ const CategoryIdSchema = z.object({
 ```
 
 ### No DTOs Required
+
 - No request body DTO
 - No response body DTO
 - DELETE returns 204 No Content (empty response)
 
 ### Database Types
+
 Only database row identification:
+
 - `categories.id` (UUID)
 - `categories.user_id` (UUID, for RLS)
 - `categories.is_deletable` (boolean, for validation)
@@ -164,11 +187,13 @@ Only database row identification:
 ### Success Response (204 No Content)
 
 #### Structure
+
 - **Status Code**: 204
 - **Response Body**: Empty (no content)
 - **Content-Length**: 0
 
 #### Example
+
 ```
 HTTP/1.1 204 No Content
 Content-Length: 0
@@ -177,10 +202,13 @@ Content-Length: 0
 ### Error Responses
 
 #### 400 Bad Request (Invalid UUID)
+
 **Scenarios:**
+
 - Path parameter is not a valid UUID
 
 **Example Response:**
+
 ```json
 {
   "error": "Bad Request",
@@ -192,11 +220,14 @@ Content-Length: 0
 ```
 
 #### 401 Unauthorized
+
 **Scenarios:**
+
 - Missing Authorization header
 - Invalid or expired JWT token
 
 **Example Response:**
+
 ```json
 {
   "error": "Unauthorized",
@@ -205,11 +236,14 @@ Content-Length: 0
 ```
 
 #### 403 Forbidden
+
 **Scenarios:**
+
 - Category exists but belongs to different user
 - Category is not deletable (is_deletable = false)
 
 **Example Response (Other User's Category):**
+
 ```json
 {
   "error": "Forbidden",
@@ -218,6 +252,7 @@ Content-Length: 0
 ```
 
 **Example Response (Non-Deletable Category):**
+
 ```json
 {
   "error": "Forbidden",
@@ -226,11 +261,14 @@ Content-Length: 0
 ```
 
 #### 404 Not Found
+
 **Scenarios:**
+
 - Category with given id doesn't exist
 - Category was already deleted
 
 **Example Response:**
+
 ```json
 {
   "error": "Not Found",
@@ -239,12 +277,15 @@ Content-Length: 0
 ```
 
 #### 500 Internal Server Error
+
 **Scenarios:**
+
 - Database connection failure
 - Trigger execution failure
 - Unexpected errors during deletion
 
 **Example Response:**
+
 ```json
 {
   "error": "Internal Server Error",
@@ -257,6 +298,7 @@ Content-Length: 0
 ## 5. Data Flow
 
 ### High-Level Flow
+
 1. **Request Reception**: Astro API endpoint receives DELETE request
 2. **Authentication Check**: Verify user is authenticated via Supabase
 3. **Path Validation**: Validate category ID from URL
@@ -270,6 +312,7 @@ Content-Length: 0
 ### Detailed Data Flow
 
 #### Step 1: API Route Handler (`src/pages/api/categories/[id].ts`)
+
 ```
 1. Check HTTP method is DELETE
 2. Extract id from path params
@@ -283,6 +326,7 @@ Content-Length: 0
 ```
 
 #### Step 2: Service Layer (`src/lib/services/categories.service.ts`)
+
 ```
 1. Receive supabase client and category id
 2. Check if category exists and get its data:
@@ -305,23 +349,26 @@ Content-Length: 0
 #### Step 3: Database Interaction (Supabase)
 
 **Check Category Existence and Deletability:**
+
 ```sql
 SELECT id, user_id, is_deletable
 FROM categories
-WHERE 
+WHERE
   id = 'c3d4e5f6-a7b8-9012-3456-7890abcdef12'
   AND user_id = '<authenticated_user_id>'; -- Applied by RLS
 ```
 
 **Delete Query:**
+
 ```sql
 DELETE FROM categories
-WHERE 
+WHERE
   id = 'c3d4e5f6-a7b8-9012-3456-7890abcdef12'
   AND user_id = '<authenticated_user_id>'; -- Applied by RLS
 ```
 
 **BEFORE DELETE Trigger (automatic):**
+
 ```sql
 -- Trigger: reassign_transactions_before_category_delete
 -- Executes BEFORE DELETE on categories table
@@ -355,6 +402,7 @@ EXECUTE FUNCTION reassign_transactions_to_other();
 ```
 
 **RLS Check (automatic):**
+
 ```sql
 -- RLS DELETE policy on categories:
 -- auth.uid() = user_id AND is_deletable = true
@@ -363,6 +411,7 @@ EXECUTE FUNCTION reassign_transactions_to_other();
 ```
 
 #### Step 4: Determining Error Codes
+
 ```typescript
 // Category not found or belongs to other user
 if (!existingCategory) {
@@ -380,14 +429,16 @@ if (!existingCategory.is_deletable) {
 ## 6. Security Considerations
 
 ### Authentication
+
 - **Method**: JWT-based authentication via Supabase
-- **Implementation**: 
+- **Implementation**:
   - Extract user from `context.locals.supabase.auth.getUser()`
   - Reject request with 401 if user is null or token is invalid
   - Use authenticated user's ID for ownership verification
 
 ### Authorization
-- **Category Ownership**: 
+
+- **Category Ownership**:
   - RLS DELETE policy verifies `auth.uid() = user_id`
   - User cannot delete other users' categories
   - Distinguish between 404 (doesn't exist) and 403 (not deletable/not owned)
@@ -398,7 +449,8 @@ if (!existingCategory.is_deletable) {
   - Return 403 for non-deletable categories
 
 ### Data Integrity
-- **Trigger Safety**: 
+
+- **Trigger Safety**:
   - Database trigger ensures transactions are reassigned atomically
   - No orphaned transactions after category deletion
   - Trigger executes in same transaction as DELETE
@@ -408,12 +460,14 @@ if (!existingCategory.is_deletable) {
   - Trigger relies on "Other" category existing
 
 ### Preventing Common Attacks
+
 - **SQL Injection**: Supabase uses parameterized queries
 - **ID Enumeration**: 404 response doesn't leak existence to unauthorized users
 - **Privilege Escalation**: RLS prevents deleting other users' categories
 - **System Category Bypass**: Multiple layers prevent "Other" deletion
 
 ### Privacy Considerations
+
 - **Permanent Deletion**: Category permanently removed
 - **Transaction Preservation**: Transactions preserved, reassigned to "Other"
 - **Compliance**: Ensure deletion complies with data retention policies
@@ -425,6 +479,7 @@ if (!existingCategory.is_deletable) {
 ### Validation Errors (400 Bad Request)
 
 #### Scenario 1: Invalid Category ID Format
+
 ```typescript
 // URL: DELETE /api/categories/invalid-uuid
 
@@ -439,6 +494,7 @@ Response: {
 ```
 
 #### Scenario 2: Malformed UUID
+
 ```typescript
 // URL: DELETE /api/categories/123
 
@@ -455,6 +511,7 @@ Response: {
 ### Authentication Errors (401 Unauthorized)
 
 #### Scenario 1: Missing Authorization Header
+
 ```typescript
 Response: {
   statusCode: 401,
@@ -464,6 +521,7 @@ Response: {
 ```
 
 #### Scenario 2: Invalid or Expired Token
+
 ```typescript
 Response: {
   statusCode: 401,
@@ -475,6 +533,7 @@ Response: {
 ### Authorization Errors (403 Forbidden)
 
 #### Scenario 1: Category Belongs to Another User
+
 ```typescript
 // Category exists but user_id doesn't match
 
@@ -486,6 +545,7 @@ Response: {
 ```
 
 #### Scenario 2: Non-Deletable Category ("Other")
+
 ```typescript
 // is_deletable = false
 
@@ -499,6 +559,7 @@ Response: {
 ### Not Found Errors (404 Not Found)
 
 #### Scenario 1: Category Doesn't Exist
+
 ```typescript
 // No category with given ID in database
 
@@ -510,6 +571,7 @@ Response: {
 ```
 
 #### Scenario 2: Category Already Deleted
+
 ```typescript
 // Category was deleted in previous request
 
@@ -523,6 +585,7 @@ Response: {
 ### Database Errors (500 Internal Server Error)
 
 #### Scenario 1: Database Connection Failure
+
 ```typescript
 Response: {
   statusCode: 500,
@@ -535,6 +598,7 @@ console.error("[Delete Category API] Database error:", error)
 ```
 
 #### Scenario 2: Trigger Execution Failure
+
 ```typescript
 // If "Other" category somehow doesn't exist
 
@@ -549,6 +613,7 @@ console.error("[Delete Category API] Trigger failed:", error)
 ```
 
 ### Error Handling Best Practices
+
 1. **Distinguish 403 Types**: Not deletable vs not owned
 2. **No Information Leakage**: Don't reveal category existence to unauthorized users
 3. **Consistent Format**: Same error structure across all endpoints
@@ -562,6 +627,7 @@ console.error("[Delete Category API] Trigger failed:", error)
 ### Potential Bottlenecks
 
 #### 1. Two-Step Process
+
 - **Issue**: SELECT to check deletability + DELETE
 - **Impact**: Two database round-trips
 - **Mitigation**:
@@ -569,6 +635,7 @@ console.error("[Delete Category API] Trigger failed:", error)
   - Current approach is clearer for error handling
 
 #### 2. Trigger Execution
+
 - **Issue**: Trigger must update potentially many transactions
 - **Impact**: Deletion slower if category has many transactions
 - **Mitigation**:
@@ -577,6 +644,7 @@ console.error("[Delete Category API] Trigger failed:", error)
   - Acceptable for typical use case
 
 #### 3. RLS Policy Evaluation
+
 - **Issue**: RLS policy evaluated on DELETE
 - **Impact**: Slight overhead per request
 - **Mitigation**:
@@ -586,6 +654,7 @@ console.error("[Delete Category API] Trigger failed:", error)
 ### Optimization Strategies
 
 #### 1. Index Usage
+
 ```sql
 -- Ensure indexes exist:
 CREATE INDEX idx_categories_user ON categories(user_id);
@@ -595,6 +664,7 @@ CREATE INDEX idx_categories_user_deletable ON categories(user_id, is_deletable);
 ```
 
 #### 2. Efficient Trigger
+
 ```sql
 -- Trigger already optimized:
 -- 1. Single SELECT to find "Other" category
@@ -603,6 +673,7 @@ CREATE INDEX idx_categories_user_deletable ON categories(user_id, is_deletable);
 ```
 
 #### 3. Batch Deletion (Future)
+
 - Support deleting multiple categories at once
 - Single transaction for consistency
 - Reduces network round-trips
@@ -610,6 +681,7 @@ CREATE INDEX idx_categories_user_deletable ON categories(user_id, is_deletable);
 ### Expected Performance
 
 #### Best Case (Category with Few Transactions)
+
 - **Total Response Time**: < 150ms
 - **Validation Time**: < 5ms
 - **Check Query**: < 30ms
@@ -617,22 +689,26 @@ CREATE INDEX idx_categories_user_deletable ON categories(user_id, is_deletable);
 - **Response**: < 5ms
 
 #### Typical Case (Category with ~50 Transactions)
+
 - **Total Response Time**: < 200ms
 - **Check Query**: < 30ms
 - **Delete + Trigger**: < 100ms (trigger updates transactions)
 
 #### Worst Case (Category with 1000+ Transactions)
+
 - **Total Response Time**: < 500ms
 - **Check Query**: < 30ms
 - **Delete + Trigger**: < 400ms (many transactions to reassign)
 
 #### Failure Case (404/403)
+
 - **Total Response Time**: < 100ms
 - **Check Query**: < 30ms
 - **No deletion executed**
 - **Error Response**: < 5ms
 
 ### Monitoring Recommendations
+
 - **Log Deletion Times**: Track slow deletions (> 200ms)
 - **Track Error Rates**: Monitor 403, 404, 500 errors
 - **Trigger Performance**: Monitor trigger execution time
@@ -643,6 +719,7 @@ CREATE INDEX idx_categories_user_deletable ON categories(user_id, is_deletable);
 ## 9. Implementation Steps
 
 ### Step 1: Add Validation Schema
+
 **File**: `src/pages/api/categories/[id].ts`
 
 ```typescript
@@ -654,6 +731,7 @@ const CategoryIdSchema = z.object({
 ```
 
 ### Step 2: Add Service Method
+
 **File**: `src/lib/services/categories.service.ts`
 
 ```typescript
@@ -670,10 +748,7 @@ export class CategoriesService {
    * @returns void
    * @throws Error if not found, forbidden, or not deletable
    */
-  static async deleteCategory(
-    supabase: SupabaseClient,
-    categoryId: string
-  ): Promise<void> {
+  static async deleteCategory(supabase: SupabaseClient, categoryId: string): Promise<void> {
     // Get authenticated user
     const {
       data: { user },
@@ -706,10 +781,7 @@ export class CategoriesService {
     }
 
     // Delete category (trigger will reassign transactions)
-    const { error, count } = await supabase
-      .from("categories")
-      .delete({ count: "exact" })
-      .eq("id", categoryId);
+    const { error, count } = await supabase.from("categories").delete({ count: "exact" }).eq("id", categoryId);
 
     if (error) {
       throw new Error(`Failed to delete category: ${error.message}`);
@@ -727,6 +799,7 @@ export class CategoriesService {
 ```
 
 ### Step 3: Add DELETE Handler to API Route
+
 **File**: `src/pages/api/categories/[id].ts`
 
 ```typescript
@@ -851,61 +924,72 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 ```
 
 ### Step 4: Test Path Parameter Validation
+
 - Invalid UUID → 400
 - Missing id → 404 (Astro routing)
 - Valid UUID → proceeds to authentication
 
 ### Step 5: Test Authentication
+
 - No token → 401
 - Invalid token → 401
 - Expired token → 401
 - Valid token → proceeds to deletion
 
 ### Step 6: Test Successful Deletion
+
 - Delete own deletable category → 204 No Content
 - Verify category removed from database
 - Verify empty response body
 - Verify Content-Length: 0
 
 ### Step 7: Test Transaction Reassignment
+
 - Create category with transactions
 - Delete category
 - Verify transactions reassigned to "Other" category
 - Verify transaction data otherwise unchanged
 
 ### Step 8: Test Authorization (403)
+
 - User A tries to delete User B's category → 403
 - User tries to delete "Other" category → 403 "Cannot delete non-deletable category"
 - Verify category still exists after failed attempt
 
 ### Step 9: Test Not Found (404)
+
 - Delete non-existent category → 404
 - Delete already-deleted category → 404
 
 ### Step 10: Test Idempotency
+
 - Delete category twice
 - First request → 204 No Content
 - Second request → 404 Not Found
 
 ### Step 11: Test Database State
+
 - Category removed from database
 - Transactions preserved and reassigned
 - "Other" category unchanged
 - Other users' categories unaffected
 
 ### Step 12: Test Trigger Execution
+
 - Verify trigger reassigns all transactions
 - Verify trigger executes atomically
 - Verify transactions.category_id updated correctly
 - No transactions left with deleted category_id
 
 ### Step 13: Test "Other" Category Protection
+
 - Try to delete "Other" category → 403
 - Verify "Other" remains in database
 - Verify error message is clear
 - Verify RLS policy blocks deletion
 
 ### Step 14: Test Edge Cases
+
 - Delete category with 0 transactions
 - Delete category with 1 transaction
 - Delete category with 1000+ transactions
@@ -913,6 +997,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 - Delete category while transactions being created
 
 ### Step 15: Integration Testing
+
 - Create category, add transactions, delete category
 - Verify complete lifecycle
 - Test with multiple users simultaneously
@@ -923,6 +1008,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 ## 10. Testing Checklist
 
 ### Unit Tests (Service Layer)
+
 - [ ] Deletes category successfully
 - [ ] Throws NOT_FOUND for non-existent category
 - [ ] Throws FORBIDDEN for other user's category
@@ -931,6 +1017,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 - [ ] Verifies user authentication
 
 ### Integration Tests (API Route)
+
 - [ ] Returns 401 when not authenticated
 - [ ] Returns 400 for invalid category ID
 - [ ] Returns 403 for other user's category
@@ -941,6 +1028,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 - [ ] Content-Length is 0
 
 ### Database Tests
+
 - [ ] Category removed from database
 - [ ] DELETE affects exactly 1 row (success case)
 - [ ] Trigger reassigns all associated transactions
@@ -949,6 +1037,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 - [ ] RLS prevents deleting other user's categories
 
 ### Trigger Tests
+
 - [ ] Trigger executes before deletion
 - [ ] Trigger finds correct "Other" category
 - [ ] Trigger updates all transactions atomically
@@ -956,6 +1045,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 - [ ] Trigger doesn't affect other users' data
 
 ### Side Effects Tests
+
 - [ ] Deleted category not in GET /categories
 - [ ] Transactions still visible in GET /transactions
 - [ ] Transactions show "Other" as category
@@ -963,6 +1053,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 - [ ] Other user's data unaffected
 
 ### End-to-End Tests
+
 - [ ] Full DELETE request removes category
 - [ ] Transactions preserved and reassigned
 - [ ] Second DELETE returns 404
@@ -975,27 +1066,32 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 ## 11. Future Enhancements
 
 ### Soft Delete
+
 1. **Add deleted_at Column**: Timestamp for soft deletion
 2. **Filter Queries**: Exclude soft-deleted categories
 3. **Permanent Deletion**: Admin endpoint for hard delete
 4. **Recovery**: Endpoint to undelete categories
 
 ### Audit Trail
+
 1. **Deletion Log**: Record who deleted what and when
 2. **Retention**: Keep deleted category data for X days
 3. **Compliance**: Meet data retention requirements
 
 ### Bulk Operations
+
 1. **Bulk Delete**: Delete multiple categories at once
 2. **Delete All Custom**: Delete all user-created categories
 3. **Reset to Default**: Delete all custom, keep defaults
 
 ### Confirmation
+
 1. **Require Confirmation**: Two-step deletion for categories with many transactions
 2. **Confirmation Token**: Time-limited token for deletion
 3. **Preview**: Show how many transactions will be reassigned
 
 ### API Improvements
+
 1. **Return Affected Count**: Return number of transactions reassigned
 2. **Return Statistics**: Include deletion summary in response (as 200 instead of 204)
 3. **Async Processing**: For categories with many transactions, process deletion asynchronously
@@ -1005,30 +1101,37 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 ## Appendix A: Example Requests and Responses
 
 ### Successful Deletion
+
 **Request:**
+
 ```bash
 DELETE /api/categories/c3d4e5f6-a7b8-9012-3456-7890abcdef12
 Authorization: Bearer <JWT_TOKEN>
 ```
 
 **Response (204 No Content):**
+
 ```
 HTTP/1.1 204 No Content
 Content-Length: 0
 ```
 
 **Side Effect:**
+
 - Category "Subscriptions" deleted
 - 5 transactions reassigned from "Subscriptions" to "Other"
 
 ### Invalid Category ID
+
 **Request:**
+
 ```bash
 DELETE /api/categories/invalid-uuid
 Authorization: Bearer <JWT_TOKEN>
 ```
 
 **Response (400 Bad Request):**
+
 ```json
 {
   "error": "Bad Request",
@@ -1040,13 +1143,16 @@ Authorization: Bearer <JWT_TOKEN>
 ```
 
 ### Try to Delete "Other" Category
+
 **Request:**
+
 ```bash
 DELETE /api/categories/<other-category-id>
 Authorization: Bearer <JWT_TOKEN>
 ```
 
 **Response (403 Forbidden):**
+
 ```json
 {
   "error": "Forbidden",
@@ -1055,13 +1161,16 @@ Authorization: Bearer <JWT_TOKEN>
 ```
 
 ### Category Not Found
+
 **Request:**
+
 ```bash
 DELETE /api/categories/00000000-0000-0000-0000-000000000000
 Authorization: Bearer <JWT_TOKEN>
 ```
 
 **Response (404 Not Found):**
+
 ```json
 {
   "error": "Not Found",
@@ -1070,13 +1179,16 @@ Authorization: Bearer <JWT_TOKEN>
 ```
 
 ### Forbidden (Other User's Category)
+
 **Request:**
+
 ```bash
 DELETE /api/categories/d5f9c2e6-c9f1-5c2b-ab2b-a0g8b8e8f8f8
 Authorization: Bearer <JWT_TOKEN>
 ```
 
 **Response (403 Forbidden):**
+
 ```json
 {
   "error": "Forbidden",
@@ -1085,12 +1197,15 @@ Authorization: Bearer <JWT_TOKEN>
 ```
 
 ### Missing Authentication
+
 **Request:**
+
 ```bash
 DELETE /api/categories/c3d4e5f6-a7b8-9012-3456-7890abcdef12
 ```
 
 **Response (401 Unauthorized):**
+
 ```json
 {
   "error": "Unauthorized",
@@ -1099,24 +1214,29 @@ DELETE /api/categories/c3d4e5f6-a7b8-9012-3456-7890abcdef12
 ```
 
 ### Second Delete (Idempotency)
+
 **Request (first time):**
+
 ```bash
 DELETE /api/categories/c3d4e5f6-a7b8-9012-3456-7890abcdef12
 Authorization: Bearer <JWT_TOKEN>
 ```
 
 **Response (204 No Content):**
+
 ```
 HTTP/1.1 204 No Content
 ```
 
 **Request (second time - same ID):**
+
 ```bash
 DELETE /api/categories/c3d4e5f6-a7b8-9012-3456-7890abcdef12
 Authorization: Bearer <JWT_TOKEN>
 ```
 
 **Response (404 Not Found):**
+
 ```json
 {
   "error": "Not Found",
@@ -1129,6 +1249,7 @@ Authorization: Bearer <JWT_TOKEN>
 ## Appendix B: Database Trigger Details
 
 ### Trigger Function
+
 ```sql
 -- Function executed by trigger
 CREATE OR REPLACE FUNCTION reassign_transactions_to_other()
@@ -1154,7 +1275,7 @@ BEGIN
   WHERE category_id = OLD.id;
 
   -- Log for debugging (optional)
-  RAISE NOTICE 'Reassigned % transactions from category % to Other category %', 
+  RAISE NOTICE 'Reassigned % transactions from category % to Other category %',
     (SELECT COUNT(*) FROM transactions WHERE category_id = other_category_id),
     OLD.id,
     other_category_id;
@@ -1166,6 +1287,7 @@ $$ LANGUAGE plpgsql;
 ```
 
 ### Trigger Definition
+
 ```sql
 -- Create trigger on categories table
 CREATE TRIGGER reassign_transactions_before_category_delete
@@ -1175,6 +1297,7 @@ EXECUTE FUNCTION reassign_transactions_to_other();
 ```
 
 ### Trigger Behavior
+
 1. **Timing**: BEFORE DELETE (runs before category is actually deleted)
 2. **Granularity**: FOR EACH ROW (runs once per deleted category)
 3. **Process**:
@@ -1189,6 +1312,7 @@ EXECUTE FUNCTION reassign_transactions_to_other();
 ## Appendix C: RLS Policy for Categories DELETE
 
 ### RLS Policy
+
 ```sql
 -- RLS policy for deleting categories
 CREATE POLICY "Users can delete their own deletable categories"
@@ -1196,12 +1320,13 @@ ON categories
 FOR DELETE
 TO authenticated
 USING (
-  auth.uid() = user_id 
+  auth.uid() = user_id
   AND is_deletable = true
 );
 ```
 
 ### Policy Breakdown
+
 - **Operation**: DELETE
 - **Target**: authenticated users only
 - **Conditions**:
@@ -1209,6 +1334,7 @@ USING (
   2. `is_deletable = true` - Category is deletable
 
 ### Multi-Layer Protection
+
 1. **RLS Policy**: Database-level enforcement
 2. **Application Logic**: Service layer checks is_deletable
 3. **Both Required**: Defense in depth
@@ -1218,28 +1344,33 @@ USING (
 ## Appendix D: Security Checklist
 
 ### Authentication
+
 - [ ] JWT token required
 - [ ] Token validated before processing
 - [ ] Invalid tokens rejected with 401
 
 ### Authorization
+
 - [ ] RLS policies enforced
 - [ ] User can only delete own categories
 - [ ] Cannot delete "Other" category
 - [ ] 403 returned for unauthorized access
 
 ### Information Disclosure
+
 - [ ] 404 vs 403 properly distinguished
 - [ ] Error messages don't leak sensitive info
 - [ ] No category existence revealed to unauthorized users
 
 ### Data Integrity
+
 - [ ] Trigger reassigns transactions before deletion
 - [ ] Transactions preserved after category deletion
 - [ ] "Other" category always exists
 - [ ] No orphaned transactions
 
 ### Audit & Compliance
+
 - [ ] Deletions logged for audit
 - [ ] Transactions preserved (not deleted)
 - [ ] Complies with data retention policies
@@ -1248,4 +1379,3 @@ USING (
 ---
 
 This implementation plan provides comprehensive guidance for implementing the DELETE /categories/{id} endpoint. Follow the steps sequentially, test the trigger thoroughly, and ensure proper handling of the "Other" category protection and transaction reassignment.
-

@@ -3,6 +3,7 @@
 ## Analysis
 
 ### Key Points from API Specification
+
 - **Endpoint**: `POST /api/transactions`
 - **Purpose**: Create a new transaction
 - **Authentication**: Required (JWT-based via Supabase)
@@ -14,22 +15,26 @@
   - note (optional)
 - **Response**: Newly created transaction with full details including category info
 - **Success**: 201 Created
-- **Errors**: 
+- **Errors**:
   - 400 Bad Request (validation errors)
   - 401 Unauthorized (not authenticated)
   - 422 Unprocessable Entity (categoryId doesn't exist or doesn't belong to user)
 
 ### Required and Optional Parameters
+
 **Required Request Body Fields:**
+
 - `amount` (number): Transaction amount, must be positive, max 2 decimal places
 - `date` (string): Transaction date in ISO format (YYYY-MM-DD)
 - `categoryId` (UUID): ID of the category to assign
 - `type` (string): Either "income" or "expense"
 
 **Optional Request Body Fields:**
+
 - `note` (string): Optional description, max 500 characters
 
 ### Necessary DTOs and Command Models
+
 - `CreateTransactionCommand` (already defined in `src/types.ts`):
   - Fields: amount, date, categoryId, type, note (optional)
 - `CreateTransactionResponseDto` (already defined in `src/types.ts`):
@@ -37,9 +42,11 @@
   - Contains: id, date, amount, type, note, category (nested), createdAt
 
 ### Service Layer Extraction
+
 Service method to be added to: `src/lib/services/transactions.service.ts`
 
 This service will:
+
 - Accept `SupabaseClient` and `CreateTransactionCommand`
 - Validate that categoryId belongs to the authenticated user
 - Insert new transaction into database
@@ -47,7 +54,9 @@ This service will:
 - Return data in `CreateTransactionResponseDto` format
 
 ### Input Validation Strategy
+
 Using Zod schemas:
+
 1. **Request Body Schema**: Validate all fields
    - amount: positive number, max 2 decimals
    - date: valid ISO date string
@@ -59,8 +68,9 @@ Using Zod schemas:
    - Ensure date is valid calendar date
 
 ### Security Considerations
+
 - **Authentication**: User must be authenticated
-- **Authorization**: 
+- **Authorization**:
   - User can only create transactions for themselves
   - User can only assign their own categories
   - RLS enforces user_id matching
@@ -68,6 +78,7 @@ Using Zod schemas:
 - **SQL Injection**: Prevented by Supabase parameterized queries
 
 ### Error Scenarios and Status Codes
+
 1. **400 Bad Request**:
    - Missing required fields
    - Invalid amount (negative, zero, or too many decimals)
@@ -95,6 +106,7 @@ Using Zod schemas:
 The POST /transactions endpoint allows authenticated users to create new financial transactions. Each transaction must be associated with a category, have a type (income or expense), an amount, and a date. The endpoint validates all input data, ensures the category belongs to the user, creates the transaction, and returns the complete transaction object including category details.
 
 **Key Features:**
+
 - Creates new record in `transactions` table
 - Validates all input data thoroughly
 - Verifies category ownership through RLS
@@ -107,20 +119,24 @@ The POST /transactions endpoint allows authenticated users to create new financi
 ## 2. Request Details
 
 ### HTTP Method
+
 `POST`
 
 ### URL Structure
+
 ```
 /api/transactions
 ```
 
 ### Request Headers
+
 - **Content-Type**: `application/json` (required)
 - **Authorization**: `Bearer <JWT_TOKEN>` (required)
 
 ### Request Body
 
 #### Structure
+
 ```json
 {
   "amount": 199.99,
@@ -132,6 +148,7 @@ The POST /transactions endpoint allows authenticated users to create new financi
 ```
 
 #### Field Descriptions
+
 - **amount** (number, required)
   - Description: Transaction amount
   - Constraints: Must be > 0, max 2 decimal places
@@ -160,6 +177,7 @@ The POST /transactions endpoint allows authenticated users to create new financi
 ### Example Requests
 
 #### Create Expense
+
 ```bash
 curl -X POST "https://api.example.com/api/transactions" \
   -H "Content-Type: application/json" \
@@ -174,6 +192,7 @@ curl -X POST "https://api.example.com/api/transactions" \
 ```
 
 #### Create Income Without Note
+
 ```bash
 curl -X POST "https://api.example.com/api/transactions" \
   -H "Content-Type: application/json" \
@@ -191,7 +210,9 @@ curl -X POST "https://api.example.com/api/transactions" \
 ## 3. Utilized Types
 
 ### Command Model
+
 **CreateTransactionCommand** (defined in `src/types.ts`):
+
 ```typescript
 export type CreateTransactionCommand = Pick<
   TablesInsert<"transactions">,
@@ -211,7 +232,9 @@ export type CreateTransactionCommand = Pick<
 ```
 
 ### Response DTO
+
 **CreateTransactionResponseDto** (defined in `src/types.ts`):
+
 ```typescript
 export type CreateTransactionResponseDto = TransactionDto;
 
@@ -231,7 +254,9 @@ export type CreateTransactionResponseDto = TransactionDto;
 ```
 
 ### Validation Schema
+
 **Request Body Validation** (to be created with Zod):
+
 ```typescript
 const CreateTransactionSchema = z.object({
   amount: z
@@ -245,23 +270,19 @@ const CreateTransactionSchema = z.object({
     .string({ required_error: "Date is required" })
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
     .refine((date) => !isNaN(Date.parse(date)), "Invalid date"),
-  categoryId: z
-    .string({ required_error: "Category ID is required" })
-    .uuid("Category ID must be a valid UUID"),
+  categoryId: z.string({ required_error: "Category ID is required" }).uuid("Category ID must be a valid UUID"),
   type: z.enum(["income", "expense"], {
     required_error: "Type is required",
     invalid_type_error: "Type must be either 'income' or 'expense'",
   }),
-  note: z
-    .string()
-    .max(500, "Note must be at most 500 characters")
-    .optional()
-    .nullable(),
+  note: z.string().max(500, "Note must be at most 500 characters").optional().nullable(),
 });
 ```
 
 ### Database Types
+
 **TablesInsert<"transactions">** (from `src/db/database.types.ts`):
+
 ```typescript
 {
   amount: number;
@@ -282,6 +303,7 @@ const CreateTransactionSchema = z.object({
 ### Success Response (201 Created)
 
 #### Structure
+
 ```json
 {
   "id": "d4e9b2e5-c9f1-5c2b-ab2b-a0g8b8e8f8f8",
@@ -298,6 +320,7 @@ const CreateTransactionSchema = z.object({
 ```
 
 #### Field Descriptions
+
 - **id**: Auto-generated UUID for the transaction
 - **date**: Transaction date as provided (ISO date string)
 - **amount**: Transaction amount as provided
@@ -309,7 +332,9 @@ const CreateTransactionSchema = z.object({
 ### Error Responses
 
 #### 400 Bad Request (Validation Errors)
+
 **Scenarios:**
+
 - Missing required fields
 - Invalid data types
 - Amount is zero or negative
@@ -320,6 +345,7 @@ const CreateTransactionSchema = z.object({
 - Note exceeds 500 characters
 
 **Example Response:**
+
 ```json
 {
   "error": "Bad Request",
@@ -332,11 +358,14 @@ const CreateTransactionSchema = z.object({
 ```
 
 #### 401 Unauthorized
+
 **Scenarios:**
+
 - Missing Authorization header
 - Invalid or expired JWT token
 
 **Example Response:**
+
 ```json
 {
   "error": "Unauthorized",
@@ -345,11 +374,14 @@ const CreateTransactionSchema = z.object({
 ```
 
 #### 422 Unprocessable Entity
+
 **Scenarios:**
+
 - categoryId doesn't exist in database
 - categoryId belongs to different user (RLS blocks insert)
 
 **Example Response:**
+
 ```json
 {
   "error": "Unprocessable Entity",
@@ -358,12 +390,15 @@ const CreateTransactionSchema = z.object({
 ```
 
 #### 500 Internal Server Error
+
 **Scenarios:**
+
 - Database connection failure
 - Unexpected errors during insert
 - Failed to fetch created transaction
 
 **Example Response:**
+
 ```json
 {
   "error": "Internal Server Error",
@@ -376,6 +411,7 @@ const CreateTransactionSchema = z.object({
 ## 5. Data Flow
 
 ### High-Level Flow
+
 1. **Request Reception**: Astro API endpoint receives POST request
 2. **Authentication Check**: Verify user is authenticated via Supabase
 3. **Body Parsing**: Parse JSON request body
@@ -390,6 +426,7 @@ const CreateTransactionSchema = z.object({
 ### Detailed Data Flow
 
 #### Step 1: API Route Handler (`src/pages/api/transactions.ts`)
+
 ```
 1. Check HTTP method is POST
 2. Get authenticated user from context.locals.supabase
@@ -401,6 +438,7 @@ const CreateTransactionSchema = z.object({
 ```
 
 #### Step 2: Service Layer (`src/lib/services/transactions.service.ts`)
+
 ```
 1. Receive supabase client and CreateTransactionCommand
 2. Extract user_id from authenticated session
@@ -422,6 +460,7 @@ const CreateTransactionSchema = z.object({
 #### Step 3: Database Interaction (Supabase)
 
 **Insert Query:**
+
 ```sql
 INSERT INTO transactions (
   user_id,
@@ -442,6 +481,7 @@ RETURNING id;
 ```
 
 **RLS Check (automatic):**
+
 ```sql
 -- RLS INSERT policy on transactions:
 -- auth.uid() = user_id ✓
@@ -452,8 +492,9 @@ RETURNING id;
 ```
 
 **Fetch Created Transaction:**
+
 ```sql
-SELECT 
+SELECT
   t.id,
   t.date,
   t.amount,
@@ -469,6 +510,7 @@ WHERE t.id = '<new_transaction_id>'
 ```
 
 #### Step 4: Data Transformation
+
 ```typescript
 // Pseudo-code for transformation
 const transactionDto = {
@@ -479,9 +521,9 @@ const transactionDto = {
   note: dbRow.note,
   category: {
     id: dbRow.category_id,
-    name: dbRow.category_name
+    name: dbRow.category_name,
   },
-  createdAt: dbRow.created_at
+  createdAt: dbRow.created_at,
 };
 ```
 
@@ -490,14 +532,16 @@ const transactionDto = {
 ## 6. Security Considerations
 
 ### Authentication
+
 - **Method**: JWT-based authentication via Supabase
-- **Implementation**: 
+- **Implementation**:
   - Extract user from `context.locals.supabase.auth.getUser()`
   - Reject request with 401 if user is null or token is invalid
   - Use authenticated user's ID for `user_id` field
 
 ### Authorization
-- **Transaction Ownership**: 
+
+- **Transaction Ownership**:
   - `user_id` automatically set to authenticated user
   - User cannot create transactions for other users
   - RLS INSERT policy verifies `auth.uid() = user_id`
@@ -507,6 +551,7 @@ const transactionDto = {
   - If category doesn't belong to user, INSERT fails with FK violation
 
 ### Input Validation
+
 - **Request Body Sanitization**:
   - Strict Zod schema validation
   - Type checking for all fields
@@ -516,6 +561,7 @@ const transactionDto = {
   - Enum validation for type
 
 ### Data Integrity
+
 - **Database Constraints**:
   - Amount CHECK constraint: `amount > 0`
   - Type ENUM constraint: only 'income' or 'expense'
@@ -527,6 +573,7 @@ const transactionDto = {
   - RLS layer (ownership)
 
 ### Preventing Common Attacks
+
 - **SQL Injection**: Supabase uses parameterized queries
 - **Mass Assignment**: Only accept defined fields from CreateTransactionCommand
 - **Privilege Escalation**: RLS prevents assigning other users' categories
@@ -539,6 +586,7 @@ const transactionDto = {
 ### Validation Errors (400 Bad Request)
 
 #### Scenario 1: Missing Required Fields
+
 ```typescript
 // Request body: { "amount": 100 }
 // Missing: date, categoryId, type
@@ -556,6 +604,7 @@ Response: {
 ```
 
 #### Scenario 2: Invalid Amount
+
 ```typescript
 // Request body: { "amount": -50, ... }
 // Amount is negative
@@ -571,6 +620,7 @@ Response: {
 ```
 
 #### Scenario 3: Too Many Decimal Places
+
 ```typescript
 // Request body: { "amount": 99.999, ... }
 // More than 2 decimals
@@ -586,6 +636,7 @@ Response: {
 ```
 
 #### Scenario 4: Invalid Date Format
+
 ```typescript
 // Request body: { "date": "13/10/2025", ... }
 // Wrong date format
@@ -601,6 +652,7 @@ Response: {
 ```
 
 #### Scenario 5: Invalid UUID
+
 ```typescript
 // Request body: { "categoryId": "invalid-uuid", ... }
 
@@ -615,6 +667,7 @@ Response: {
 ```
 
 #### Scenario 6: Invalid Type
+
 ```typescript
 // Request body: { "type": "payment", ... }
 
@@ -629,6 +682,7 @@ Response: {
 ```
 
 #### Scenario 7: Note Too Long
+
 ```typescript
 // Request body: { "note": "<501 characters>", ... }
 
@@ -645,6 +699,7 @@ Response: {
 ### Authentication Errors (401 Unauthorized)
 
 #### Scenario 1: Missing Authorization Header
+
 ```typescript
 Response: {
   statusCode: 401,
@@ -654,6 +709,7 @@ Response: {
 ```
 
 #### Scenario 2: Invalid Token
+
 ```typescript
 Response: {
   statusCode: 401,
@@ -665,6 +721,7 @@ Response: {
 ### Business Logic Errors (422 Unprocessable Entity)
 
 #### Scenario 1: Category Doesn't Exist
+
 ```typescript
 // categoryId not found in database
 
@@ -676,6 +733,7 @@ Response: {
 ```
 
 #### Scenario 2: Category Belongs to Different User
+
 ```typescript
 // categoryId exists but belongs to another user
 // RLS on categories blocks the FK reference
@@ -690,6 +748,7 @@ Response: {
 ### Database Errors (500 Internal Server Error)
 
 #### Scenario 1: Database Connection Failure
+
 ```typescript
 Response: {
   statusCode: 500,
@@ -702,6 +761,7 @@ console.error("[Create Transaction API] Database error:", error)
 ```
 
 #### Scenario 2: Insert Failure
+
 ```typescript
 Response: {
   statusCode: 500,
@@ -714,6 +774,7 @@ console.error("[Create Transaction API] Insert failed:", error)
 ```
 
 ### Error Handling Best Practices
+
 1. **Distinguish Error Types**: 400 vs 422 vs 500
 2. **Specific Error Messages**: Help client understand what's wrong
 3. **Security**: Don't leak sensitive info about other users
@@ -727,14 +788,16 @@ console.error("[Create Transaction API] Insert failed:", error)
 ### Potential Bottlenecks
 
 #### 1. Two-Step Process (Insert + Fetch)
+
 - **Issue**: Insert transaction, then fetch with JOIN
 - **Impact**: Two database round-trips
-- **Mitigation**: 
+- **Mitigation**:
   - Use RETURNING clause to get basic data immediately
   - Consider using database function for atomic operation
   - Performance impact minimal for single insert
 
 #### 2. Category Foreign Key Validation
+
 - **Issue**: Database must verify category exists and belongs to user
 - **Impact**: Additional lookup during insert
 - **Mitigation**:
@@ -743,6 +806,7 @@ console.error("[Create Transaction API] Insert failed:", error)
   - Acceptable overhead for data integrity
 
 #### 3. RLS Policy Evaluation
+
 - **Issue**: RLS policies evaluated on both insert and category lookup
 - **Impact**: Slight overhead per request
 - **Mitigation**:
@@ -753,6 +817,7 @@ console.error("[Create Transaction API] Insert failed:", error)
 ### Optimization Strategies
 
 #### 1. Database-Level Optimizations
+
 ```sql
 -- Ensure indexes exist (should be in migrations):
 CREATE INDEX idx_transactions_user_date ON transactions(user_id, date DESC);
@@ -761,6 +826,7 @@ CREATE INDEX idx_categories_user ON categories(user_id);
 ```
 
 #### 2. Use RETURNING Clause
+
 ```typescript
 // In service layer
 const { data, error } = await supabase
@@ -771,9 +837,10 @@ const { data, error } = await supabase
     amount: command.amount,
     date: command.date,
     type: command.type,
-    note: command.note
+    note: command.note,
   })
-  .select(`
+  .select(
+    `
     id,
     date,
     amount,
@@ -781,24 +848,28 @@ const { data, error } = await supabase
     note,
     created_at,
     category:categories (id, name)
-  `)
+  `
+  )
   .single();
 
 // Returns created transaction with category in one query
 ```
 
 #### 3. Validation Efficiency
+
 - **Early Returns**: Validate authentication first
 - **Fast Failures**: Schema validation happens before DB call
 - **Minimal Data Transfer**: Only send necessary fields to DB
 
 #### 4. Connection Pooling
+
 - Supabase handles connection pooling automatically
 - Reuse same client instance from `context.locals.supabase`
 
 ### Expected Performance
 
 #### Best Case (Valid Request)
+
 - **Total Response Time**: < 100ms
 - **Validation Time**: < 5ms
 - **Database Insert + Fetch**: < 50ms
@@ -806,16 +877,19 @@ const { data, error } = await supabase
 - **Network Transfer**: < 10ms
 
 #### Typical Case
+
 - **Total Response Time**: < 200ms
 - **All Operations**: Similar to best case
 - **Variability**: Network latency, DB load
 
 #### Worst Case (Validation Errors)
+
 - **Total Response Time**: < 50ms
 - **Fails Fast**: No database interaction
 - **Validation Only**: Quick Zod schema check
 
 ### Monitoring Recommendations
+
 - **Log Insert Times**: Track slow inserts (> 100ms)
 - **Track Error Rates**: Monitor 400, 422, 500 errors
 - **Validation Failures**: Track common validation errors
@@ -826,6 +900,7 @@ const { data, error } = await supabase
 ## 9. Implementation Steps
 
 ### Step 1: Create Zod Validation Schema
+
 **File**: `src/pages/api/transactions.ts` (or separate validation file)
 
 ```typescript
@@ -840,32 +915,27 @@ const CreateTransactionSchema = z.object({
       const decimals = val.toString().split(".")[1];
       return !decimals || decimals.length <= 2;
     }, "Amount can have at most 2 decimal places"),
-  
+
   date: z
     .string({ required_error: "Date is required" })
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
     .refine((date) => !isNaN(Date.parse(date)), "Invalid date"),
-  
-  categoryId: z
-    .string({ required_error: "Category ID is required" })
-    .uuid("Category ID must be a valid UUID"),
-  
+
+  categoryId: z.string({ required_error: "Category ID is required" }).uuid("Category ID must be a valid UUID"),
+
   type: z.enum(["income", "expense"], {
     required_error: "Type is required",
     invalid_type_error: "Type must be either 'income' or 'expense'",
   }),
-  
-  note: z
-    .string()
-    .max(500, "Note must be at most 500 characters")
-    .optional()
-    .nullable(),
+
+  note: z.string().max(500, "Note must be at most 500 characters").optional().nullable(),
 });
 
 type CreateTransactionInput = z.infer<typeof CreateTransactionSchema>;
 ```
 
 ### Step 2: Add Service Method
+
 **File**: `src/lib/services/transactions.service.ts`
 
 ```typescript
@@ -907,7 +977,8 @@ export class TransactionsService {
         type: command.type,
         note: command.note || null,
       })
-      .select(`
+      .select(
+        `
         id,
         date,
         amount,
@@ -918,7 +989,8 @@ export class TransactionsService {
           id,
           name
         )
-      `)
+      `
+      )
       .single();
 
     if (error) {
@@ -953,6 +1025,7 @@ export class TransactionsService {
 ```
 
 ### Step 3: Add POST Handler to API Route
+
 **File**: `src/pages/api/transactions.ts`
 
 ```typescript
@@ -974,18 +1047,12 @@ const CreateTransactionSchema = z.object({
     .string({ required_error: "Date is required" })
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
     .refine((date) => !isNaN(Date.parse(date)), "Invalid date"),
-  categoryId: z
-    .string({ required_error: "Category ID is required" })
-    .uuid("Category ID must be a valid UUID"),
+  categoryId: z.string({ required_error: "Category ID is required" }).uuid("Category ID must be a valid UUID"),
   type: z.enum(["income", "expense"], {
     required_error: "Type is required",
     invalid_type_error: "Type must be either 'income' or 'expense'",
   }),
-  note: z
-    .string()
-    .max(500, "Note must be at most 500 characters")
-    .optional()
-    .nullable(),
+  note: z.string().max(500, "Note must be at most 500 characters").optional().nullable(),
 });
 
 export const POST: APIRoute = async ({ request, locals }) => {
@@ -1053,16 +1120,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const validData = validationResult.data;
 
     // 4. Call service layer
-    const transaction = await TransactionsService.createTransaction(
-      locals.supabase,
-      {
-        amount: validData.amount,
-        date: validData.date,
-        categoryId: validData.categoryId,
-        type: validData.type,
-        note: validData.note,
-      }
-    );
+    const transaction = await TransactionsService.createTransaction(locals.supabase, {
+      amount: validData.amount,
+      date: validData.date,
+      categoryId: validData.categoryId,
+      type: validData.type,
+      note: validData.note,
+    });
 
     // 5. Return success response
     return new Response(JSON.stringify(transaction), {
@@ -1102,6 +1166,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 ```
 
 ### Step 4: Test Authentication
+
 - **Valid Token**: Test with authenticated user → expect 201
 - **Missing Token**: Test without Authorization header → expect 401
 - **Invalid Token**: Test with malformed token → expect 401
@@ -1110,6 +1175,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 ### Step 5: Test Validation
 
 #### Amount Validation
+
 - Missing amount → 400
 - amount = 0 → 400 "must be positive"
 - amount = -50 → 400 "must be positive"
@@ -1118,6 +1184,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 - amount = 100 → ✓
 
 #### Date Validation
+
 - Missing date → 400
 - date = "13/10/2025" → 400 "must be in YYYY-MM-DD format"
 - date = "2025-13-01" → 400 "Invalid date"
@@ -1125,12 +1192,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
 - date = "2025-10-13" → ✓
 
 #### CategoryId Validation
+
 - Missing categoryId → 400
 - categoryId = "invalid" → 400 "must be a valid UUID"
 - categoryId = "123" → 400 "must be a valid UUID"
 - categoryId = valid UUID → ✓
 
 #### Type Validation
+
 - Missing type → 400
 - type = "payment" → 400 "must be either 'income' or 'expense'"
 - type = "INCOME" → 400 (case sensitive)
@@ -1138,6 +1207,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 - type = "expense" → ✓
 
 #### Note Validation
+
 - note = 501 chars → 400 "at most 500 characters"
 - note = 500 chars → ✓
 - note = null → ✓
@@ -1146,11 +1216,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
 ### Step 6: Test Business Logic
 
 #### Category Ownership
+
 - Create transaction with user's own category → ✓ 201
 - Create transaction with non-existent categoryId → 422
 - Create transaction with another user's category → 422
 
 #### User Ownership
+
 - Transaction is created with authenticated user's ID
 - Verify user_id is not in response
 - Verify only user can see their transaction
@@ -1158,6 +1230,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 ### Step 7: Test Response Format
 
 #### Success Response
+
 - Status code is 201
 - Response contains all required fields
 - `id` is a valid UUID
@@ -1169,6 +1242,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 - `note` preserved as sent (or null)
 
 #### Error Responses
+
 - 400 has error, message, details
 - 401 has error, message
 - 422 has error, message
@@ -1178,6 +1252,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 ### Step 8: Test Database State
 
 #### After Successful Creation
+
 - Transaction exists in database
 - `user_id` matches authenticated user
 - `category_id` matches provided categoryId
@@ -1186,6 +1261,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 - `id` is generated automatically
 
 #### After Failed Creation
+
 - No transaction created on validation failure
 - No transaction created on 422 error
 - Database state unchanged
@@ -1193,6 +1269,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 ### Step 9: Integration Testing
 
 #### Complete Flow
+
 - Send valid POST request
 - Verify 201 response
 - Verify transaction in database
@@ -1200,6 +1277,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 - Verify it appears in GET /dashboard summary
 
 #### Multiple Transactions
+
 - Create multiple transactions
 - Verify all are created independently
 - Verify no interference between requests
@@ -1207,6 +1285,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 ### Step 10: Edge Cases
 
 #### Boundary Values
+
 - amount = 0.01 (minimum)
 - amount = 99999999.99 (large value)
 - note = empty string ""
@@ -1216,6 +1295,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 - date = far future (2099-12-31)
 
 #### Special Characters
+
 - note with unicode: "Coffee ☕"
 - note with quotes: 'Buy "headphones"'
 - note with newlines (should be allowed)
@@ -1223,43 +1303,51 @@ export const POST: APIRoute = async ({ request, locals }) => {
 ### Step 11: Performance Testing
 
 #### Single Insert
+
 - Measure time for single transaction creation
 - Should be < 200ms
 
 #### Concurrent Inserts
+
 - Create multiple transactions simultaneously
 - Verify all succeed
 - Verify no race conditions
 - Verify UUIDs are unique
 
 #### Large Amounts
+
 - Test with very large amounts (within NUMERIC(10,2) range)
 - Verify precision maintained
 
 ### Step 12: Error Recovery
 
 #### Database Errors
+
 - Simulate database connection failure
 - Verify 500 error returned
 - Verify error logged
 - Verify no partial data created
 
 #### Network Errors
+
 - Test with interrupted request
 - Verify proper error handling
 
 ### Step 13: Security Testing
 
 #### SQL Injection Attempts
+
 - note = "'; DROP TABLE transactions; --"
 - Verify parameterized query prevents injection
 
 #### Category Hijacking
+
 - Try to create transaction with another user's category
 - Verify 422 error
 - Verify transaction not created
 
 #### User ID Manipulation
+
 - Try to send user_id in request body
 - Verify it's ignored (not in schema)
 - Verify authenticated user's ID is used
@@ -1267,18 +1355,21 @@ export const POST: APIRoute = async ({ request, locals }) => {
 ### Step 14: Code Quality
 
 #### Type Safety
+
 - All types properly defined
 - No `any` types
 - DTOs match specification
 - Service returns correct type
 
 #### Error Handling
+
 - All error paths covered
 - Consistent error format
 - Helpful error messages
 - Proper logging
 
 #### Code Organization
+
 - Validation schema separate
 - Service layer handles business logic
 - Route handler handles HTTP concerns
@@ -1287,12 +1378,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
 ### Step 15: Documentation
 
 #### Code Comments
+
 - JSDoc for service method
 - Explain validation rules
 - Document error codes
 - Add usage examples
 
 #### API Documentation
+
 - Update API docs with examples
 - Document all error scenarios
 - Include curl examples
@@ -1303,6 +1396,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 ## 10. Testing Checklist
 
 ### Unit Tests (Service Layer)
+
 - [ ] Creates transaction successfully with valid data
 - [ ] Sets user_id from authenticated user
 - [ ] Maps categoryId to category_id correctly
@@ -1314,6 +1408,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 - [ ] Throws error on database failure
 
 ### Integration Tests (API Route)
+
 - [ ] Returns 401 when not authenticated
 - [ ] Returns 400 for invalid JSON body
 - [ ] Returns 400 for missing required fields
@@ -1328,6 +1423,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 - [ ] Response matches CreateTransactionResponseDto structure
 
 ### Database Tests
+
 - [ ] Transaction inserted with correct user_id
 - [ ] Transaction inserted with correct category_id
 - [ ] All fields stored correctly
@@ -1338,6 +1434,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 - [ ] ENUM constraint enforces valid type
 
 ### End-to-End Tests
+
 - [ ] Full request from client creates transaction
 - [ ] Created transaction appears in GET /transactions
 - [ ] Created transaction affects GET /dashboard summary
@@ -1349,12 +1446,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
 ## 11. Future Enhancements
 
 ### Validation Improvements
+
 1. **Date Range Validation**: Prevent future dates if desired
 2. **Amount Limits**: Set reasonable max amounts per transaction
 3. **Duplicate Detection**: Warn if similar transaction created recently
 4. **Category Suggestions**: Suggest category based on note content
 
 ### Feature Additions
+
 1. **Bulk Create**: Create multiple transactions at once
 2. **Recurring Transactions**: Template for repeated transactions
 3. **Attachments**: Support receipt/invoice attachments
@@ -1362,12 +1461,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
 5. **Geolocation**: Optional location data for transaction
 
 ### Business Logic
+
 1. **Budget Warnings**: Check if transaction exceeds budget
 2. **Category Auto-Assignment**: ML-based category suggestions
 3. **Duplicate Prevention**: Detect and prevent duplicate transactions
 4. **Audit Trail**: Track who created transaction and when
 
 ### API Improvements
+
 1. **Batch Operations**: Create multiple transactions in one request
 2. **Idempotency**: Support idempotency keys to prevent duplicates
 3. **Webhooks**: Trigger webhooks on transaction creation
@@ -1378,7 +1479,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
 ## Appendix A: Example Requests and Responses
 
 ### Successful Creation
+
 **Request:**
+
 ```bash
 POST /api/transactions
 Content-Type: application/json
@@ -1394,6 +1497,7 @@ Authorization: Bearer <JWT_TOKEN>
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": "d4e9b2e5-c9f1-5c2b-ab2b-a0g8b8e8f8f8",
@@ -1410,7 +1514,9 @@ Authorization: Bearer <JWT_TOKEN>
 ```
 
 ### Missing Required Field
+
 **Request:**
+
 ```bash
 POST /api/transactions
 
@@ -1421,6 +1527,7 @@ POST /api/transactions
 ```
 
 **Response (400 Bad Request):**
+
 ```json
 {
   "error": "Bad Request",
@@ -1433,7 +1540,9 @@ POST /api/transactions
 ```
 
 ### Invalid Amount
+
 **Request:**
+
 ```bash
 POST /api/transactions
 
@@ -1446,6 +1555,7 @@ POST /api/transactions
 ```
 
 **Response (400 Bad Request):**
+
 ```json
 {
   "error": "Bad Request",
@@ -1457,7 +1567,9 @@ POST /api/transactions
 ```
 
 ### Invalid Category
+
 **Request:**
+
 ```bash
 POST /api/transactions
 
@@ -1470,6 +1582,7 @@ POST /api/transactions
 ```
 
 **Response (422 Unprocessable Entity):**
+
 ```json
 {
   "error": "Unprocessable Entity",
@@ -1480,4 +1593,3 @@ POST /api/transactions
 ---
 
 This implementation plan provides comprehensive guidance for implementing the POST /transactions endpoint. Follow the steps sequentially, test thoroughly at each stage, and ensure all security and validation considerations are properly addressed.
-

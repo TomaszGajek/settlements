@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
+    "dev:e2e": "astro dev --port 4322",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
@@ -22,6 +23,7 @@
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:codegen": "playwright codegen http://localhost:4321",
     "test:e2e:report": "playwright show-report playwright-report",
+    "test:e2e:cleanup": "tsx tests/setup/cleanup-test-data.ts",
     "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e"
   },
   "dependencies": {
@@ -64,6 +66,8 @@
     "@eslint/compat": "1.2.7",
     "@eslint/js": "9.23.0",
     "@playwright/test": "^1.56.1",
+    "dotenv": "^16.4.5",
+    "tsx": "^4.19.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",

@@ -16,4 +16,3 @@ export function useCategories() {
     refetchOnWindowFocus: false,
   });
 }
-

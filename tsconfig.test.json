@@ -6,4 +6,3 @@
   "include": ["tests/**/*", "src/**/*"],
   "exclude": ["node_modules", "dist", ".astro"]
 }
-

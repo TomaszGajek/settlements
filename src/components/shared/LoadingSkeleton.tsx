@@ -98,4 +98,3 @@ export const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({ variant, count
       return null;
   }
 };
-

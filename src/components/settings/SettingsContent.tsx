@@ -55,12 +55,11 @@ export const SettingsContent: React.FC = () => {
   });
 
   // Delete category dialog state
-  const [deleteCategoryDialogState, setDeleteCategoryDialogState] =
-    useState<DeleteCategoryDialogState>({
-      isOpen: false,
-      category: null,
-      transactionCount: 0,
-    });
+  const [deleteCategoryDialogState, setDeleteCategoryDialogState] = useState<DeleteCategoryDialogState>({
+    isOpen: false,
+    category: null,
+    transactionCount: 0,
+  });
 
   // Delete account dialog state
   const [deleteAccountDialogOpen, setDeleteAccountDialogOpen] = useState(false);
@@ -130,11 +129,10 @@ export const SettingsContent: React.FC = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-100">Kategorie</h2>
             <p className="text-sm text-gray-400 mt-1">
-              Zarządzaj kategoriami transakcji. Kategoria "Inne" jest systemowa i nie
-              może być usunięta.
+              Zarządzaj kategoriami transakcji. Kategoria "Inne" jest systemowa i nie może być usunięta.
             </p>
           </div>
-          <Button onClick={handleAddCategory} aria-label="Dodaj kategorię">
+          <Button onClick={handleAddCategory} aria-label="Dodaj kategorię" data-testid="add-category-button">
             <Plus className="w-4 h-4 mr-2" />
             Dodaj kategorię
           </Button>
@@ -158,9 +156,7 @@ export const SettingsContent: React.FC = () => {
         {/* Section Header */}
         <div>
           <h2 className="text-2xl font-bold text-gray-100">Konto</h2>
-          <p className="text-sm text-gray-400 mt-1">
-            Usuń swoje konto i wszystkie powiązane dane.
-          </p>
+          <p className="text-sm text-gray-400 mt-1">Usuń swoje konto i wszystkie powiązane dane.</p>
         </div>
 
         {/* Delete Account Section */}
@@ -184,11 +180,7 @@ export const SettingsContent: React.FC = () => {
         isDeleting={deleteMutation.isPending}
       />
 
-      <DeleteAccountDialog
-        isOpen={deleteAccountDialogOpen}
-        onClose={() => setDeleteAccountDialogOpen(false)}
-      />
+      <DeleteAccountDialog isOpen={deleteAccountDialogOpen} onClose={() => setDeleteAccountDialogOpen(false)} />
     </div>
   );
 };
-

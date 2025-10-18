@@ -135,4 +135,3 @@ export interface EmptyStateProps {
   onAction?: () => void;
   illustration?: React.ReactNode;
 }
-

@@ -22,4 +22,3 @@ export { AmountInput } from "./AmountInput";
 export { DatePickerField } from "./DatePickerField";
 export { CategorySelect } from "./CategorySelect";
 export { NoteTextarea } from "./NoteTextarea";
-

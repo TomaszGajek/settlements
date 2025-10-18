@@ -164,10 +164,10 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({ mode, form, on
 
         {/* Action Buttons */}
         <div className="flex justify-end gap-3 pt-4">
-          <Button type="button" variant="ghost" onClick={onCancel} disabled={isSubmitting}>
+          <Button type="button" variant="ghost" onClick={onCancel} disabled={isSubmitting} data-testid="transaction-form-cancel">
             Anuluj
           </Button>
-          <Button type="submit" disabled={isSubmitting || !form.formState.isValid}>
+          <Button type="submit" disabled={isSubmitting || !form.formState.isValid} data-testid="transaction-form-submit">
             {isSubmitting ? (
               <>
                 <span className="mr-2">Zapisywanie...</span>
@@ -182,4 +182,3 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({ mode, form, on
     </Form>
   );
 };
-

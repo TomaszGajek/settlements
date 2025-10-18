@@ -39,9 +39,7 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({
 
     // Separate system categories (non-deletable) from user categories
     const systemCategories = categories.filter((c) => !c.isDeletable);
-    const userCategories = categories
-      .filter((c) => c.isDeletable)
-      .sort((a, b) => a.name.localeCompare(b.name, "pl"));
+    const userCategories = categories.filter((c) => c.isDeletable).sort((a, b) => a.name.localeCompare(b.name, "pl"));
 
     // Return user categories first, then system categories
     return [...userCategories, ...systemCategories];
@@ -93,4 +91,3 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({
     </div>
   );
 };
-

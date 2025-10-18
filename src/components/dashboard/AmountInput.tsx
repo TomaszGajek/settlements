@@ -87,6 +87,7 @@ export const AmountInput: React.FC<AmountInputProps> = ({ value, onChange, error
         onChange={handleChange}
         onBlur={handleBlur}
         disabled={disabled}
+        data-testid="transaction-amount-input"
         aria-label="Kwota transakcji"
         aria-required="true"
         aria-invalid={!!error}
@@ -99,4 +100,3 @@ export const AmountInput: React.FC<AmountInputProps> = ({ value, onChange, error
     </div>
   );
 };
-

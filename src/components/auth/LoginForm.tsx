@@ -36,10 +36,10 @@ function mapSupabaseError(error: unknown): string {
 export function LoginForm({ defaultEmail, onSuccess }: LoginFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [shouldRedirect, setShouldRedirect] = useState(false);
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginFormSchema),
+    mode: "onChange", // Enable real-time validation
     defaultValues: {
       email: defaultEmail || "",
       password: "",
@@ -54,14 +54,21 @@ export function LoginForm({ defaultEmail, onSuccess }: LoginFormProps) {
     }
   }, [defaultEmail]);
 
-  // Handle redirect after successful login
+  // Listen for auth state changes and redirect when session is established
   useEffect(() => {
-    if (shouldRedirect) {
-      const now = new Date();
-      const dashboardUrl = `/dashboard?month=${now.getMonth() + 1}&year=${now.getFullYear()}`;
-      window.location.href = dashboardUrl;
-    }
-  }, [shouldRedirect]);
+    const {
+      data: { subscription },
+    } = supabaseClient.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session) {
+        // Session is now established, safe to redirect
+        const now = new Date();
+        const dashboardUrl = `/dashboard?month=${now.getMonth() + 1}&year=${now.getFullYear()}`;
+        window.location.href = dashboardUrl;
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const onSubmit = async (data: LoginFormData) => {
     setError(null);
@@ -79,13 +86,12 @@ export function LoginForm({ defaultEmail, onSuccess }: LoginFormProps) {
 
       toast.success("Zalogowano pomyślnie! Przekierowywanie...");
 
-      // Redirect do dashboard (handled by middleware/auth state change)
+      // Redirect will be handled by onAuthStateChange listener
+      // The SIGNED_IN event will trigger automatic redirect to dashboard
       if (onSuccess) {
         onSuccess();
-      } else {
-        // Trigger redirect via effect
-        setShouldRedirect(true);
       }
+      // Don't set isSubmitting to false here - let the redirect happen
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Wystąpił nieoczekiwany błąd";
       setError(errorMessage);

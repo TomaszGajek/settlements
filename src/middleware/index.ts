@@ -7,7 +7,7 @@ const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
 // Public paths that don't require authentication
-const publicPaths = ["/", "/reset-password"];
+const publicPaths = ["/", "/reset-password", "/reset-password/confirm"];
 
 // API paths that need special handling
 const apiPaths = ["/api/"];

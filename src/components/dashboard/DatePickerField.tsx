@@ -74,6 +74,7 @@ export const DatePickerField: React.FC<DatePickerFieldProps> = ({
             error && "border-red-500"
           )}
           disabled={disabled}
+          data-testid="transaction-date-picker"
           aria-label="Wybierz datę transakcji"
           aria-required="true"
           aria-invalid={!!error}
@@ -104,4 +105,3 @@ export const DatePickerField: React.FC<DatePickerFieldProps> = ({
     </Popover>
   );
 };
-

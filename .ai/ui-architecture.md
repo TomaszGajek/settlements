@@ -903,6 +903,7 @@ index.astro
 ### 5.4. Shared Components Specifications
 
 #### Header.tsx
+
 ```typescript
 interface HeaderProps {
   // No props - gets auth state from context
@@ -922,6 +923,7 @@ Layout:
 ```
 
 #### LoadingSkeleton.tsx
+
 ```typescript
 interface LoadingSkeletonProps {
   variant: 'cards' | 'chart' | 'list' | 'table';
@@ -936,6 +938,7 @@ Purpose:
 ```
 
 #### EmptyState.tsx
+
 ```typescript
 interface EmptyStateProps {
   title: string;
@@ -981,6 +984,7 @@ interface AuthContextValue {
 ```
 
 **Usage**:
+
 ```typescript
 const { user, signOut } = useAuth();
 ```
@@ -990,6 +994,7 @@ const { user, signOut } = useAuth();
 **Library**: React Query (TanStack Query)
 
 **Configuration**:
+
 ```typescript
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -1004,18 +1009,19 @@ const queryClient = new QueryClient({
 ```
 
 **Query Keys Structure**:
+
 ```typescript
 // Dashboard
-['dashboard', { month, year }]
-
-// Transactions
-['transactions', { month, year, page }]
-
-// Categories
-['categories']
-
-// User profile
-['profile', userId]
+["dashboard", { month, year }][
+  // Transactions
+  ("transactions", { month, year, page })
+][
+  // Categories
+  "categories"
+][
+  // User profile
+  ("profile", userId)
+];
 ```
 
 **Custom Hooks**:
@@ -1024,7 +1030,7 @@ const queryClient = new QueryClient({
 // useDashboard.ts
 function useDashboard(month: number, year: number) {
   return useQuery({
-    queryKey: ['dashboard', { month, year }],
+    queryKey: ["dashboard", { month, year }],
     queryFn: () => fetchDashboard(month, year),
     staleTime: 30_000,
   });
@@ -1033,13 +1039,10 @@ function useDashboard(month: number, year: number) {
 // useTransactions.ts
 function useTransactions(month: number, year: number) {
   return useInfiniteQuery({
-    queryKey: ['transactions', { month, year }],
-    queryFn: ({ pageParam = 1 }) => 
-      fetchTransactions(month, year, pageParam),
-    getNextPageParam: (lastPage) => 
-      lastPage.pagination.page < lastPage.pagination.totalPages
-        ? lastPage.pagination.page + 1
-        : undefined,
+    queryKey: ["transactions", { month, year }],
+    queryFn: ({ pageParam = 1 }) => fetchTransactions(month, year, pageParam),
+    getNextPageParam: (lastPage) =>
+      lastPage.pagination.page < lastPage.pagination.totalPages ? lastPage.pagination.page + 1 : undefined,
     staleTime: 30_000,
   });
 }
@@ -1047,7 +1050,7 @@ function useTransactions(month: number, year: number) {
 // useCategories.ts
 function useCategories() {
   return useQuery({
-    queryKey: ['categories'],
+    queryKey: ["categories"],
     queryFn: fetchCategories,
     staleTime: 300_000, // 5min - categories change rarely
   });
@@ -1056,34 +1059,34 @@ function useCategories() {
 // useTransactionMutations.ts
 function useTransactionMutations() {
   const queryClient = useQueryClient();
-  
+
   const createMutation = useMutation({
     mutationFn: createTransaction,
     onMutate: async (newTransaction) => {
       // Optimistic update
-      await queryClient.cancelQueries(['transactions']);
-      const previous = queryClient.getQueryData(['transactions']);
-      
-      queryClient.setQueryData(['transactions'], (old) => ({
+      await queryClient.cancelQueries(["transactions"]);
+      const previous = queryClient.getQueryData(["transactions"]);
+
+      queryClient.setQueryData(["transactions"], (old) => ({
         ...old,
-        pages: [[newTransaction, ...old.pages[0]], ...old.pages.slice(1)]
+        pages: [[newTransaction, ...old.pages[0]], ...old.pages.slice(1)],
       }));
-      
+
       return { previous };
     },
     onError: (err, variables, context) => {
       // Rollback
-      queryClient.setQueryData(['transactions'], context.previous);
+      queryClient.setQueryData(["transactions"], context.previous);
     },
     onSettled: () => {
       // Refetch to ensure consistency
-      queryClient.invalidateQueries(['transactions']);
-      queryClient.invalidateQueries(['dashboard']);
+      queryClient.invalidateQueries(["transactions"]);
+      queryClient.invalidateQueries(["dashboard"]);
     },
   });
-  
+
   // Similar for update and delete...
-  
+
   return { createMutation, updateMutation, deleteMutation };
 }
 ```
@@ -1107,26 +1110,33 @@ function useDatePeriod(): {
 } {
   // Read from URL search params
   const [searchParams, setSearchParams] = useSearchParams();
-  
-  const period = useMemo(() => ({
-    month: parseInt(searchParams.get('month') || getCurrentMonth()),
-    year: parseInt(searchParams.get('year') || getCurrentYear()),
-  }), [searchParams]);
-  
-  const setPeriod = useCallback((newPeriod: DatePeriod) => {
-    setSearchParams({ 
-      month: newPeriod.month.toString(), 
-      year: newPeriod.year.toString() 
-    });
-  }, [setSearchParams]);
-  
+
+  const period = useMemo(
+    () => ({
+      month: parseInt(searchParams.get("month") || getCurrentMonth()),
+      year: parseInt(searchParams.get("year") || getCurrentYear()),
+    }),
+    [searchParams]
+  );
+
+  const setPeriod = useCallback(
+    (newPeriod: DatePeriod) => {
+      setSearchParams({
+        month: newPeriod.month.toString(),
+        year: newPeriod.year.toString(),
+      });
+    },
+    [setSearchParams]
+  );
+
   // Helper methods...
-  
+
   return { period, setPeriod, nextMonth, prevMonth, setYear };
 }
 ```
 
 **Benefits**:
+
 - Deep linking support
 - Browser back/forward works
 - State persists on refresh
@@ -1137,6 +1147,7 @@ function useDatePeriod(): {
 **Pattern**: `useState` for component-only state
 
 Examples:
+
 - Modal open/close state
 - Form field values (managed by React Hook Form)
 - Dropdown open state
@@ -1156,16 +1167,14 @@ interface Preferences {
 }
 
 function usePreferences() {
-  const [prefs, setPrefs] = useState<Preferences>(() => 
-    loadFromLocalStorage('settlements:preferences')
-  );
-  
+  const [prefs, setPrefs] = useState<Preferences>(() => loadFromLocalStorage("settlements:preferences"));
+
   const updatePreference = (key: keyof Preferences, value: any) => {
     const updated = { ...prefs, [key]: value };
     setPrefs(updated);
-    saveToLocalStorage('settlements:preferences', updated);
+    saveToLocalStorage("settlements:preferences", updated);
   };
-  
+
   return { prefs, updatePreference };
 }
 ```
@@ -1244,16 +1253,17 @@ onSettled (always runs)
 
 **After mutations**:
 
-| Mutation | Invalidate Queries |
-|----------|-------------------|
-| Create Transaction | `transactions`, `dashboard` |
-| Update Transaction | `transactions`, `dashboard` |
-| Delete Transaction | `transactions`, `dashboard` |
-| Create Category | `categories` |
-| Update Category | `categories`, `transactions` (shows new name) |
-| Delete Category | `categories`, `transactions`, `dashboard` |
+| Mutation           | Invalidate Queries                            |
+| ------------------ | --------------------------------------------- |
+| Create Transaction | `transactions`, `dashboard`                   |
+| Update Transaction | `transactions`, `dashboard`                   |
+| Delete Transaction | `transactions`, `dashboard`                   |
+| Create Category    | `categories`                                  |
+| Update Category    | `categories`, `transactions` (shows new name) |
+| Delete Category    | `categories`, `transactions`, `dashboard`     |
 
 **Manual invalidation**:
+
 - User clicks refresh (future feature)
 - Window regains focus (if stale > 30s)
 - Network reconnects after offline
@@ -1266,90 +1276,78 @@ onSettled (always runs)
 
 ```typescript
 class ApiClient {
-  private baseURL = '/api';
-  
-  async request<T>(
-    endpoint: string,
-    options?: RequestInit
-  ): Promise<T> {
+  private baseURL = "/api";
+
+  async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    
+
     try {
       const response = await fetch(url, {
         ...options,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           ...options?.headers,
         },
       });
-      
+
       // Handle different status codes
       if (response.status === 401) {
         // Unauthorized - redirect to login
-        window.location.href = '/?reason=session_expired';
-        throw new Error('Unauthorized');
+        window.location.href = "/?reason=session_expired";
+        throw new Error("Unauthorized");
       }
-      
+
       if (response.status === 403) {
-        throw new ApiError('Brak uprawnień', 403);
+        throw new ApiError("Brak uprawnień", 403);
       }
-      
+
       if (response.status === 404) {
-        throw new ApiError('Nie znaleziono zasobu', 404);
+        throw new ApiError("Nie znaleziono zasobu", 404);
       }
-      
+
       if (response.status >= 500) {
-        throw new ApiError('Błąd serwera', response.status);
+        throw new ApiError("Błąd serwera", response.status);
       }
-      
+
       if (!response.ok) {
         const error = await response.json();
-        throw new ApiError(
-          error.message || 'Wystąpił błąd',
-          response.status,
-          error.errors
-        );
+        throw new ApiError(error.message || "Wystąpił błąd", response.status, error.errors);
       }
-      
+
       // Success - return data
       if (response.status === 204) {
         return undefined as T; // No content
       }
-      
+
       return await response.json();
-      
     } catch (error) {
       if (error instanceof ApiError) throw error;
-      
+
       // Network error
-      throw new ApiError(
-        'Sprawdź połączenie internetowe',
-        0,
-        { network: 'offline' }
-      );
+      throw new ApiError("Sprawdź połączenie internetowe", 0, { network: "offline" });
     }
   }
-  
+
   get<T>(endpoint: string) {
-    return this.request<T>(endpoint, { method: 'GET' });
+    return this.request<T>(endpoint, { method: "GET" });
   }
-  
+
   post<T>(endpoint: string, data: any) {
     return this.request<T>(endpoint, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(data),
     });
   }
-  
+
   patch<T>(endpoint: string, data: any) {
     return this.request<T>(endpoint, {
-      method: 'PATCH',
+      method: "PATCH",
       body: JSON.stringify(data),
     });
   }
-  
+
   delete<T>(endpoint: string) {
-    return this.request<T>(endpoint, { method: 'DELETE' });
+    return this.request<T>(endpoint, { method: "DELETE" });
   }
 }
 
@@ -1361,25 +1359,17 @@ export const apiClient = new ApiClient();
 ```typescript
 // src/lib/services/transactions.service.ts
 
-export async function fetchTransactions(
-  month: number,
-  year: number,
-  page: number = 1,
-  pageSize: number = 20
-) {
+export async function fetchTransactions(month: number, year: number, page: number = 1, pageSize: number = 20) {
   return apiClient.get<TransactionsResponse>(
     `/transactions?month=${month}&year=${year}&page=${page}&pageSize=${pageSize}`
   );
 }
 
 export async function createTransaction(data: CreateTransactionDto) {
-  return apiClient.post<Transaction>('/transactions', data);
+  return apiClient.post<Transaction>("/transactions", data);
 }
 
-export async function updateTransaction(
-  id: string,
-  data: UpdateTransactionDto
-) {
+export async function updateTransaction(id: string, data: UpdateTransactionDto) {
   return apiClient.patch<Transaction>(`/transactions/${id}`, data);
 }
 
@@ -1397,34 +1387,24 @@ export async function deleteTransaction(id: string) {
 ```typescript
 // src/lib/schemas/transaction.schema.ts
 
-import { z } from 'zod';
+import { z } from "zod";
 
 export const transactionSchema = z.object({
   amount: z
-    .number({ required_error: 'Kwota jest wymagana' })
-    .positive('Kwota musi być większa od 0')
-    .max(999999999.99, 'Kwota jest zbyt duża')
-    .refine(
-      (val) => /^\d+(\.\d{1,2})?$/.test(val.toString()),
-      'Maksymalnie 2 miejsca po przecinku'
-    ),
-  
-  date: z
-    .string({ required_error: 'Data jest wymagana' })
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Nieprawidłowy format daty'),
-  
-  type: z.enum(['income', 'expense'], {
-    required_error: 'Typ jest wymagany',
+    .number({ required_error: "Kwota jest wymagana" })
+    .positive("Kwota musi być większa od 0")
+    .max(999999999.99, "Kwota jest zbyt duża")
+    .refine((val) => /^\d+(\.\d{1,2})?$/.test(val.toString()), "Maksymalnie 2 miejsca po przecinku"),
+
+  date: z.string({ required_error: "Data jest wymagana" }).regex(/^\d{4}-\d{2}-\d{2}$/, "Nieprawidłowy format daty"),
+
+  type: z.enum(["income", "expense"], {
+    required_error: "Typ jest wymagany",
   }),
-  
-  categoryId: z
-    .string({ required_error: 'Kategoria jest wymagana' })
-    .uuid('Nieprawidłowa kategoria'),
-  
-  note: z
-    .string()
-    .max(500, 'Notatka może mieć maksymalnie 500 znaków')
-    .optional(),
+
+  categoryId: z.string({ required_error: "Kategoria jest wymagana" }).uuid("Nieprawidłowa kategoria"),
+
+  note: z.string().max(500, "Notatka może mieć maksymalnie 500 znaków").optional(),
 });
 
 export type TransactionFormData = z.infer<typeof transactionSchema>;
@@ -1439,11 +1419,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { transactionSchema } from '@/lib/schemas';
 
-function TransactionModal({ 
-  mode, 
-  transaction, 
-  isOpen, 
-  onClose 
+function TransactionModal({
+  mode,
+  transaction,
+  isOpen,
+  onClose
 }: TransactionModalProps) {
   const form = useForm<TransactionFormData>({
     resolver: zodResolver(transactionSchema),
@@ -1458,9 +1438,9 @@ function TransactionModal({
       date: format(new Date(), 'yyyy-MM-dd'),
     },
   });
-  
+
   const { createMutation, updateMutation } = useTransactionMutations();
-  
+
   const onSubmit = (data: TransactionFormData) => {
     if (mode === 'create') {
       createMutation.mutate(data, {
@@ -1476,7 +1456,7 @@ function TransactionModal({
       );
     }
   };
-  
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <Form {...form}>
@@ -1496,18 +1476,21 @@ function TransactionModal({
 ### 10.1. Code Splitting Strategy
 
 **Route-level** (automatic with Astro):
+
 - `/` bundle
 - `/dashboard` bundle (largest)
 - `/settings` bundle
 
 **Component-level** (manual lazy loading):
+
 ```typescript
-const TransactionModal = lazy(() => import('./TransactionModal'));
-const DailyChart = lazy(() => import('./DailyChart'));
-const CategoryModal = lazy(() => import('./CategoryModal'));
+const TransactionModal = lazy(() => import("./TransactionModal"));
+const DailyChart = lazy(() => import("./DailyChart"));
+const CategoryModal = lazy(() => import("./CategoryModal"));
 ```
 
 **Library-level** (tree-shaking):
+
 - Lucide React icons: named imports only
 - date-fns: import individual functions
 - Recharts: code-split with lazy()
@@ -1515,12 +1498,14 @@ const CategoryModal = lazy(() => import('./CategoryModal'));
 ### 10.2. Caching Strategy
 
 **Browser HTTP Cache**:
+
 ```
 Static assets: Cache-Control: public, max-age=31536000, immutable
 API responses: Cache-Control: private, no-cache
 ```
 
 **React Query Cache**:
+
 ```typescript
 {
   staleTime: {
@@ -1535,6 +1520,7 @@ API responses: Cache-Control: private, no-cache
 ```
 
 **Prefetching**:
+
 - Next month data on hover (100ms delay)
 - Categories on "Add Transaction" hover
 - Page 2 of transactions at 50% scroll
@@ -1542,18 +1528,20 @@ API responses: Cache-Control: private, no-cache
 ### 10.3. Rendering Optimizations
 
 **Virtualization**: NOT needed for MVP
+
 - Lists capped at reasonable sizes (<100 items per page)
 - Infinite scroll pagination handles large datasets
 
 **Memoization**:
+
 ```typescript
 const MemoizedTransactionItem = memo(TransactionItem, (prev, next) => {
-  return prev.transaction.id === next.transaction.id &&
-         prev.transaction.updatedAt === next.transaction.updatedAt;
+  return prev.transaction.id === next.transaction.id && prev.transaction.updatedAt === next.transaction.updatedAt;
 });
 ```
 
 **Debouncing/Throttling**:
+
 - Search inputs: 300ms debounce
 - Scroll events: throttled
 - Window resize: throttled (for chart)
@@ -1565,6 +1553,7 @@ const MemoizedTransactionItem = memo(TransactionItem, (prev, next) => {
 ### 11.1. WCAG 2.1 Level AA Compliance
 
 **Keyboard Navigation**:
+
 - All interactive elements reachable by Tab
 - Visible focus indicators (ring-2 ring-offset-2)
 - Modal focus trap
@@ -1572,6 +1561,7 @@ const MemoizedTransactionItem = memo(TransactionItem, (prev, next) => {
 - Arrow keys for navigation (month/year, list items)
 
 **Screen Reader Support**:
+
 - Semantic HTML (`<header>`, `<main>`, `<nav>`, `<section>`)
 - ARIA labels on icon-only buttons
 - ARIA live regions for toasts (`aria-live="polite"`)
@@ -1579,18 +1569,21 @@ const MemoizedTransactionItem = memo(TransactionItem, (prev, next) => {
 - Error announcements
 
 **Color Contrast**:
+
 - Text: minimum 4.5:1 ratio
 - Large text (18pt+): minimum 3:1
 - UI components: minimum 3:1
 - Test with Chrome DevTools contrast checker
 
 **Focus Management**:
+
 - Modal open → focus first field
 - Modal close → return focus to trigger
 - Delete item → focus next item or previous
 - Form submit error → focus first invalid field
 
 **Alternative Text**:
+
 - Illustrations: descriptive alt text
 - Icons: aria-label when no visible text
 - Chart: data table alternative (sr-only)
@@ -1615,6 +1608,7 @@ const MemoizedTransactionItem = memo(TransactionItem, (prev, next) => {
 ### 12.1. Error Boundaries
 
 **Component-level**:
+
 ```typescript
 <ErrorBoundary
   fallback={<ErrorFallback />}
@@ -1628,6 +1622,7 @@ const MemoizedTransactionItem = memo(TransactionItem, (prev, next) => {
 ```
 
 **Page-level**:
+
 ```typescript
 // In Layout.astro
 <ErrorBoundary
@@ -1647,6 +1642,7 @@ const MemoizedTransactionItem = memo(TransactionItem, (prev, next) => {
 ### 12.2. API Error Handling
 
 **Error Types**:
+
 ```typescript
 class ApiError extends Error {
   constructor(
@@ -1660,27 +1656,29 @@ class ApiError extends Error {
 ```
 
 **Error Messages Dictionary**:
+
 ```typescript
 // src/lib/errorMessages.ts
 
 export const ERROR_MESSAGES = {
-  NETWORK_ERROR: 'Sprawdź połączenie internetowe',
-  UNAUTHORIZED: 'Sesja wygasła. Zaloguj się ponownie',
-  FORBIDDEN: 'Brak uprawnień do wykonania tej operacji',
-  NOT_FOUND: 'Nie znaleziono zasobu',
-  CONFLICT: 'Konflikt danych. Odśwież i spróbuj ponownie',
-  SERVER_ERROR: 'Błąd serwera. Spróbuj ponownie później',
-  VALIDATION_ERROR: 'Popraw błędy i spróbuj ponownie',
-  
+  NETWORK_ERROR: "Sprawdź połączenie internetowe",
+  UNAUTHORIZED: "Sesja wygasła. Zaloguj się ponownie",
+  FORBIDDEN: "Brak uprawnień do wykonania tej operacji",
+  NOT_FOUND: "Nie znaleziono zasobu",
+  CONFLICT: "Konflikt danych. Odśwież i spróbuj ponownie",
+  SERVER_ERROR: "Błąd serwera. Spróbuj ponownie później",
+  VALIDATION_ERROR: "Popraw błędy i spróbuj ponownie",
+
   // Field-specific
-  CATEGORY_EXISTS: 'Kategoria o tej nazwie już istnieje',
-  CATEGORY_NOT_FOUND: 'Kategoria nie istnieje',
-  INVALID_AMOUNT: 'Kwota musi być większa od 0',
+  CATEGORY_EXISTS: "Kategoria o tej nazwie już istnieje",
+  CATEGORY_NOT_FOUND: "Kategoria nie istnieje",
+  INVALID_AMOUNT: "Kwota musi być większa od 0",
   // ...
 };
 ```
 
 **Global Error Handler** (React Query):
+
 ```typescript
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -1688,10 +1686,10 @@ const queryClient = new QueryClient({
       onError: (error) => {
         if (error instanceof ApiError) {
           toast.error(error.message);
-          
+
           if (error.statusCode === 401) {
             // Redirect to login
-            window.location.href = '/?reason=session_expired';
+            window.location.href = "/?reason=session_expired";
           }
         } else {
           toast.error(ERROR_MESSAGES.NETWORK_ERROR);
@@ -1709,38 +1707,43 @@ const queryClient = new QueryClient({
 ### 13.1. Authentication & Authorization
 
 **JWT Validation**:
+
 - Middleware validates token on every protected route request
 - Token stored in httpOnly cookies (Supabase default)
 - Auto-refresh before expiration
 - Invalidate on logout
 
 **Row-Level Security (RLS)**:
+
 - All database queries filtered by user_id automatically
 - No need for explicit WHERE clauses in API layer
 - Enforced at database level (defense in depth)
 
 **API Endpoint Protection**:
+
 ```typescript
 // src/middleware/index.ts
 
 export async function onRequest(context, next) {
   const { request, url } = context;
-  
+
   // Public routes
-  const publicPaths = ['/', '/reset-password', '/api/auth'];
-  if (publicPaths.some(path => url.pathname.startsWith(path))) {
+  const publicPaths = ["/", "/reset-password", "/api/auth"];
+  if (publicPaths.some((path) => url.pathname.startsWith(path))) {
     return next();
   }
-  
+
   // Protected routes - verify JWT
   const token = getTokenFromRequest(request);
-  const { data: { user } } = await supabase.auth.getUser(token);
-  
+  const {
+    data: { user },
+  } = await supabase.auth.getUser(token);
+
   if (!user) {
     // Redirect to login
-    return Response.redirect(new URL('/', url.origin));
+    return Response.redirect(new URL("/", url.origin));
   }
-  
+
   // Attach user to context
   context.locals.user = user;
   return next();
@@ -1750,12 +1753,14 @@ export async function onRequest(context, next) {
 ### 13.2. Input Validation
 
 **Client-side**:
+
 - Zod schemas for all forms
 - Type coercion and sanitization
 - Max length enforcement
 - Format validation (email, date, UUID)
 
 **Server-side**:
+
 - Re-validate all inputs (never trust client)
 - Parameterized queries (Supabase Client prevents SQL injection)
 - Rate limiting (future enhancement)
@@ -1781,20 +1786,21 @@ export async function onRequest(context, next) {
 **Coverage Goal**: >80% for utils, 100% for critical business logic
 
 **Example**:
+
 ```typescript
 // formatCurrency.test.ts
 
-describe('formatCurrency', () => {
-  it('formats with Polish locale', () => {
-    expect(formatCurrency(1234.56)).toBe('1 234,56 zł');
+describe("formatCurrency", () => {
+  it("formats with Polish locale", () => {
+    expect(formatCurrency(1234.56)).toBe("1 234,56 zł");
   });
-  
-  it('handles zero', () => {
-    expect(formatCurrency(0)).toBe('0,00 zł');
+
+  it("handles zero", () => {
+    expect(formatCurrency(0)).toBe("0,00 zł");
   });
-  
-  it('handles large numbers', () => {
-    expect(formatCurrency(1000000)).toBe('1 000 000,00 zł');
+
+  it("handles large numbers", () => {
+    expect(formatCurrency(1000000)).toBe("1 000 000,00 zł");
   });
 });
 ```
@@ -1806,27 +1812,28 @@ describe('formatCurrency', () => {
 **Tools**: Vitest + MSW (Mock Service Worker)
 
 **Example**:
+
 ```typescript
 // useTransactions.test.ts
 
-describe('useTransactions hook', () => {
-  it('fetches transactions for given month', async () => {
+describe("useTransactions hook", () => {
+  it("fetches transactions for given month", async () => {
     const { result } = renderHook(() => useTransactions(10, 2025));
-    
+
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    
+
     expect(result.current.data.pages[0].transactions).toHaveLength(20);
   });
-  
-  it('handles API errors gracefully', async () => {
+
+  it("handles API errors gracefully", async () => {
     server.use(
-      rest.get('/api/transactions', (req, res, ctx) => {
+      rest.get("/api/transactions", (req, res, ctx) => {
         return res(ctx.status(500));
       })
     );
-    
+
     const { result } = renderHook(() => useTransactions(10, 2025));
-    
+
     await waitFor(() => expect(result.current.isError).toBe(true));
   });
 });
@@ -1839,31 +1846,32 @@ describe('useTransactions hook', () => {
 **Tools**: Vitest + React Testing Library
 
 **Example**:
+
 ```typescript
 // TransactionModal.test.tsx
 
 describe('TransactionModal', () => {
   it('validates required fields', async () => {
     render(<TransactionModal mode="create" isOpen />);
-    
+
     const submitButton = screen.getByRole('button', { name: /zapisz/i });
     fireEvent.click(submitButton);
-    
+
     expect(await screen.findByText(/kwota jest wymagana/i)).toBeInTheDocument();
   });
-  
+
   it('submits form with valid data', async () => {
     const onClose = vi.fn();
     render(<TransactionModal mode="create" isOpen onClose={onClose} />);
-    
+
     await userEvent.type(screen.getByLabelText(/kwota/i), '150.50');
     await userEvent.click(screen.getByLabelText(/data/i));
     await userEvent.click(screen.getByText('15')); // Select day
     await userEvent.click(screen.getByLabelText(/kategoria/i));
     await userEvent.click(screen.getByText('Jedzenie'));
-    
+
     await userEvent.click(screen.getByRole('button', { name: /zapisz/i }));
-    
+
     await waitFor(() => expect(onClose).toHaveBeenCalled());
   });
 });
@@ -1876,43 +1884,45 @@ describe('TransactionModal', () => {
 **Tools**: Playwright
 
 **Scenarios**:
+
 1. Complete signup → add transaction → view on list → logout
 2. Login → navigate months → edit transaction → verify changes
 3. Login → create category → delete category → verify reassignment to "Inne"
 4. Login → delete account → verify complete removal
 
 **Example**:
+
 ```typescript
 // e2e/transaction-flow.spec.ts
 
-test('user can add and view transaction', async ({ page }) => {
+test("user can add and view transaction", async ({ page }) => {
   // Login
-  await page.goto('/');
-  await page.fill('[name="email"]', 'test@example.com');
-  await page.fill('[name="password"]', 'password123');
+  await page.goto("/");
+  await page.fill('[name="email"]', "test@example.com");
+  await page.fill('[name="password"]', "password123");
   await page.click('button:has-text("Zaloguj")');
-  
+
   // Wait for dashboard
-  await page.waitForURL('/dashboard');
-  
+  await page.waitForURL("/dashboard");
+
   // Open transaction modal
   await page.click('[aria-label="Dodaj transakcję"]');
-  
+
   // Fill form
-  await page.fill('[name="amount"]', '150.75');
+  await page.fill('[name="amount"]', "150.75");
   await page.click('[name="category"]');
-  await page.click('text=Jedzenie');
-  await page.fill('[name="note"]', 'Zakupy tygodniowe');
-  
+  await page.click("text=Jedzenie");
+  await page.fill('[name="note"]', "Zakupy tygodniowe");
+
   // Submit
   await page.click('button:has-text("Zapisz")');
-  
+
   // Verify toast
-  await expect(page.locator('text=Transakcja dodana')).toBeVisible();
-  
+  await expect(page.locator("text=Transakcja dodana")).toBeVisible();
+
   // Verify in list
-  await expect(page.locator('text=150,75 zł')).toBeVisible();
-  await expect(page.locator('text=Jedzenie')).toBeVisible();
+  await expect(page.locator("text=150,75 zł")).toBeVisible();
+  await expect(page.locator("text=Jedzenie")).toBeVisible();
 });
 ```
 
@@ -1935,6 +1945,7 @@ dist/
 ### 15.2. Environment Configuration
 
 **Development** (`.env.development`):
+
 ```
 PUBLIC_SUPABASE_URL=http://localhost:54321
 PUBLIC_SUPABASE_ANON_KEY=eyJ...
@@ -1942,6 +1953,7 @@ SUPABASE_SERVICE_ROLE_KEY=eyJ...
 ```
 
 **Production** (`.env.production`):
+
 ```
 PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 PUBLIC_SUPABASE_ANON_KEY=eyJ...
@@ -1977,6 +1989,7 @@ CMD ["node", "./dist/server/entry.mjs"]
 **Platform**: DigitalOcean App Platform
 
 **Configuration**:
+
 - Auto-deploy from GitHub main branch
 - Environment variables configured in dashboard
 - Health check endpoint: `/api/health`
@@ -1989,6 +2002,7 @@ CMD ["node", "./dist/server/entry.mjs"]
 ### 16.1. Logging Strategy
 
 **Client-side**:
+
 ```typescript
 // src/lib/logger.ts
 
@@ -1996,16 +2010,16 @@ const isDev = import.meta.env.DEV;
 
 export const logger = {
   debug: (...args: any[]) => {
-    if (isDev) console.log('[DEBUG]', ...args);
+    if (isDev) console.log("[DEBUG]", ...args);
   },
-  
+
   info: (...args: any[]) => {
-    console.log('[INFO]', ...args);
+    console.log("[INFO]", ...args);
   },
-  
+
   error: (message: string, error?: any, context?: any) => {
-    console.error('[ERROR]', message, { error, context });
-    
+    console.error("[ERROR]", message, { error, context });
+
     // Future: send to error tracking service
     // if (!isDev) sendToSentry({ message, error, context });
   },
@@ -2013,6 +2027,7 @@ export const logger = {
 ```
 
 **Server-side**:
+
 - Astro logs to stdout
 - DigitalOcean captures and stores logs
 - Query logs in dashboard
@@ -2027,25 +2042,22 @@ export const logger = {
 export async function GET() {
   try {
     // Check database connection
-    const { data, error } = await supabase
-      .from('categories')
-      .select('count')
-      .limit(1);
-    
+    const { data, error } = await supabase.from("categories").select("count").limit(1);
+
     if (error) throw error;
-    
+
     return new Response(
-      JSON.stringify({ 
-        status: 'healthy', 
-        timestamp: new Date().toISOString() 
+      JSON.stringify({
+        status: "healthy",
+        timestamp: new Date().toISOString(),
       }),
       { status: 200 }
     );
   } catch (error) {
     return new Response(
-      JSON.stringify({ 
-        status: 'unhealthy', 
-        error: error.message 
+      JSON.stringify({
+        status: "unhealthy",
+        error: error.message,
       }),
       { status: 503 }
     );
@@ -2056,6 +2068,7 @@ export async function GET() {
 ### 16.3. Performance Monitoring
 
 **Metrics to Track**:
+
 - Page load time (Lighthouse)
 - Time to Interactive (TTI)
 - First Contentful Paint (FCP)
@@ -2064,6 +2077,7 @@ export async function GET() {
 - Cache hit rates
 
 **Tools** (future):
+
 - Vercel Analytics / Cloudflare Web Analytics
 - Custom performance marks in code
 
@@ -2144,12 +2158,14 @@ export async function GET() {
 ### 18.1. Browser Support
 
 **Minimum supported versions**:
+
 - Chrome 90+
 - Firefox 88+
 - Safari 14+
 - Edge 90+
 
 **Reasoning**: Modern features used:
+
 - CSS Grid & Flexbox
 - ES2020 features
 - Intersection Observer API
@@ -2159,28 +2175,34 @@ export async function GET() {
 ### 18.2. Dependencies Overview
 
 **Core**:
+
 - `astro`: ^5.0.0
 - `react`: ^19.0.0
 - `react-dom`: ^19.0.0
 
 **UI & Styling**:
+
 - `tailwindcss`: ^4.0.0
 - `@radix-ui/*`: (via Shadcn/ui)
 - `lucide-react`: Icons
 - `recharts`: Charts
 
 **State & Data**:
+
 - `@tanstack/react-query`: ^5.0.0
 - `react-hook-form`: ^7.0.0
 - `zod`: ^3.0.0
 
 **Date & Time**:
+
 - `date-fns`: ^3.0.0
 
 **Backend**:
+
 - `@supabase/supabase-js`: ^2.0.0
 
 **Development**:
+
 - `typescript`: ^5.0.0
 - `vitest`: ^1.0.0
 - `@testing-library/react`: ^14.0.0
@@ -2190,6 +2212,7 @@ export async function GET() {
 ### 18.3. Naming Conventions
 
 **Files**:
+
 - Components: PascalCase (`TransactionModal.tsx`)
 - Utilities: camelCase (`formatCurrency.ts`)
 - Hooks: camelCase with `use` prefix (`useAuth.ts`)
@@ -2197,17 +2220,20 @@ export async function GET() {
 - Types: PascalCase (`Transaction.ts`) or in `types.ts`
 
 **Variables & Functions**:
+
 - camelCase for variables and functions
 - PascalCase for components and classes
 - UPPER_SNAKE_CASE for constants
 
 **CSS Classes**:
+
 - Tailwind utilities only (no custom class names except in global.css)
 - BEM naming for custom classes if needed: `block__element--modifier`
 
 ### 18.4. Git Workflow
 
 **Branches**:
+
 - `main`: production-ready code
 - `develop`: integration branch
 - `feature/*`: new features
@@ -2215,6 +2241,7 @@ export async function GET() {
 - `hotfix/*`: urgent production fixes
 
 **Commit Messages**:
+
 ```
 type(scope): subject
 
@@ -2226,6 +2253,7 @@ footer (optional)
 Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 
 Example:
+
 ```
 feat(transactions): add infinite scroll to transaction list
 
@@ -2253,13 +2281,13 @@ Niniejszy dokument stanowi kompleksową architekturę UI dla MVP aplikacji Settl
 ✅ **Accessibility** - wymagania WCAG 2.1 AA  
 ✅ **Bezpieczeństwo** - auth, validation, XSS prevention  
 ✅ **Testowanie** - strategie unit, integration, E2E  
-✅ **Deployment** - build, Docker, hosting  
+✅ **Deployment** - build, Docker, hosting
 
 Dokument jest gotowy do wykorzystania jako:
+
 - Blueprint dla implementacji
 - Dokumentacja dla developerów
 - Referencyjna specyfikacja techniczna
 - Podstawa do code review
 
 **Następny krok**: Rozpoczęcie implementacji zgodnie z ustalonym planem.
-

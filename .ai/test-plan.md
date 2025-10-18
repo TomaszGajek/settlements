@@ -805,7 +805,6 @@ Settlements to aplikacja webowa (desktop-only) umożliwiająca:
 ---
 
 **Dokument zatwierdzony przez**:  
-QA Lead: _________________  
-Product Owner: _________________  
-Data: _________________
-
+QA Lead: ********\_********  
+Product Owner: ********\_********  
+Data: ********\_********

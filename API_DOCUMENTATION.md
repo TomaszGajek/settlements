@@ -109,12 +109,12 @@ curl -X GET "http://localhost:3000/api/categories" \
 **Example using JavaScript (fetch):**
 
 ```javascript
-const response = await fetch('http://localhost:3000/api/categories', {
-  method: 'GET',
+const response = await fetch("http://localhost:3000/api/categories", {
+  method: "GET",
   headers: {
-    'Authorization': `Bearer ${accessToken}`,
-    'Content-Type': 'application/json'
-  }
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
+  },
 });
 
 const categories = await response.json();
@@ -191,6 +191,7 @@ Content-Type: application/json
 ```
 
 Possible validation errors:
+
 - "Name is required" - Missing name field
 - "Name cannot be empty" - Empty string or whitespace only
 - "Name must be at most 100 characters" - Name exceeds maximum length
@@ -236,25 +237,25 @@ curl -X POST "http://localhost:3000/api/categories" \
 **Example using JavaScript (fetch):**
 
 ```javascript
-const response = await fetch('http://localhost:3000/api/categories', {
-  method: 'POST',
+const response = await fetch("http://localhost:3000/api/categories", {
+  method: "POST",
   headers: {
-    'Authorization': `Bearer ${accessToken}`,
-    'Content-Type': 'application/json'
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    name: 'Subscriptions'
-  })
+    name: "Subscriptions",
+  }),
 });
 
 if (response.status === 201) {
   const category = await response.json();
-  console.log('Category created:', category);
+  console.log("Category created:", category);
 } else if (response.status === 409) {
-  console.error('Category already exists');
+  console.error("Category already exists");
 } else {
   const error = await response.json();
-  console.error('Error:', error);
+  console.error("Error:", error);
 }
 ```
 
@@ -344,6 +345,7 @@ Content-Type: application/json
 ```
 
 Possible validation errors:
+
 - "Name is required" - Missing name field
 - "Name cannot be empty" - Empty string or whitespace only
 - "Name must be at most 100 characters" - Name exceeds maximum length
@@ -416,30 +418,30 @@ curl -X PATCH "http://localhost:3000/api/categories/c3d4e5f6-a7b8-9012-3456-7890
 **Example using JavaScript (fetch):**
 
 ```javascript
-const categoryId = 'c3d4e5f6-a7b8-9012-3456-7890abcdef12';
+const categoryId = "c3d4e5f6-a7b8-9012-3456-7890abcdef12";
 
 const response = await fetch(`http://localhost:3000/api/categories/${categoryId}`, {
-  method: 'PATCH',
+  method: "PATCH",
   headers: {
-    'Authorization': `Bearer ${accessToken}`,
-    'Content-Type': 'application/json'
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    name: 'Monthly Subscriptions'
-  })
+    name: "Monthly Subscriptions",
+  }),
 });
 
 if (response.status === 200) {
   const category = await response.json();
-  console.log('Category updated:', category);
+  console.log("Category updated:", category);
 } else if (response.status === 403) {
   const error = await response.json();
-  console.error('Cannot update:', error.message);
+  console.error("Cannot update:", error.message);
 } else if (response.status === 409) {
-  console.error('Category name already exists');
+  console.error("Category name already exists");
 } else {
   const error = await response.json();
-  console.error('Error:', error);
+  console.error("Error:", error);
 }
 ```
 
@@ -557,26 +559,26 @@ curl -X DELETE "http://localhost:3000/api/categories/c3d4e5f6-a7b8-9012-3456-789
 **Example using JavaScript (fetch):**
 
 ```javascript
-const categoryId = 'c3d4e5f6-a7b8-9012-3456-7890abcdef12';
+const categoryId = "c3d4e5f6-a7b8-9012-3456-7890abcdef12";
 
 const response = await fetch(`http://localhost:3000/api/categories/${categoryId}`, {
-  method: 'DELETE',
+  method: "DELETE",
   headers: {
-    'Authorization': `Bearer ${accessToken}`
-  }
+    Authorization: `Bearer ${accessToken}`,
+  },
 });
 
 if (response.status === 204) {
-  console.log('Category deleted successfully');
+  console.log("Category deleted successfully");
   // Category deleted, transactions reassigned to "Inne"
 } else if (response.status === 403) {
   const error = await response.json();
-  console.error('Cannot delete:', error.message);
+  console.error("Cannot delete:", error.message);
 } else if (response.status === 404) {
-  console.error('Category not found');
+  console.error("Category not found");
 } else {
   const error = await response.json();
-  console.error('Error:', error);
+  console.error("Error:", error);
 }
 ```
 
@@ -611,24 +613,24 @@ Content-Type: application/json
 
 ```json
 {
-  "totalIncome": 5000.00,
-  "totalExpenses": 3200.50,
-  "balance": 1799.50,
+  "totalIncome": 5000.0,
+  "totalExpenses": 3200.5,
+  "balance": 1799.5,
   "dailyData": [
     {
       "day": 1,
       "income": 0,
-      "expenses": 150.00
+      "expenses": 150.0
     },
     {
       "day": 2,
-      "income": 5000.00,
+      "income": 5000.0,
       "expenses": 0
     },
     {
       "day": 3,
       "income": 0,
-      "expenses": 450.50
+      "expenses": 450.5
     }
   ]
 }
@@ -688,12 +690,12 @@ curl -X GET "http://localhost:3000/api/dashboard?month=10&year=2025" \
 **Example using JavaScript (fetch):**
 
 ```javascript
-const response = await fetch('http://localhost:3000/api/dashboard?month=10&year=2025', {
-  method: 'GET',
+const response = await fetch("http://localhost:3000/api/dashboard?month=10&year=2025", {
+  method: "GET",
   headers: {
-    'Authorization': `Bearer ${accessToken}`,
-    'Content-Type': 'application/json'
-  }
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
+  },
 });
 
 const dashboardData = await response.json();
@@ -729,7 +731,7 @@ Content-Type: application/json
   "data": [
     {
       "id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-      "amount": 150.00,
+      "amount": 150.0,
       "date": "2025-10-15",
       "type": "expense",
       "note": "Grocery shopping",
@@ -739,7 +741,7 @@ Content-Type: application/json
     },
     {
       "id": "b2c3d4e5-f6a7-8901-2345-67890abcdef1",
-      "amount": 5000.00,
+      "amount": 5000.0,
       "date": "2025-10-01",
       "type": "income",
       "note": "Monthly salary",
@@ -824,12 +826,12 @@ curl -X GET "http://localhost:3000/api/transactions?month=10&year=2025&page=1&pa
 **Example using JavaScript (fetch):**
 
 ```javascript
-const response = await fetch('http://localhost:3000/api/transactions?month=10&year=2025&page=1&pageSize=20', {
-  method: 'GET',
+const response = await fetch("http://localhost:3000/api/transactions?month=10&year=2025&page=1&pageSize=20", {
+  method: "GET",
   headers: {
-    'Authorization': `Bearer ${accessToken}`,
-    'Content-Type': 'application/json'
-  }
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
+  },
 });
 
 const transactions = await response.json();
@@ -870,7 +872,7 @@ Content-Type: application/json
 ```json
 {
   "id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-  "amount": 150.00,
+  "amount": 150.0,
   "date": "2025-10-15",
   "type": "expense",
   "note": "Grocery shopping",
@@ -952,19 +954,19 @@ curl -X POST "http://localhost:3000/api/transactions" \
 **Example using JavaScript (fetch):**
 
 ```javascript
-const response = await fetch('http://localhost:3000/api/transactions', {
-  method: 'POST',
+const response = await fetch("http://localhost:3000/api/transactions", {
+  method: "POST",
   headers: {
-    'Authorization': `Bearer ${accessToken}`,
-    'Content-Type': 'application/json'
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    amount: 150.00,
-    date: '2025-10-15',
-    categoryId: 'c3d4e5f6-a7b8-9012-3456-7890abcdef12',
-    type: 'expense',
-    note: 'Grocery shopping'
-  })
+    amount: 150.0,
+    date: "2025-10-15",
+    categoryId: "c3d4e5f6-a7b8-9012-3456-7890abcdef12",
+    type: "expense",
+    note: "Grocery shopping",
+  }),
 });
 
 const transaction = await response.json();
@@ -1006,7 +1008,7 @@ Content-Type: application/json
 ```json
 {
   "id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-  "amount": 175.50,
+  "amount": 175.5,
   "date": "2025-10-15",
   "type": "expense",
   "note": "Updated grocery shopping",
@@ -1116,19 +1118,18 @@ curl -X PATCH "http://localhost:3000/api/transactions/a1b2c3d4-e5f6-7890-1234-56
 **Example using JavaScript (fetch):**
 
 ```javascript
-const response = await fetch('http://localhost:3000/api/transactions/a1b2c3d4-e5f6-7890-1234-567890abcdef', {
-  method: 'PATCH',
+const response = await fetch("http://localhost:3000/api/transactions/a1b2c3d4-e5f6-7890-1234-567890abcdef", {
+  method: "PATCH",
   headers: {
-    'Authorization': `Bearer ${accessToken}`,
-    'Content-Type': 'application/json'
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    amount: 175.50,
-    note: 'Updated grocery shopping'
-  })
+    amount: 175.5,
+    note: "Updated grocery shopping",
+  }),
 });
 
 const updatedTransaction = await response.json();
 console.log(updatedTransaction);
 ```
-

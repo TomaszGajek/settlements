@@ -37,9 +37,7 @@ export async function fetchCategories(): Promise<ListCategoriesResponseDto> {
  * @throws Error with specific message for duplicate names (409 Conflict)
  * @throws Error if API call fails
  */
-export async function createCategory(
-  data: CreateCategoryCommand
-): Promise<CreateCategoryResponseDto> {
+export async function createCategory(data: CreateCategoryCommand): Promise<CreateCategoryResponseDto> {
   const response = await fetch("/api/categories", {
     method: "POST",
     headers: {
@@ -70,10 +68,7 @@ export async function createCategory(
  * @throws Error with specific message for various error cases (403, 404, 409)
  * @throws Error if API call fails
  */
-export async function updateCategory(
-  id: string,
-  data: UpdateCategoryCommand
-): Promise<UpdateCategoryResponseDto> {
+export async function updateCategory(id: string, data: UpdateCategoryCommand): Promise<UpdateCategoryResponseDto> {
   const response = await fetch(`/api/categories/${id}`, {
     method: "PATCH",
     headers: {
@@ -137,4 +132,3 @@ export async function deleteCategory(id: string): Promise<void> {
 
   // 204 No Content - success
 }
-

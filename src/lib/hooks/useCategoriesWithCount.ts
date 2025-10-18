@@ -13,9 +13,7 @@ import { useMemo } from "react";
  */
 async function fetchTransactionCounts(): Promise<Record<string, number>> {
   // Fetch only category_id field for all user transactions
-  const { data: transactions, error } = await supabaseClient
-    .from("transactions")
-    .select("category_id");
+  const { data: transactions, error } = await supabaseClient.from("transactions").select("category_id");
 
   if (error) {
     throw new Error(`Failed to fetch transaction counts: ${error.message}`);
@@ -81,4 +79,3 @@ export function useCategoriesWithCount() {
     error,
   };
 }
-
