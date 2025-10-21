@@ -6,6 +6,13 @@ import type { Database } from "../db/database.types.ts";
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
+// Validate environment variables
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error(
+    "Missing Supabase environment variables. Please set PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY in your Cloudflare Pages environment variables."
+  );
+}
+
 // Public paths that don't require authentication
 const publicPaths = ["/", "/reset-password", "/reset-password/confirm"];
 

@@ -76,7 +76,6 @@ W sekcji **Environment secrets** dodaj każdy sekret osobno:
 12. Kliknij **Add secret**
 
 13. Kliknij **Add secret**
-14. **Name**: `E2E_TEST_USER_PASSWORD`
     - **Value**: Hasło użytkownika testowego
 15. Kliknij **Add secret**
 
@@ -170,4 +169,6 @@ Po skonfigurowaniu sekretów:
 ---
 
 **Ostatnia aktualizacja:** 2025-10-18
+
+
 

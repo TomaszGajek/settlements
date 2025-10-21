@@ -1,0 +1,194 @@
+name: Master Branch CI/CD
+
+# ============================================================================
+# Master Branch Continuous Integration and Deployment Workflow
+# ============================================================================
+# This workflow runs on every push to the master branch and performs:
+# 1. Code linting (ESLint)
+# 2. Unit & Integration tests with coverage
+# 3. Build for production
+# 4. Deploy to Cloudflare Pages
+#
+# The workflow uses:
+# - Node.js 22 (from .nvmrc)
+# - Cloudflare Pages for deployment
+# - Environment secrets for Supabase integration
+# ============================================================================
+
+on:
+  push:
+    branches: [master]
+
+env:
+  NODE_VERSION: 22
+
+jobs:
+  # ========================================
+  # JOB 1: Linting
+  # ========================================
+  lint:
+    name: Code Linting
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+  # ========================================
+  # JOB 2: Unit & Integration Tests
+  # ========================================
+  unit-test:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit and integration tests with coverage
+        run: npm run test:coverage
+
+      - name: Upload unit test coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-coverage-report
+          path: coverage/
+          retention-days: 7
+
+  # ========================================
+  # JOB 3: Build
+  # ========================================
+  build:
+    name: Build for Production
+    runs-on: ubuntu-latest
+    needs: [lint, unit-test]
+
+    env:
+      PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
+      PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 1
+
+  # ========================================
+  # JOB 4: Deploy to Cloudflare Pages
+  # ========================================
+  # NOTE: If you're using Cloudflare Git Integration, you can disable this job
+  # by commenting it out or removing it entirely. Git Integration will handle
+  # deployment automatically when you push to master.
+  deploy:
+    name: Deploy to Cloudflare Pages
+    runs-on: ubuntu-latest
+    needs: build
+    environment: production
+    # Uncomment the line below if you want to disable this job
+    # if: false
+
+    env:
+      PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
+      PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: dist
+          path: dist
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=${{ secrets.CLOUDFLARE_PROJECT_NAME }} --compatibility-date=2025-10-21
+
+  # ========================================
+  # JOB 5: Deployment Status
+  # ========================================
+  status:
+    name: Deployment Status Summary
+    runs-on: ubuntu-latest
+    needs: [lint, unit-test, build, deploy]
+    if: always()
+
+    steps:
+      - name: Determine overall status
+        id: status
+        run: |
+          LINT_STATUS="${{ needs.lint.result }}"
+          UNIT_STATUS="${{ needs.unit-test.result }}"
+          BUILD_STATUS="${{ needs.build.result }}"
+          DEPLOY_STATUS="${{ needs.deploy.result }}"
+
+          echo "lint_status=$LINT_STATUS" >> $GITHUB_OUTPUT
+          echo "unit_status=$UNIT_STATUS" >> $GITHUB_OUTPUT
+          echo "build_status=$BUILD_STATUS" >> $GITHUB_OUTPUT
+          echo "deploy_status=$DEPLOY_STATUS" >> $GITHUB_OUTPUT
+
+          if [[ "$LINT_STATUS" == "success" && "$UNIT_STATUS" == "success" && "$BUILD_STATUS" == "success" && "$DEPLOY_STATUS" == "success" ]]; then
+            echo "overall_status=✅ Deployment successful" >> $GITHUB_OUTPUT
+            echo "overall_emoji=✅" >> $GITHUB_OUTPUT
+          else
+            echo "overall_status=❌ Deployment failed" >> $GITHUB_OUTPUT
+            echo "overall_emoji=❌" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create status summary
+        run: |
+          echo "## ${{ steps.status.outputs.overall_emoji }} Master Branch CI/CD Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔍 Linting | ${{ needs.lint.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🧪 Unit & Integration Tests | ${{ needs.unit-test.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🏗️ Build | ${{ needs.build.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🚀 Deploy to Cloudflare Pages | ${{ needs.deploy.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Overall Status:** ${{ steps.status.outputs.overall_status }}" >> $GITHUB_STEP_SUMMARY
+

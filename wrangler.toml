@@ -1,0 +1,27 @@
+# Cloudflare Workers/Pages Configuration
+# This file is used for local development and deployment configuration
+# More info: https://developers.cloudflare.com/workers/wrangler/configuration/
+
+name = "settlements-app"
+compatibility_date = "2025-10-21"
+compatibility_flags = ["nodejs_compat"]
+
+# Pages configuration
+pages_build_output_dir = "./dist"
+
+# KV Namespaces for sessions (if needed)
+# Uncomment the following lines if you need session storage
+# [[kv_namespaces]]
+# binding = "SESSION"
+# id = "your-kv-namespace-id"
+# preview_id = "your-preview-kv-namespace-id"
+
+# Environment variables (for local development only)
+# Production secrets should be set in Cloudflare Dashboard or GitHub Secrets
+[vars]
+# Add non-sensitive environment variables here
+
+# For development, use .dev.vars file (gitignored) for secrets:
+# PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+# PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+
