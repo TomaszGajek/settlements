@@ -1,0 +1,7 @@
+# Local Development Environment Variables for Cloudflare
+# Copy this file to .dev.vars (gitignored) and fill in your values
+# This file is used by wrangler for local development
+
+PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+
