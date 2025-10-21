@@ -41,4 +41,10 @@
 ## CI/CD i Hosting
 
 - **Github Actions**: Do tworzenia pipeline'ów CI/CD (w tym automatyczne uruchamianie testów).
-- **DigitalOcean**: Do hostowania aplikacji za pośrednictwem obrazu docker.
+- **Cloudflare Pages**: Jako hosting aplikacji Astro z SSR (Server-Side Rendering).
+- **Astro Cloudflare Adapter**: Adapter umożliwiający deployment aplikacji Astro na Cloudflare Pages.
+
+### Deployment Pipeline
+
+- **Pull Request Workflow**: Automatyczne testy (linting, unit, integration, E2E) przy każdym PR do master.
+- **Master Branch Workflow**: Automatyczny deployment na Cloudflare Pages po merge do master (linting, testy, build, deploy).
