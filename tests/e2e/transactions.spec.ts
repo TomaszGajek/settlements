@@ -7,6 +7,9 @@ import { test, expect } from "@playwright/test";
 import { loginAsTestUser } from "../setup/e2e-helpers";
 
 test.describe("Transaction Management", () => {
+  // Run tests serially to avoid data contamination between parallel tests
+  test.describe.configure({ mode: "serial" });
+
   test.beforeEach(async ({ page }) => {
     // Zaloguj się jako użytkownik testowy
     await loginAsTestUser(page);
@@ -71,10 +74,14 @@ test.describe("Transaction Management", () => {
   });
 
   test("TC-TRANS-004: should delete transaction", async ({ page }) => {
+    // Use a unique amount to avoid conflicts with other tests (even in serial mode)
+    const uniqueAmount = "50.17";
+    const formattedAmount = "50,17"; // Polish currency format
+
     // Najpierw dodaj transakcję do usunięcia
     await page.getByTestId("add-transaction-button").click();
     await page.getByTestId("transaction-type-expense").click();
-    await page.getByTestId("transaction-amount-input").fill("50.00");
+    await page.getByTestId("transaction-amount-input").fill(uniqueAmount);
     await page.getByTestId("transaction-category-select").click();
     await page.locator('[role="option"]').first().click();
     await page.getByTestId("transaction-note-input").fill("Do usunięcia");
@@ -84,12 +91,15 @@ test.describe("Transaction Management", () => {
     // Poczekaj aż modal się zamknie i lista się załaduje
     await page.waitForTimeout(1000);
 
-    // Policz transakcje przed usunięciem
-    const transactionsBefore = await page.getByTestId("transaction-item").count();
+    // Znajdź transakcję z unikalną kwotą i kliknij delete
+    const transactionToDelete = page
+      .locator('[data-testid="transaction-item"]')
+      .filter({ hasText: formattedAmount })
+      .first();
 
-    // Znajdź transakcję z kwotą "50,00 zł" (formatowana) i kliknij delete na pierwszej znalezionej
-    // Używamy kwoty ponieważ jest widoczna, a notatka jest w tooltipie
-    const transactionToDelete = page.locator('[data-testid="transaction-item"]').filter({ hasText: "50,00" }).first();
+    // Upewnij się że transakcja istnieje przed usunięciem
+    await expect(transactionToDelete).toBeVisible();
+
     await transactionToDelete.getByTestId("transaction-delete-button").click();
 
     // Potwierdź w dialogu
@@ -110,19 +120,15 @@ test.describe("Transaction Management", () => {
       page.waitForTimeout(10000),
     ]);
 
-    // Dodatkowy krótki wait na renderowanie
-    await page.waitForTimeout(1000);
+    // Dodatkowy wait na renderowanie (dłuższy timeout dla CI)
+    await page.waitForTimeout(2000);
 
-    // Sprawdź czy liczba transakcji się zmniejszyła
-    // W testach izolowanych powinno działać, ale if transakcje są współdzielone między testami,
-    // może to nie zadziałać idealnie
-    const transactionsAfter = await page.getByTestId("transaction-item").count();
+    // Sprawdź czy usunięta transakcja nie jest już widoczna
+    // Ponieważ używamy unikalnej kwoty, nie powinno być innych transakcji z taką kwotą
+    const deletedTransaction = page.locator('[data-testid="transaction-item"]').filter({ hasText: formattedAmount });
 
-    // Sprawdź czy liczba się zmniejszyła (może nie o dokładnie 1 jeśli są współdzielone dane)
-    expect(transactionsAfter).toBeLessThanOrEqual(transactionsBefore);
-
-    // Dodatkowo: sprawdź czy toast sukcesu się pokazał (już to zrobiliśmy wcześniej)
-    // To potwierdza że delete mutation się powiódł
+    // Weryfikacja że transakcja została usunięta
+    await expect(deletedTransaction).toHaveCount(0, { timeout: 5000 });
   });
 
   test("TC-TRANS-005: should load more transactions on scroll", async ({ page }) => {
