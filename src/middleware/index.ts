@@ -99,7 +99,23 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return next();
   } catch (error) {
     // Catch any unexpected errors and return a proper HTML response
-    const errorMessage = error instanceof Error ? error.message : String(error);
+    let errorMessage = "Unknown error";
+    let errorStack = "";
+
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      errorStack = error.stack || "";
+    } else {
+      try {
+        errorMessage = JSON.stringify(error, null, 2);
+      } catch {
+        errorMessage = String(error);
+      }
+    }
+
+    // Log the error for server-side debugging
+    // eslint-disable-next-line no-console
+    console.error("[Middleware] Error:", error);
 
     return new Response(
       `<!DOCTYPE html>
@@ -109,15 +125,21 @@ export const onRequest = defineMiddleware(async (context, next) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Server Error</title>
   <style>
-    body { font-family: system-ui, sans-serif; padding: 2rem; max-width: 600px; margin: 0 auto; }
+    body { font-family: system-ui, sans-serif; padding: 2rem; max-width: 800px; margin: 0 auto; }
     h1 { color: #dc2626; }
-    pre { background: #f3f4f6; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; }
+    .error-section { margin: 1rem 0; }
+    .error-section h2 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+    pre { background: #f3f4f6; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word; }
   </style>
 </head>
 <body>
   <h1>Server Error</h1>
-  <p>An unexpected error occurred:</p>
-  <pre>${errorMessage}</pre>
+  <p>An unexpected error occurred in the middleware:</p>
+  <div class="error-section">
+    <h2>Error Message</h2>
+    <pre>${errorMessage}</pre>
+  </div>
+  ${errorStack ? `<div class="error-section"><h2>Stack Trace</h2><pre>${errorStack}</pre></div>` : ""}
 </body>
 </html>`,
       {
