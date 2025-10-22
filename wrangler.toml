@@ -3,7 +3,7 @@
 # More info: https://developers.cloudflare.com/workers/wrangler/configuration/
 
 name = "settlements"
-compatibility_date = "2024-10-21"
+compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 
 # Pages configuration
