@@ -10,11 +10,11 @@ compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = "./dist"
 
 # KV Namespaces for sessions (if needed)
-# Uncomment the following lines if you need session storage
+# Uncomment and add your KV namespace ID from Cloudflare Dashboard
 # [[kv_namespaces]]
 # binding = "SESSION"
-# id = "your-kv-namespace-id"
-# preview_id = "your-preview-kv-namespace-id"
+# id = "your-kv-namespace-id-here"
+# preview_id = "your-preview-kv-namespace-id-here"
 
 # Environment variables (for local development only)
 # Production secrets should be set in Cloudflare Dashboard or GitHub Secrets

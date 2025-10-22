@@ -8,9 +8,9 @@ const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
 // Validate environment variables
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    "Missing Supabase environment variables. Please set PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY in your Cloudflare Pages environment variables."
-  );
+  const errorMessage = `Missing Supabase environment variables. PUBLIC_SUPABASE_URL: ${supabaseUrl ? "SET" : "MISSING"}, PUBLIC_SUPABASE_ANON_KEY: ${supabaseAnonKey ? "SET" : "MISSING"}. Please configure these in your Cloudflare Pages environment variables.`;
+  console.error(errorMessage);
+  throw new Error(errorMessage);
 }
 
 // Public paths that don't require authentication
