@@ -15,7 +15,6 @@ name: Master Branch CI/CD
 # - Environment secrets for Supabase integration
 # ============================================================================
 
-
 on:
   push:
     branches: [master]
