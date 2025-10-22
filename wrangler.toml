@@ -4,6 +4,7 @@
 
 name = "settlements-app"
 compatibility_date = "2025-10-21"
+compatibility_flags = ["nodejs_compat"]
 
 # Pages configuration
 pages_build_output_dir = "./dist"

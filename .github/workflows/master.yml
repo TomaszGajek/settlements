@@ -116,11 +116,16 @@ jobs:
   # ========================================
   # JOB 4: Deploy to Cloudflare Pages
   # ========================================
+  # NOTE: If you're using Cloudflare Git Integration, you can disable this job
+  # by commenting it out or removing it entirely. Git Integration will handle
+  # deployment automatically when you push to master.
   deploy:
     name: Deploy to Cloudflare Pages
     runs-on: ubuntu-latest
     needs: build
     environment: production
+    # Uncomment the line below if you want to disable this job
+    # if: false
 
     env:
       PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
@@ -141,7 +146,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=${{ secrets.CLOUDFLARE_PROJECT_NAME }}
+          command: pages deploy dist --project-name=${{ secrets.CLOUDFLARE_PROJECT_NAME }} --compatibility-date=2025-10-21
 
   # ========================================
   # JOB 5: Deployment Status
