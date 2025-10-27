@@ -27,9 +27,8 @@ export const Header: React.FC<HeaderProps> = ({ currentPage }) => {
       await signOut();
       toast.success("Wylogowano pomyślnie");
       window.location.href = "/";
-    } catch (error) {
+    } catch {
       toast.error("Nie udało się wylogować");
-      console.error("Logout error:", error);
     }
   };
 

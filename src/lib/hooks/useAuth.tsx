@@ -35,8 +35,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await supabaseClient.auth.signOut();
         // Przekieruj do strony logowania z parametrem
         window.location.href = "/?reason=session_expired";
-      } catch (error) {
-        console.error("Error during automatic sign out:", error);
+      } catch {
+        // Silent error handling for automatic sign out
       }
     }
   }, [session]);

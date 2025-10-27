@@ -39,8 +39,8 @@ export const DeleteTransactionDialog: React.FC<DeleteDialogProps> = ({ isOpen, o
     try {
       await onConfirm(transaction.id);
       onClose();
-    } catch (error) {
-      console.error("Delete error:", error);
+    } catch {
+      // Error is handled by the parent component
     } finally {
       setIsDeleting(false);
     }

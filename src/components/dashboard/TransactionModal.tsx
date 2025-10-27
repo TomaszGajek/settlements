@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -76,36 +76,38 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   }, [isOpen, mode, transaction, defaultDate, form]);
 
   // Handle form submission
-  const onSubmit = async (data: TransactionFormData) => {
-    try {
-      if (mode === "create") {
-        await createMutation.mutateAsync({
-          amount: data.amount,
-          date: data.date,
-          categoryId: data.categoryId,
-          type: data.type,
-          note: data.note || null,
-        });
-      } else if (mode === "edit" && transaction) {
-        await updateMutation.mutateAsync({
-          id: transaction.id,
-          data: {
+  const onSubmit = useCallback(
+    async (data: TransactionFormData) => {
+      try {
+        if (mode === "create") {
+          await createMutation.mutateAsync({
             amount: data.amount,
             date: data.date,
             categoryId: data.categoryId,
             type: data.type,
             note: data.note || null,
-          },
-        });
+          });
+        } else if (mode === "edit" && transaction) {
+          await updateMutation.mutateAsync({
+            id: transaction.id,
+            data: {
+              amount: data.amount,
+              date: data.date,
+              categoryId: data.categoryId,
+              type: data.type,
+              note: data.note || null,
+            },
+          });
+        }
+        // Close modal on success
+        onClose();
+        form.reset();
+      } catch {
+        // Error is handled by mutation (toast notification)
       }
-      // Close modal on success
-      onClose();
-      form.reset();
-    } catch (error) {
-      console.error("Form submission error:", error);
-      // Error is handled by mutation (toast notification)
-    }
-  };
+    },
+    [mode, transaction, createMutation, updateMutation, onClose, form]
+  );
 
   // Handle close with unsaved changes check
   const handleClose = () => {
@@ -142,7 +144,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       window.addEventListener("keydown", handleKeyDown);
       return () => window.removeEventListener("keydown", handleKeyDown);
     }
-  }, [isOpen, form]);
+  }, [isOpen, form, onSubmit]);
 
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 

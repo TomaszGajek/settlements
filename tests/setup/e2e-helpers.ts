@@ -136,14 +136,12 @@ export async function deleteTestUser(email: string) {
   const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers();
 
   if (listError) {
-    console.error(`Failed to list users: ${listError.message}`);
     return;
   }
 
   const user = users.users.find((u) => u.email === email);
 
   if (!user) {
-    console.warn(`User ${email} not found, skipping deletion`);
     return;
   }
 
@@ -151,7 +149,6 @@ export async function deleteTestUser(email: string) {
   const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
 
   if (deleteError) {
-    console.error(`Failed to delete test user: ${deleteError.message}`);
     throw deleteError;
   }
 }
@@ -164,13 +161,10 @@ export async function cleanupAllTestUsers() {
   const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers();
 
   if (listError) {
-    console.error(`Failed to list users: ${listError.message}`);
     return;
   }
 
   const testUsers = users.users.filter((u) => u.email?.includes("@e2e-test.local"));
-
-  console.log(`Found ${testUsers.length} test users to clean up`);
 
   for (const user of testUsers) {
     try {
@@ -182,9 +176,8 @@ export async function cleanupAllTestUsers() {
 
       // Finally, delete the user account
       await supabaseAdmin.auth.admin.deleteUser(user.id);
-      console.log(`✓ Deleted test user: ${user.email}`);
-    } catch (error) {
-      console.error(`Failed to delete user ${user.email}:`, error);
+    } catch {
+      // Silent error handling
     }
   }
 }
@@ -263,20 +256,12 @@ export async function createTestTransaction(
  * Delete all transactions for a user
  */
 export async function cleanupUserTransactions(userId: string) {
-  const { error } = await supabaseAdmin.from("transactions").delete().eq("user_id", userId);
-
-  if (error) {
-    console.error(`Failed to cleanup user transactions: ${error.message}`);
-  }
+  await supabaseAdmin.from("transactions").delete().eq("user_id", userId);
 }
 
 /**
  * Delete all categories for a user (except default "Inne")
  */
 export async function cleanupUserCategories(userId: string) {
-  const { error } = await supabaseAdmin.from("categories").delete().eq("user_id", userId).eq("is_deletable", true);
-
-  if (error) {
-    console.error(`Failed to cleanup user categories: ${error.message}`);
-  }
+  await supabaseAdmin.from("categories").delete().eq("user_id", userId).eq("is_deletable", true);
 }
