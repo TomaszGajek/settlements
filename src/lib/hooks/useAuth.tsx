@@ -1,6 +1,8 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import type { User, Session } from "@supabase/supabase-js";
 import { supabaseClient } from "@/db/supabase.client";
+import { useSessionTimeout } from "./useSessionTimeout";
+import { toast } from "sonner";
 
 interface AuthContextValue {
   user: User | null;
@@ -22,6 +24,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  /**
+   * Handler dla timeout'u sesji - automatyczne wylogowanie
+   */
+  const handleSessionTimeout = useCallback(async () => {
+    if (session) {
+      toast.error("Sesja wygasła z powodu nieaktywności. Zaloguj się ponownie.");
+
+      try {
+        await supabaseClient.auth.signOut();
+        // Przekieruj do strony logowania z parametrem
+        window.location.href = "/?reason=session_expired";
+      } catch (error) {
+        console.error("Error during automatic sign out:", error);
+      }
+    }
+  }, [session]);
+
+  // Hook do śledzenia aktywności i timeout'u sesji (30 minut = 1800000 ms)
+  const { clearSessionTimeout } = useSessionTimeout(handleSessionTimeout, 30 * 60 * 1000);
+
   // Initialize auth state on mount
   useEffect(() => {
     // Get initial session
@@ -38,10 +60,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoading(false);
+
+      // Jeśli użytkownik się wylogował, wyczyść timeout
+      if (!session) {
+        clearSessionTimeout();
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [clearSessionTimeout]);
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabaseClient.auth.signInWithPassword({
@@ -71,6 +98,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
+    // Wyczyść timeout przed wylogowaniem
+    clearSessionTimeout();
+
     const { error } = await supabaseClient.auth.signOut();
 
     if (error) {
