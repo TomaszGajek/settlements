@@ -41,7 +41,6 @@ export function useCategoryMutations() {
     onError: (error: Error) => {
       // Error messages are already translated in the service
       toast.error(error.message || "Nie udało się dodać kategorii");
-      console.error("Create category error:", error);
     },
   });
 
@@ -60,7 +59,6 @@ export function useCategoryMutations() {
     onError: (error: Error) => {
       // Error messages are already translated in the service
       toast.error(error.message || "Nie udało się zaktualizować kategorii");
-      console.error("Update category error:", error);
     },
   });
 
@@ -79,7 +77,6 @@ export function useCategoryMutations() {
     onError: (error: Error) => {
       // Error messages are already translated in the service
       toast.error(error.message || "Nie udało się usunąć kategorii");
-      console.error("Delete category error:", error);
     },
   });
 

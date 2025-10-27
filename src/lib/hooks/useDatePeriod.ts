@@ -85,13 +85,9 @@ export function useDatePeriod() {
 
   // Navigate to previous month
   const prevMonth = useCallback(() => {
-    console.log("⏮️ prevMonth called");
     setPeriodState((current) => {
-      console.log("⏮️ Current period:", current);
       const newPeriod =
         current.month === 1 ? { month: 12, year: current.year - 1 } : { month: current.month - 1, year: current.year };
-
-      console.log("⏮️ New period:", newPeriod);
 
       // Update URL
       const newParams = new URLSearchParams();
@@ -99,8 +95,6 @@ export function useDatePeriod() {
       newParams.set("year", String(newPeriod.year));
       const newUrl = `${window.location.pathname}?${newParams.toString()}`;
       window.history.pushState({}, "", newUrl);
-
-      console.log("⏮️ URL updated:", newUrl);
 
       return newPeriod;
     });

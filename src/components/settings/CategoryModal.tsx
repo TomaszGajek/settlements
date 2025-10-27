@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -78,28 +78,30 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({ mode, isOpen, onCl
   }, [isOpen, mode, category, form]);
 
   // Handle form submission
-  const onSubmit = async (data: CategoryFormData) => {
-    try {
-      if (mode === "create") {
-        await createMutation.mutateAsync({
-          name: data.name,
-        });
-      } else if (mode === "edit" && category) {
-        await updateMutation.mutateAsync({
-          id: category.id,
-          data: {
+  const onSubmit = useCallback(
+    async (data: CategoryFormData) => {
+      try {
+        if (mode === "create") {
+          await createMutation.mutateAsync({
             name: data.name,
-          },
-        });
+          });
+        } else if (mode === "edit" && category) {
+          await updateMutation.mutateAsync({
+            id: category.id,
+            data: {
+              name: data.name,
+            },
+          });
+        }
+        // Close modal on success
+        onClose();
+        form.reset();
+      } catch {
+        // Error is handled by mutation (toast notification)
       }
-      // Close modal on success
-      onClose();
-      form.reset();
-    } catch (error) {
-      console.error("Category form submission error:", error);
-      // Error is handled by mutation (toast notification)
-    }
-  };
+    },
+    [mode, category, createMutation, updateMutation, onClose, form]
+  );
 
   // Handle close with unsaved changes check
   const handleClose = () => {
@@ -131,7 +133,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({ mode, isOpen, onCl
       window.addEventListener("keydown", handleKeyDown);
       return () => window.removeEventListener("keydown", handleKeyDown);
     }
-  }, [isOpen, form]);
+  }, [isOpen, form, onSubmit]);
 
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 

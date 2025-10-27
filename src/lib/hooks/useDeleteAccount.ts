@@ -72,7 +72,6 @@ export function useDeleteAccount() {
     onError: (error: Error) => {
       // Show error toast with translated message
       toast.error(error.message || "Nie udało się usunąć konta");
-      console.error("Delete account error:", error);
     },
   });
 

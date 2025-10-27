@@ -25,7 +25,6 @@ export function useTransactionMutations() {
     },
     onError: (error: Error) => {
       toast.error(error.message || "Nie udało się dodać transakcji");
-      console.error("Create transaction error:", error);
     },
   });
 
@@ -39,7 +38,6 @@ export function useTransactionMutations() {
     },
     onError: (error: Error) => {
       toast.error(error.message || "Nie udało się zaktualizować transakcji");
-      console.error("Update transaction error:", error);
     },
   });
 
@@ -53,7 +51,6 @@ export function useTransactionMutations() {
     },
     onError: (error: Error) => {
       toast.error(error.message || "Nie udało się usunąć transakcji");
-      console.error("Delete transaction error:", error);
     },
   });
 
